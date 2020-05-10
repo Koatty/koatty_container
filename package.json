@@ -1,0 +1,52 @@
+{
+    "name": "think_container",
+    "version": "1.0.3",
+    "description": "IOC Container for Koatty.",
+    "scripts": {
+        "build": "del-cli --force dist && tsc",
+        "prepublishOnly": "npm test && npm run build",
+        "test": "tslint 'src/**/*.ts'"
+    },
+    "main": "./dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thinkkoa/think_container.git"
+    },
+    "keywords": [
+        "IOC",
+        "koatty",
+        "thinkkoa"
+    ],
+    "engines": {
+        "node": ">10.0.0"
+    },
+    "author": {
+        "name": "richenlin",
+        "email": "richenlin@gmail.com"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/thinkkoa/think_container/issues"
+    },
+    "homepage": "https://github.com/thinkkoa/think_container",
+    "devDependencies": {
+        "@types/node": "^12.x.x",
+        "del-cli": "^3.0.0",
+        "ts-node": "^8.10.1",
+        "tslint": "^6.1.2",
+        "tslint-config-alloy": "^0.2.1",
+        "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "reflect-metadata": "^0.1.13",
+        "think_lib": "^2.x.x",
+        "think_logger": "^2.x.x",
+        "tslib": "^1.11.2"
+    },
+    "maintainers": [
+        {
+            "name": "richenlin",
+            "email": "richenlin@gmail.com"
+        }
+    ]
+}
