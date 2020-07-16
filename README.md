@@ -1,2 +1,2 @@
-# think_container
+# koatty_container
 IOC Container for Koatty!
