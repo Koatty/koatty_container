@@ -22,13 +22,25 @@ export class Container implements IContainer {
     private classMap: Map<any, any>;
     private instanceMap: WeakMap<any, any>;
     private metadataMap: WeakMap<any, any>;
+    private static instance: Container;
+
+    /**
+     * 
+     *
+     * @static
+     * @returns
+     * @memberof ValidateUtil
+     */
+    static getInstance() {
+        return this.instance || (this.instance = new Container());
+    }
 
     /**
      * creates an instance of Container.
      * @param {*} app
      * @memberof Container
      */
-    public constructor() {
+    private constructor() {
         this.classMap = new Map();
         this.instanceMap = new WeakMap();
         this.metadataMap = new WeakMap();
@@ -129,10 +141,10 @@ export class Container implements IContainer {
      * @param {string} identifier
      * @param {CompomentType} [type="SERVICE"]
      * @param {any[]} [args=[]]
-     * @returns {object}
+     * @returns {*}
      * @memberof Container
      */
-    public get(identifier: string, type: CompomentType = "SERVICE", args: any[] = []): object {
+    public get(identifier: string, type: CompomentType = "SERVICE", args: any[] = []): any {
         const target = this.getClass(identifier, type);
         if (!helper.isClass(target)) {
             return null;
@@ -433,5 +445,4 @@ export class Container implements IContainer {
         return datas;
     }
 }
-// export
-export const IOCContainer = new Container();
+

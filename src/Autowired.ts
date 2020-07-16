@@ -8,9 +8,8 @@
 import "reflect-metadata";
 import * as helper from "think_lib";
 import * as logger from "think_logger";
-import { Container, IOCContainer } from "./Container";
+import { Container } from "./Container";
 import { CompomentType, TAGGED_PROP } from "./IContainer";
-
 
 const functionPrototype = Object.getPrototypeOf(Function);
 // get property of an object
@@ -63,6 +62,7 @@ function ordinaryGetPrototypeOf(obj: any): any {
 function recursiveGetMetadata(metadataKey: any, target: any, propertyKey?: string | symbol): any[] {
     // get metadata value of a metadata key on the prototype
     // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
+    const IOCContainer = Container.getInstance();
     const metadata = IOCContainer.listPropertyData(metadataKey, target) || {};
 
     // get metadata value of a metadata key on the prototype chain
@@ -130,7 +130,7 @@ export function Autowired(identifier?: string, type?: CompomentType, constructAr
             isDelay = true;
         }
 
-        IOCContainer.savePropertyData(TAGGED_PROP, {
+        Container.getInstance().savePropertyData(TAGGED_PROP, {
             type,
             identifier,
             delay: isDelay,

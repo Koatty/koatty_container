@@ -42,8 +42,8 @@ export interface IContainer {
     setApp(app: Application): void;
     reg<T>(target: T, options?: ObjectDefinitionOptions): T;
     reg<T>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-    get(identifier: string, type?: CompomentType, args?: any[]): object;
-    getClass(identifier: string, type?: CompomentType): object;
+    get(identifier: string, type?: CompomentType, args?: any[]): any;
+    getClass(identifier: string, type?: CompomentType): Function;
     getInsByClass<T>(target: T, args?: any[]): T;
     saveClass(type: CompomentType, module: Function, identifier: string): void;
     listClass(type: CompomentType): any[];

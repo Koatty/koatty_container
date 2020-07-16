@@ -1,6 +1,6 @@
 {
     "name": "think_container",
-    "version": "1.0.4",
+    "version": "1.1.2",
     "description": "IOC Container for Koatty.",
     "scripts": {
         "build": "del-cli --force dist && tsc",
@@ -31,17 +31,17 @@
     "homepage": "https://github.com/thinkkoa/think_container",
     "devDependencies": {
         "@types/node": "^12.x.x",
-        "del-cli": "^3.0.0",
-        "ts-node": "^8.10.1",
+        "del-cli": "^3.0.1",
+        "ts-node": "^8.10.2",
         "tslint": "^6.1.2",
         "tslint-config-alloy": "^0.2.1",
-        "typescript": "^3.8.3"
+        "typescript": "^3.9.6"
     },
     "dependencies": {
         "reflect-metadata": "^0.1.13",
-        "think_lib": "^2.x.x",
-        "think_logger": "^2.x.x",
-        "tslib": "^1.11.2"
+        "think_lib": "^2.6.0",
+        "think_logger": "^2.2.4",
+        "tslib": "^2.0.0"
     },
     "maintainers": [
         {
