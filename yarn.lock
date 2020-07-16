@@ -539,20 +539,10 @@ mkdirp@^0.5.3:
   dependencies:
     minimist "^1.2.5"
 
-moment@^2.25.3:
-  version "2.27.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.27.0.tgz#8bff4e3e26a236220dfe3e36de756b6ebaa0105d"
-  integrity sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
-
 murmurhash@^0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-0.0.2.tgz#6f07bd8a1105e709c26fc89420cb5930c24585fe"
   integrity sha1-bwe9ihEF5wnCb8iUIMtZMMJFhf4=
-
-murmurhash@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-1.0.0.tgz#d0e4556892317d984af632b6a88d5605beef26a7"
-  integrity sha512-u/NfpXS+viMWAupgU6IkwAVWkVnpvzS+D9bDxNuNRUoQ0BRMZ1DK/dPH6Qrknn7RxMHVQBpYBQQigUt7of6RiQ==
 
 normalize-package-data@^2.5.0:
   version "2.5.0"
@@ -761,16 +751,6 @@ supports-color@^5.3.0:
   dependencies:
     has-flag "^3.0.0"
 
-think_lib@^2.6.x:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/think_lib/-/think_lib-2.6.0.tgz#d7959976f0e19fd9c0b76a3a7b0b396c6e58911f"
-  integrity sha512-vEtmdGahwkwYynh1jCNWBK9ckFdhHJ8r1T6Oe5SNbdIfHnGvqM7R9xZXhYB4qFjxTDupG6UtQkwt7l71Lh3heQ==
-  dependencies:
-    co "^4.6.0"
-    lodash "^4.17.15"
-    moment "^2.25.3"
-    murmurhash "^1.0.0"
-
 think_lib@^2.x.x:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/think_lib/-/think_lib-2.5.2.tgz#6be720de31286b7cad6e90f1a208a805cc41fc87"
@@ -780,7 +760,7 @@ think_lib@^2.x.x:
     lodash "^4.17.15"
     murmurhash "^0.0.2"
 
-think_logger@^2.2.4:
+think_logger@^2.x.x:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/think_logger/-/think_logger-2.2.4.tgz#58688602d8a65ff4c5afdf40f383bcb7889f63f1"
   integrity sha512-2jwU8AmRwv/FTEYFC/nmd5QP3id7woXEubbFJgZv++V6WX5rPmVeN2tqWSiypMECySXQLMksO8VCxxmI4cSe/Q==

@@ -1,5 +1,5 @@
 {
-    "name": "think_container",
+    "name": "koatty_container",
     "version": "1.1.2",
     "description": "IOC Container for Koatty.",
     "scripts": {
@@ -10,7 +10,7 @@
     "main": "./dist/index.js",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/thinkkoa/think_container.git"
+        "url": "git+https://github.com/thinkkoa/koatty_container.git"
     },
     "keywords": [
         "IOC",
@@ -26,9 +26,9 @@
     },
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/thinkkoa/think_container/issues"
+        "url": "https://github.com/thinkkoa/koatty_container/issues"
     },
-    "homepage": "https://github.com/thinkkoa/think_container",
+    "homepage": "https://github.com/thinkkoa/koatty_container",
     "devDependencies": {
         "@types/node": "^12.x.x",
         "del-cli": "^3.0.1",
@@ -39,8 +39,8 @@
     },
     "dependencies": {
         "reflect-metadata": "^0.1.13",
-        "think_lib": "^2.6.0",
-        "think_logger": "^2.2.4",
+        "think_lib": "^2.x.x",
+        "think_logger": "^2.x.x",
         "tslib": "^2.0.0"
     },
     "maintainers": [
