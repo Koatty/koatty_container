@@ -5,7 +5,7 @@
  * @ version: 2020-05-10 11:41:01
  */
 export type Scope = 'Singleton' | 'Prototype';
-export type CompomentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
+export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
 
 // used to store class to be injected
 export const TAGGED_CLS = 'INJECT_TAGGED_CLS';
@@ -42,11 +42,11 @@ export interface IContainer {
     setApp(app: Application): void;
     reg<T>(target: T, options?: ObjectDefinitionOptions): T;
     reg<T>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-    get(identifier: string, type?: CompomentType, args?: any[]): any;
-    getClass(identifier: string, type?: CompomentType): Function;
+    get(identifier: string, type?: ComponentType, args?: any[]): any;
+    getClass(identifier: string, type?: ComponentType): Function;
     getInsByClass<T>(target: T, args?: any[]): T;
-    saveClass(type: CompomentType, module: Function, identifier: string): void;
-    listClass(type: CompomentType): any[];
+    saveClass(type: ComponentType, module: Function, identifier: string): void;
+    listClass(type: ComponentType): any[];
     getIdentifier(target: Function): string;
     getType(target: Function): string;
     getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
@@ -71,7 +71,7 @@ export interface ObjectDefinitionOptions {
     initMethod?: string;
     destroyMethod?: string;
     scope?: Scope;
-    type: CompomentType;
+    type: ComponentType;
     args: any[];
 }
 

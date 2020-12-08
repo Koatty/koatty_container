@@ -6,9 +6,9 @@
  */
 // tslint:disable-next-line: no-import-side-effect
 import "reflect-metadata";
-import * as helper from "think_lib";
+import * as helper from "koatty_lib";
 import { injectAutowired } from './Autowired';
-import { IContainer, ObjectDefinitionOptions, Application, CompomentType, TAGGED_CLS } from "./IContainer";
+import { IContainer, ObjectDefinitionOptions, Application, ComponentType, TAGGED_CLS } from "./IContainer";
 
 /**
  * IOC Container
@@ -139,12 +139,12 @@ export class Container implements IContainer {
      * get instance from IOC container.
      *
      * @param {string} identifier
-     * @param {CompomentType} [type="SERVICE"]
+     * @param {ComponentType} [type="SERVICE"]
      * @param {any[]} [args=[]]
      * @returns {*}
      * @memberof Container
      */
-    public get(identifier: string, type: CompomentType = "SERVICE", args: any[] = []): any {
+    public get(identifier: string, type: ComponentType = "SERVICE", args: any[] = []): any {
         const target = this.getClass(identifier, type);
         if (!helper.isClass(target)) {
             return null;
@@ -166,11 +166,11 @@ export class Container implements IContainer {
      * get class from IOC container by identifier.
      *
      * @param {string} identifier
-     * @param {CompomentType} [type="SERVICE"]
+     * @param {ComponentType} [type="SERVICE"]
      * @returns {Function}
      * @memberof Container
      */
-    public getClass(identifier: string, type: CompomentType = "SERVICE"): Function {
+    public getClass(identifier: string, type: ComponentType = "SERVICE"): Function {
         return this.classMap.get(`${type}:${identifier}`);
     }
 
@@ -287,12 +287,12 @@ export class Container implements IContainer {
     /**
      * save class to Container
      *
-     * @param {CompomentType} type
+     * @param {ComponentType} type
      * @param {Function} module
      * @param {string} identifier
      * @memberof Container
      */
-    public saveClass(type: CompomentType, module: Function, identifier: string) {
+    public saveClass(type: ComponentType, module: Function, identifier: string) {
         Reflect.defineMetadata(TAGGED_CLS, { id: identifier, type }, module);
         const key = `${type}:${identifier}`;
         if (!this.classMap.has(key)) {
@@ -303,11 +303,11 @@ export class Container implements IContainer {
     /**
      * get all class from Container
      *
-     * @param {CompomentType} type
+     * @param {ComponentType} type
      * @returns
      * @memberof Container
      */
-    public listClass(type: CompomentType) {
+    public listClass(type: ComponentType) {
         const modules: any[] = [];
         this.classMap.forEach((v, k) => {
             if (k.startsWith(type)) {
