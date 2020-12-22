@@ -10,9 +10,6 @@ export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE
 // used to store class to be injected
 export const TAGGED_CLS = 'INJECT_TAGGED_CLS';
 
-// used to store arguments tags
-export const TAGGED_ARGS = 'INJECT_TAGGED_ARGS';
-
 // used to store class properties tags
 export const TAGGED_PROP = 'INJECT_TAGGED_PROP';
 
@@ -27,9 +24,8 @@ export const TAGGED_METHOD = 'INJECT_TAGGED_METHOD';
  */
 export interface Application {
     config(propKey: string, type: string): any;
+    on(event: string, callback: () => void): any;
     once(event: string, callback: () => void): any;
-    request: any;
-    response: any;
 }
 
 /**

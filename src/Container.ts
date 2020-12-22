@@ -446,3 +446,5 @@ export class Container implements IContainer {
     }
 }
 
+// export Singleton
+export const IOCContainer: Container = Container.getInstance();
