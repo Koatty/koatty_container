@@ -9,7 +9,7 @@
         "release": "standard-version",
         "test": "npm run eslint && npm run build && jest --passWithNoTests",
         "test:cov": "jest --collectCoverage --detectOpenHandles",
-        "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+        "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
     },
     "main": "./dist/index.js",
     "repository": {
