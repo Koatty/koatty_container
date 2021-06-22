@@ -101,7 +101,7 @@ export function injectAutowired(target: any, instance: any, container: Container
                 dep = container.get(identifier, type, args);
                 if (dep) {
                     // tslint:disable-next-line: no-unused-expression
-                    process.env.APP_DEBUG && logger.Custom("think", "", `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
+                    logger.Debug("think", "", `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
                     Reflect.defineProperty(instance, metaKey, {
                         enumerable: true,
                         configurable: false,
