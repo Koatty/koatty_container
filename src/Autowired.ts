@@ -53,7 +53,7 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
         }
         //Cannot rely on injection middleware
         // if (type === "MIDDLEWARE") {
-        //     throw new Error(`Middleware ${identifier || ""} cannot be injected!`);
+        //     throw new Error(`Middleware ${identifier ?? ""} cannot be injected!`);
         // }
 
         if (!designType || designType.name === "Object") {
@@ -64,7 +64,7 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
             type,
             identifier,
             delay: isDelay,
-            args: constructArgs || []
+            args: constructArgs ?? []
         }, target, propertyKey);
     };
 }
@@ -95,7 +95,7 @@ export function injectAutowired(target: any, instance: any, container: Container
     // tslint:disable-next-line: forin
     for (const metaKey in metaData) {
         let dep;
-        const { type, identifier, delay, args } = metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
+        const { type, identifier, delay, args } = metaData[metaKey] ?? { type: "", identifier: "", delay: false, args: [] };
         if (type && identifier) {
             if (!delay || isLazy) {
                 dep = container.get(identifier, type, args);
@@ -109,7 +109,7 @@ export function injectAutowired(target: any, instance: any, container: Container
                         value: dep
                     });
                 } else {
-                    throw new Error(`Component ${metaData[metaKey].identifier || ""} not found. It's autowired in class ${target.name}`);
+                    throw new Error(`Component ${metaData[metaKey].identifier ?? ""} not found. It's autowired in class ${target.name}`);
                 }
             } else {
                 // Delay loading solves the problem of cyclic dependency
