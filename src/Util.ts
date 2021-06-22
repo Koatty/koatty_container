@@ -2,7 +2,7 @@
  * @Author: richen
  * @Date: 2020-12-21 17:40:24
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-06-22 10:18:17
+ * @LastEditTime: 2021-06-22 11:03:55
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
@@ -70,7 +70,6 @@ export function RecursiveGetMetadata(metadataKey: any, target: any, propertyKey?
     // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
     const IOCContainer = Container.getInstance();
     const metadata = IOCContainer.listPropertyData(metadataKey, target) ?? {};
-
     // get metadata value of a metadata key on the prototype chain
     let parent = ordinaryGetPrototypeOf(target);
     while (parent !== null) {

@@ -100,8 +100,7 @@ export function injectAutowired(target: any, instance: any, container: Container
             if (!delay || isLazy) {
                 dep = container.get(identifier, type, args);
                 if (dep) {
-                    // tslint:disable-next-line: no-unused-expression
-                    logger.Debug("think", "", `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
+                    logger.Debug(`Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
                     Reflect.defineProperty(instance, metaKey, {
                         enumerable: true,
                         configurable: false,
