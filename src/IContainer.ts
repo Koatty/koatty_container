@@ -7,6 +7,12 @@
 export type Scope = 'Singleton' | 'Prototype';
 export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
 
+// used to store class properties aop
+export const TAGGED_AOP = 'TAGGED_AOP';
+
+// used to store class properties args
+export const TAGGED_ARGS = 'TAGGED_ARGS';
+
 // used to store class to be injected
 export const TAGGED_CLS = 'INJECT_TAGGED_CLS';
 
