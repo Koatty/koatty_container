@@ -4,6 +4,7 @@
  * @ license: MIT
  * @ version: 2020-05-10 11:41:01
  */
+import Koa from "koa";
 export type Scope = 'Singleton' | 'Prototype';
 export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
 
@@ -28,10 +29,41 @@ export const TAGGED_METHOD = 'INJECT_TAGGED_METHOD';
  * @export
  * @interface Application
  */
-export interface Application {
-    config(propKey: string, type: string): any;
+export interface Application extends Koa {
+    env: string;
+    rootPath: string;
+    appPath: string;
+    thinkPath: string;
+    appDebug: boolean;
+    options: any;
+    trace: any;
+
+    setMap: (key: string, value: any) => Map<string, unknown>;
+    getMap: (key: string) => any;
+    use: (fn: Function) => any;
+    config: (name: string, type?: string) => any;
     on(event: string, callback: () => void): any;
     once(event: string, callback: () => void): any;
+    createContext: (req: any, res: any) => any;
+}
+
+/**
+ * Base Context.
+ *
+ * @export
+ * @interface Context
+ * @extends {Koa.Context}
+ */
+export interface Context extends Koa.Context {
+    /**
+     * Replace ctx.throw
+     *
+     * @type {(status: number, message?: string)}
+     * @type {(message: string, code?: number, status?: HttpStatusCode)}
+     * @memberof Context
+     */
+    throw(status: number, message?: string): never;
+    throw(message: string, code?: number, status?: any): never;
 }
 
 /**
