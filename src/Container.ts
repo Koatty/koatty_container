@@ -34,7 +34,7 @@ export class Container implements IContainer {
      * @memberof ValidateUtil
      */
     static getInstance() {
-        return this.instance ?? (this.instance = new Container());
+        return this.instance || (this.instance = new Container());
     }
 
     /**

@@ -95,7 +95,7 @@ export function injectAutowired(target: any, instance: any, container: Container
     // tslint:disable-next-line: forin
     for (const metaKey in metaData) {
         let dep;
-        const { type, identifier, delay, args } = metaData[metaKey] ?? { type: "", identifier: "", delay: false, args: [] };
+        const { type, identifier, delay, args } = metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
         if (type && identifier) {
             if (!delay || isLazy) {
                 dep = container.get(identifier, type, args);

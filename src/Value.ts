@@ -2,7 +2,7 @@
  * @Author: richen
  * @Date: 2020-12-18 10:37:03
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-06-28 18:13:56
+ * @LastEditTime: 2021-07-07 18:04:11
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
@@ -29,9 +29,9 @@ export function Value(key: string, type?: string): PropertyDecorator {
         //     throw Error("Value decorator cannot be used in the middleware class. Please use app.config() to get the configuration.");
         // }
 
-        // identifier = identifier ?? helper.camelCase(propertyKey, { pascalCase: true });
-        key = key ?? propertyKey;
-        IOCContainer.savePropertyData(TAGGED_ARGS, `${key ?? ""}|${type ?? "config"}`, target, propertyKey);
+        // identifier = identifier || helper.camelCase(propertyKey, { pascalCase: true });
+        key = key || propertyKey;
+        IOCContainer.savePropertyData(TAGGED_ARGS, `${key ?? ""}|${type || "config"}`, target, propertyKey);
     };
 }
 /**
