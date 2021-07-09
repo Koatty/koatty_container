@@ -29,24 +29,23 @@ export const TAGGED_METHOD = 'INJECT_TAGGED_METHOD';
  * @export
  * @interface Application
  */
-export interface Application extends Koa {
+export interface Application {
     env: string;
-    rootPath: string;
-    appPath: string;
-    thinkPath: string;
-    appDebug: boolean;
     options: any;
-    trace: any;
+    context: Context;
 
-    setMap: (key: string, value: any) => Map<string, unknown>;
-    getMap: (key: string) => any;
     use: (fn: Function) => any;
     config: (name: string, type?: string) => any;
     on(event: string, callback: () => void): any;
     once(event: string, callback: () => void): any;
-    createContext: (req: any, res: any) => any;
+    /**
+    * app metadata
+    *
+    * @memberof Application
+    */
+    getMetaData: (key: string) => unknown;
+    setMetaData: (key: string, value: unknown) => Map<string, unknown>;
 }
-
 /**
  * Base Context.
  *
@@ -54,7 +53,7 @@ export interface Application extends Koa {
  * @interface Context
  * @extends {Koa.Context}
  */
-export interface Context extends Koa.Context {
+export interface Context {
     /**
      * Replace ctx.throw
      *
@@ -64,6 +63,13 @@ export interface Context extends Koa.Context {
      */
     throw(status: number, message?: string): never;
     throw(message: string, code?: number, status?: any): never;
+    /**
+    * context metadata
+    *
+    * @memberof Context
+    */
+    getMetaData: (key: string) => unknown;
+    setMetaData: (key: string, value: unknown) => Map<string, unknown>;
 }
 
 /**
