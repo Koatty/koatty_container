@@ -1,6 +1,6 @@
 {
     "name": "koatty_container",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "IOC Container for Koatty.",
     "scripts": {
         "build": "del-cli --force dist && tsc",
