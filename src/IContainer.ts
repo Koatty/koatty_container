@@ -4,7 +4,6 @@
  * @ license: MIT
  * @ version: 2020-05-10 11:41:01
  */
-import Koa from "koa";
 export type Scope = 'Singleton' | 'Prototype';
 export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
 

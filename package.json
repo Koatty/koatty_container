@@ -43,7 +43,6 @@
         "@commitlint/cli": "^12.x.x",
         "@commitlint/config-conventional": "^12.x.x",
         "@types/cls-hooked": "^4.x.x",
-        "@types/koa": "^2.x.x",
         "@types/node": "^12.x.x",
         "@typescript-eslint/eslint-plugin": "^4.x.x",
         "@typescript-eslint/parser": "^4.x.x",
@@ -62,7 +61,6 @@
         "typescript": "^4.x.x"
     },
     "dependencies": {
-        "koa": "^2.x.x",
         "koatty_lib": "^1.x.x",
         "koatty_logger": "^1.x.x",
         "reflect-metadata": "^0.1.13",
