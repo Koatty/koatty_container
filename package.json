@@ -1,13 +1,14 @@
 {
     "name": "koatty_container",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "IOC Container for Koatty.",
     "scripts": {
         "build": "del-cli --force dist && tsc",
         "eslint": "eslint --ext .ts,.js ./",
         "prepublishOnly": "npm test && npm run build",
-        "release": "standard-version",
-        "test": "npm run eslint && npm run build && jest --passWithNoTests",
+        "release": "npm run prepublishOnly && standard-version",
+        "pub": "git push --follow-tags origin && npm publish",
+        "test": "npm run eslint && jest --passWithNoTests",
         "test:cov": "jest --collectCoverage --detectOpenHandles",
         "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
     },
@@ -28,7 +29,7 @@
         "name": "richenlin",
         "email": "richenlin@gmail.com"
     },
-    "license": "MIT",
+    "license": "BSD-3-Clause",
     "bugs": {
         "url": "https://github.com/koatty/koatty_container/issues"
     },
@@ -40,21 +41,24 @@
         }
     ],
     "devDependencies": {
+        "@babel/core": "^7.x.x",
+        "@babel/plugin-proposal-decorators": "^7.x.x",
+        "@babel/preset-env": "^7.x.x",
+        "@babel/preset-typescript": "^7.x.x",
         "@commitlint/cli": "^12.x.x",
-        "@commitlint/config-conventional": "^12.x.x",
-        "@types/cls-hooked": "^4.x.x",
-        "@types/node": "^12.x.x",
-        "@typescript-eslint/eslint-plugin": "^4.x.x",
-        "@typescript-eslint/parser": "^4.x.x",
+        "@commitlint/config-conventional": "^15.x.x",
+        "@types/jest": "^27.x.x",
+        "@types/koa": "^2.x.x",
+        "@types/node": "^16.x.x",
+        "@typescript-eslint/eslint-plugin": "^5.x.x",
+        "@typescript-eslint/parser": "^5.x.x",
         "conventional-changelog-cli": "^2.x.x",
-        "del-cli": "^3.x.x",
-        "eslint": "^7.x.x",
-        "eslint-plugin-jest": "^24.x.x",
-        "husky": "^6.x.x",
+        "del-cli": "^4.x.x",
+        "eslint": "^8.x.x",
+        "eslint-plugin-jest": "^25.x.x",
+        "husky": "^7.x.x",
         "jest": "^27.x.x",
         "jest-html-reporters": "^2.x.x",
-        "koatty_cacheable": "^1.x.x",
-        "koatty_schedule": "^1.x.x",
         "standard-version": "^9.x.x",
         "ts-jest": "^27.x.x",
         "ts-node": "^10.x.x",
@@ -64,7 +68,7 @@
         "koatty_lib": "^1.x.x",
         "koatty_logger": "^1.x.x",
         "reflect-metadata": "^0.1.13",
-        "tslib": "^2.3.0"
+        "tslib": "^2.3.1"
     },
     "husky": {
         "hooks": {
