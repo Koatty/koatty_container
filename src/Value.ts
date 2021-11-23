@@ -2,11 +2,11 @@
  * @Author: richen
  * @Date: 2020-12-18 10:37:03
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-07-07 18:04:11
+ * @LastEditTime: 2021-11-23 10:53:10
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
-import { DefaultLogger as logger } from "koatty_logger";
+// import { DefaultLogger as logger } from "koatty_logger";
 import { Container, IOCContainer } from "./Container";
 import { TAGGED_ARGS } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
@@ -19,7 +19,7 @@ import { RecursiveGetMetadata } from "./Util";
  * @param {string} [type] configuration type
  * @returns {PropertyDecorator}
  */
-export function Value(key: string, type?: string): PropertyDecorator {
+export function Value(key?: string, type?: string): PropertyDecorator {
     return (target: any, propertyKey: string) => {
         // ###############
         // PropertyDecorator is executed before ClassDecorator, resulting in that componentType cannot be obtained here...
@@ -65,7 +65,7 @@ export function injectValue(target: any, instance: any, container: Container) {
 
     // tslint:disable-next-line: forin
     for (const metaKey in metaData) {
-        logger.Debug(`Register inject ${IOCContainer.getIdentifier(target)} config key: ${metaKey} => value: ${metaData[metaKey]}`);
+        // logger.Debug(`Register inject ${IOCContainer.getIdentifier(target)} config key: ${metaKey} => value: ${metaData[metaKey]}`);
         const propKeys = metaData[metaKey].split("|");
         const [propKey, type] = propKeys;
         Reflect.defineProperty(instance, metaKey, {

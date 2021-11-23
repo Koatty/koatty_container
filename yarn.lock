@@ -3894,13 +3894,6 @@ koatty_lib@^1.x.x:
     murmurhash "^2.0.0"
     tslib "^2.3.0"
 
-koatty_logger@^1.x.x:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/koatty_logger/-/koatty_logger-1.1.2.tgz#16bb3122198522ac484e6d4e118d2b2819929686"
-  integrity sha512-9Na6Cq6boHFpg0cLzG0xXC+KFMjxwokFT5JJVfW3ZKj15H0Sq4kD+O+jzCQYA4YzlI4uAvO8DT6MXEzT24ZyUw==
-  dependencies:
-    koatty_lib "^1.x.x"
-
 leven@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/leven/-/leven-3.1.0.tgz#77891de834064cccba82ae7842bb6b14a13ed7f2"

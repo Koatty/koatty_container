@@ -8,7 +8,7 @@
 import "reflect-metadata";
 import * as helper from "koatty_lib";
 import { Container, IOCContainer } from "./Container";
-import { DefaultLogger as logger } from "koatty_logger";
+// import { DefaultLogger as logger } from "koatty_logger";
 import { ComponentType, TAGGED_PROP } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
@@ -100,7 +100,7 @@ export function injectAutowired(target: any, instance: any, container: Container
             if (!delay || isLazy) {
                 dep = container.get(identifier, type, args);
                 if (dep) {
-                    logger.Debug(`Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
+                    // logger.Debug(`Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
                     Reflect.defineProperty(instance, metaKey, {
                         enumerable: true,
                         configurable: false,
@@ -114,10 +114,12 @@ export function injectAutowired(target: any, instance: any, container: Container
                 // Delay loading solves the problem of cyclic dependency
                 const app = container.getApp();
                 // tslint:disable-next-line: no-unused-expression
-                app && app.once("appStart", () => {
-                    // lazy inject autowired
-                    injectAutowired(target, instance, container, true);
-                });
+                if (app && app.once) {
+                    app.once("appStart", () => {
+                        // lazy inject autowired
+                        injectAutowired(target, instance, container, true);
+                    });
+                }
             }
         }
     }
