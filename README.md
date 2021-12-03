@@ -1,6 +1,6 @@
 # koatty_container
 
-IOC容器以及Typescript中的实现
+Typescript中IOC容器的实现，支持DI（依赖注入）以及 AOP （切面编程）.
 
 
 ## IOC容器
