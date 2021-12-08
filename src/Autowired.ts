@@ -115,7 +115,7 @@ export function injectAutowired(target: any, instance: any, container: Container
                 const app = container.getApp();
                 // tslint:disable-next-line: no-unused-expression
                 if (app && app.once) {
-                    app.once("appStart", () => {
+                    app.once("appReady", () => {
                         // lazy inject autowired
                         injectAutowired(target, instance, container, true);
                     });

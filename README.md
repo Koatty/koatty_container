@@ -1,6 +1,6 @@
 # koatty_container
 
-Typescript中IOC容器的实现，支持DI（依赖注入）以及 AOP （切面编程）.
+Typescript中IOC容器的实现，支持DI（依赖注入）以及 AOP （切面编程）。参考Spring IOC的实现机制，用Typescript实现了一个IOC容器，在应用启动的时候，自动分类装载组件，并且根据依赖关系，注入相应的依赖。它解决了一个最主要的问题：将组件的创建+配置与组件的使用相分离，并且，由IoC容器负责管理组件的生命周期。
 
 [![Version npm](https://img.shields.io/npm/v/koatty_container.svg?style=flat-square)](https://www.npmjs.com/package/koatty_container)
 [![npm Downloads](https://img.shields.io/npm/dm/koatty_container.svg?style=flat-square)](https://npmcharts.com/compare/koatty_container?minimal)
@@ -12,10 +12,10 @@ IoC全称Inversion of Control，直译为控制反转。不是什么技术，而
 如何理解好Ioc呢？理解好Ioc的关键是要明确“谁控制谁，控制什么，为何是反转（有反转就应该有正转了），哪些方面反转了”，那我们来深入分析一下：
 
 * 谁控制谁，控制什么：
-  传统OO程序设计，我们直接在对象内部通过new进行创建对象，是程序主动去创建依赖对象；而IoC是有专门一个容器来创建这些对象，即由Ioc容器来控制对象的创建；谁控制谁？当然是IoC 容器控制了对象；控制什么？那就是主要控制了外部资源获取（不只是对象包括比如文件等）。
+> 传统OO程序设计，我们直接在对象内部通过new进行创建对象，是程序主动去创建依赖对象；而IoC是有专门一个容器来创建这些对象，即由Ioc容器来控制对象的创建；谁控制谁？当然是IoC 容器控制了对象；控制什么？那就是主要控制了外部资源获取（不只是对象包括比如文件等）。
 
 * 为何是反转，哪些方面反转了：
-  有反转就有正转，传统应用程序是由我们自己在对象中主动控制去直接获取依赖对象，也就是正转；而反转则是由容器来帮忙创建及注入依赖对象；为何是反转？因为由容器帮我们查找及注入依赖对象，对象只是被动的接受依赖对象，所以是反转；哪些方面反转了？依赖对象的获取被反转了。
+> 有反转就有正转，传统应用程序是由我们自己在对象中主动控制去直接获取依赖对象，也就是正转；而反转则是由容器来帮忙创建及注入依赖对象；为何是反转？因为由容器帮我们查找及注入依赖对象，对象只是被动的接受依赖对象，所以是反转；哪些方面反转了？依赖对象的获取被反转了。
 
 听着比较难以理解是不是，我们来举例说明，我们假定一个在线书店，通过BookService获取书籍：
 
@@ -42,7 +42,7 @@ export class BookService {
 
 ```
 
-为了从数据库查询书籍，BookService持有一个DataSource。为了实例化一个HikariDataSource，又不得不实例化一个HikariConfig。
+为了从数据库查询书籍，BookService持有一个DataSource。为了实例化一个DataSource，又不得不实例化一个DataConfig。
 
 现在，我们继续编写UserService获取用户：
 
@@ -65,7 +65,7 @@ export class UserService {
 }
 
 ```
-因为UserService也需要访问数据库，因此，我们不得不也实例化一个HikariDataSource。
+因为UserService也需要访问数据库，因此，我们不得不也实例化一个DataSource。
 
 在处理用户购买的CartController中，我们需要实例化UserService和BookService：
 
@@ -113,11 +113,7 @@ export class HistoryController extends {
 
 解决这一问题的核心方案就是IoC。
 
-## Typescript实现IOC
-
-参考Spring IOC的实现机制，我用Typescript实现了一个IOC容器（koatty_container），在应用启动的时候，自动分类装载组件，并且根据依赖关系，注入相应的依赖。因此，IoC又称为依赖注入（DI：Dependency Injection），它解决了一个最主要的问题：将组件的创建+配置与组件的使用相分离，并且，由IoC容器负责管理组件的生命周期。
-
-### 组件分类
+## 组件分类
 
 根据组件的不同应用场景，Koatty把Bean分为 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE' 四种类型。
 
@@ -133,7 +129,23 @@ export class HistoryController extends {
 * SERVICE
   逻辑服务类
 
-### API定义
+
+## 循环依赖
+
+随着项目规模的扩大，很容易出现循环依赖。koatty_container解决循环依赖的思路是延迟加载。koatty_container在 `app` 上绑定了一个 `appReady` 事件，用于延迟加载产生循环依赖的bean, 在使用IOC的时候需要进行处理：
+
+```js
+// 
+app.emit("appReady");
+```
+
+注意：虽然延迟加载能够解决大部分场景下的循环依赖，但是在极端情况下仍然可能装配失败，解决方案：
+
+1、尽量避免循环依赖，新增第三方公共类来解耦互相依赖的类
+
+2、使用IOC容器获取类的原型(getClass)，自行实例化
+
+## API
 
 通过组件加载的Loader，在项目启动时，会自动分析并装配Bean，自动处理好Bean之间的依赖问题。IOC容器提供了一系列的API接口，方便注册以及获取装配好的Bean。
 
