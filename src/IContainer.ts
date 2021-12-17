@@ -31,7 +31,6 @@ export const TAGGED_METHOD = 'INJECT_TAGGED_METHOD';
 export interface Application {
     env: string;
     options: any;
-    context: Context;
 
     use: (fn: Function) => any;
     config: (name: string, type?: string) => any;

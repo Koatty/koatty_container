@@ -101,7 +101,7 @@ export class Container implements IContainer {
                 args: [],
                 ...options
             };
-            options.args = options.args.length ? options.args : [this.app];
+            options.args = options.args.length ? options.args : [];
             // inject options once
             Reflect.defineProperty(target.prototype, "_options", {
                 enumerable: false,
@@ -109,10 +109,7 @@ export class Container implements IContainer {
                 writable: true,
                 value: options
             });
-            const ref = this.getClass(options.type, identifier);
-            if (!ref) {
-                this.saveClass(options.type, target, identifier);
-            }
+
             // define app as getter
             const app = this.app;
             Reflect.defineProperty(target.prototype, "app", {
@@ -130,15 +127,18 @@ export class Container implements IContainer {
             // inject AOP
             injectAOP(target, target.prototype, this);
 
+            const ref = this.getClass(options.type, identifier);
+            if (!ref) {
+                this.saveClass(options.type, target, identifier);
+            }
 
+            // instantiation
+            instance = Reflect.construct(target, options.args);
             if (options.scope === "Singleton") {
-                // instantiation
-                instance = Reflect.construct(target, options.args);
-            } else {
-                instance = target;
+                instance = Object.seal(instance);
             }
             // registration
-            this.instanceMap.set(target, Object.seal(instance));
+            this.instanceMap.set(target, instance);
         }
         return instance;
     }
@@ -154,20 +154,18 @@ export class Container implements IContainer {
      */
     public get(identifier: string, type: ComponentType = "SERVICE", args: any[] = []): any {
         const target = this.getClass(identifier, type);
-        if (!helper.isClass(target)) {
+        if (!target) {
             return null;
         }
         // get instance from the Container
-        const instance: any = this.reg(target, { scope: args.length > 0 ? "Prototype" : "Singleton", type, args });
-
+        const instance: any = this.instanceMap.get(target);
         // require Prototype instance
-        if (helper.isClass(instance)) {
+        if (args.length > 0) {
             // instantiation
             return Reflect.construct(target, args);
         } else {
             return instance;
         }
-
     }
 
     /**
@@ -195,12 +193,10 @@ export class Container implements IContainer {
         if (!helper.isClass(target)) {
             return null;
         }
-        const type = this.getType(<Function><unknown>target);
         // get instance from the Container
-        const instance: any = this.reg(target, { scope: args.length > 0 ? "Prototype" : "Singleton", type, args });
-
+        const instance: any = this.instanceMap.get(target);
         // require Prototype instance
-        if (helper.isClass(instance)) {
+        if (args.length > 0) {
             // instantiation
             return Reflect.construct(<Function><unknown>target, args);
         } else {
