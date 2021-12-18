@@ -7,7 +7,7 @@
         "build:cp": "node scripts/postBuild && copyfiles package.json LICENSE README.md dist/",
         "build:js": "del-cli --force dist && npx rollup -c",
         "build:doc": "del-cli --force docs/api && npx api-documenter markdown --input temp --output docs/api",
-        "build:dts": "del-cli --force lib && npx tsc && npx api-extractor run --local --verbose && del-cli --force lib",
+        "build:dts": "del-cli --force temp && npx tsc && npx api-extractor run --local --verbose",
         "eslint": "eslint --ext .ts,.js ./",
         "prepublishOnly": "npm test && npm run build",
         "prerelease": "npm test && npm run build",
@@ -16,7 +16,6 @@
         "release:major": "npm run release -- --release-as major",
         "release:minor": "npm run release -- --release-as minor",
         "pub": "git push --follow-tags origin && npm publish",
-        "pub:pre": "git push --follow-tags origin && npm publish --tag prerelease",
         "test": "npm run eslint && jest --passWithNoTests",
         "test:cov": "jest --collectCoverage --detectOpenHandles",
         "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
