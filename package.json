@@ -1,6 +1,6 @@
 {
     "name": "koatty_container",
-    "version": "1.6.12-0",
+    "version": "1.6.12-1",
     "description": "IOC Container for Koatty.",
     "scripts": {
         "build": "npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -13,8 +13,8 @@
         "prerelease": "npm test && npm run build",
         "release": "standard-version",
         "release:pre": "npm run release -- --prerelease",
-        "release:major": "npm run release -- --release-as minor",
-        "release:patch": "npm run release -- --release-as patch",
+        "release:major": "npm run release -- --release-as major",
+        "release:minor": "npm run release -- --release-as minor",
         "pub": "git push --follow-tags origin && npm publish",
         "pub:pre": "git push --follow-tags origin && npm publish --tag prerelease",
         "test": "npm run eslint && jest --passWithNoTests",
