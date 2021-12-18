@@ -1,16 +1,8 @@
 /*
  * @Author: richen
- * @Date: 2020-12-21 17:40:24
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-06-22 11:03:55
- * @License: BSD (3-Clause)
- * @Copyright (c) - <richenlin(at)gmail.com>
- */
-/*
- * @Author: richen
  * @Date: 2020-12-17 20:04:07
- * @LastEditors: linyyyang<linyyyang@tencent.com>
- * @LastEditTime: 2020-12-21 17:05:08
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2021-12-18 02:58:21
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
