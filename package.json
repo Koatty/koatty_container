@@ -16,6 +16,7 @@
         "release:major": "npm run release -- --release-as minor",
         "release:patch": "npm run release -- --release-as patch",
         "pub": "git push --follow-tags origin && npm publish",
+        "pub:pre": "git push --follow-tags origin && npm publish --tag prerelease",
         "test": "npm run eslint && jest --passWithNoTests",
         "test:cov": "jest --collectCoverage --detectOpenHandles",
         "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
