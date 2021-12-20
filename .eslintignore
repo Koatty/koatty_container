@@ -4,7 +4,7 @@ node_modules
 **/yarn.lock
 **/*.config.js
 dist
-lib
+temp
 scripts
 coverage
 test
