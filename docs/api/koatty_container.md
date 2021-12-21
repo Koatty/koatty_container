@@ -27,6 +27,7 @@
 |  [Before(aopName)](./koatty_container.before.md) | Executed before specifying the PointCut method. |
 |  [BeforeEach(aopName)](./koatty_container.beforeeach.md) | Executed after execution of each method of the specified PointCut class. |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
+|  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | Find all property on a given ES6 class |
 |  [RecursiveGetMetadata(metadataKey, target, propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 |  [Value(key, type)](./koatty_container.value.md) | Indicates that an decorated configuration as a property. |
