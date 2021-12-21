@@ -21,6 +21,10 @@
         "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
     },
     "main": "./dist/index.js",
+    "exports": {
+        "require": "./dist/index.js",
+        "import": "./dist/index.mjs"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/koatty/koatty_container.git"

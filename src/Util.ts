@@ -2,7 +2,7 @@
  * @Author: richen
  * @Date: 2020-12-17 20:04:07
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-12-18 02:58:21
+ * @LastEditTime: 2021-12-21 16:50:52
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
@@ -77,6 +77,34 @@ export function RecursiveGetMetadata(metadataKey: any, target: any, propertyKey?
         parent = ordinaryGetPrototypeOf(parent);
     }
     return metadata;
+}
+
+/**
+*
+*
+* @param {(string | symbol)} metadataKey
+* @param {*} target
+* @param {(string | symbol)} [propertyKey]
+* @returns
+*/
+export function getOriginMetadata(metadataKey: string | symbol, target: any, propertyKey?: string | symbol) {
+    // filter Object.create(null)
+    if (typeof target === "object" && target.constructor) {
+        target = target.constructor;
+    }
+    if (propertyKey) {
+        // for property or method
+        if (!Reflect.hasMetadata(metadataKey, target, propertyKey)) {
+            Reflect.defineMetadata(metadataKey, new Map(), target, propertyKey);
+        }
+        return Reflect.getMetadata(metadataKey, target, propertyKey);
+    } else {
+        // for class
+        if (!Reflect.hasMetadata(metadataKey, target)) {
+            Reflect.defineMetadata(metadataKey, new Map(), target);
+        }
+        return Reflect.getMetadata(metadataKey, target);
+    }
 }
 
 /**
