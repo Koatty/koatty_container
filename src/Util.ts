@@ -2,7 +2,7 @@
  * @Author: richen
  * @Date: 2020-12-17 20:04:07
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2021-12-21 16:50:52
+ * @LastEditTime: 2022-02-15 13:47:29
  * @License: BSD (3-Clause)
  * @Copyright (c) - <richenlin(at)gmail.com>
  */
@@ -69,7 +69,7 @@ export function RecursiveGetMetadata(metadataKey: any, target: any, propertyKey?
         const metadata = IOCContainer.listPropertyData(metadataKey, parent);
         if (metadata) {
             for (const n in metadata) {
-                if (!metadata.hasOwnProperty(n)) {
+                if (!Object.hasOwnProperty.call(metadata, n)) {
                     metadata[n] = metadata[n];
                 }
             }
