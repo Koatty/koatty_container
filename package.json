@@ -29,11 +29,6 @@
         "type": "git",
         "url": "git+https://github.com/koatty/koatty_container.git"
     },
-    "keywords": [
-        "IOC",
-        "koatty",
-        "thinkkoa"
-    ],
     "engines": {
         "node": ">10.0.0"
     },
@@ -85,10 +80,5 @@
     },
     "peerDependencies": {
         "koatty_lib": "^1.x.x"
-    },
-    "husky": {
-        "hooks": {
-            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-        }
     }
 }
