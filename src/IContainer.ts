@@ -10,17 +10,20 @@ export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE
 // used to store class properties aop
 export const TAGGED_AOP = 'TAGGED_AOP';
 
-// used to store class properties args
+// used to store class properties args (value)
 export const TAGGED_ARGS = 'TAGGED_ARGS';
 
 // used to store class to be injected
-export const TAGGED_CLS = 'INJECT_TAGGED_CLS';
+export const TAGGED_CLS = 'TAGGED_CLS';
 
-// used to store class properties tags
-export const TAGGED_PROP = 'INJECT_TAGGED_PROP';
+// used to store class properties tags (autowired)
+export const TAGGED_PROP = 'TAGGED_PROP';
+
+// used to store class properties parameters (get/post...)
+export const TAGGED_PARAM = 'TAGGED_PARAM';
 
 // used to store class method to be injected
-export const TAGGED_METHOD = 'INJECT_TAGGED_METHOD';
+export const TAGGED_METHOD = 'TAGGED_METHOD';
 
 /**
  * Base Application
