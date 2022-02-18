@@ -9,7 +9,6 @@ import "reflect-metadata";
 import * as helper from "koatty_lib";
 import { injectAutowired } from './Autowired';
 import { IContainer, ObjectDefinitionOptions, Application, ComponentType, TAGGED_CLS } from "./IContainer";
-import { injectValue } from "./Value";
 import { injectAOP } from "./AOP";
 
 /**
@@ -122,8 +121,6 @@ export class Container implements IContainer {
 
             // inject autowired
             injectAutowired(target, target.prototype, this);
-            // inject value
-            injectValue(target, target.prototype, this);
             // inject AOP
             injectAOP(target, target.prototype, this);
 
