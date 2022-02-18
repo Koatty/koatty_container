@@ -30,7 +30,6 @@
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | Find all property on a given ES6 class |
 |  [RecursiveGetMetadata(metadataKey, target, propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
-|  [Value(key, type)](./koatty_container.value.md) | Indicates that an decorated configuration as a property. |
 
 ## Interfaces
 
@@ -49,7 +48,6 @@
 
 |  Variable | Description |
 |  --- | --- |
-|  [Config](./koatty_container.config.md) | Indicates that an decorated configuration as a property. |
 |  [IOCContainer](./koatty_container.ioccontainer.md) |  |
 |  [TAGGED\_AOP](./koatty_container.tagged_aop.md) |  |
 |  [TAGGED\_ARGS](./koatty_container.tagged_args.md) |  |
