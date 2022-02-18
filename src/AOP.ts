@@ -198,7 +198,7 @@ export function injectAOP(target: any, instance: any, container: Container) {
         // inject default AOP method
         injectDefaultAOP(target, instance, methods);
     } else {
-        const classMetaData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target);
+        const classMetaData = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target);
         if (classMetaData) {
             const { type, name, method } = classMetaData;
             if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {

@@ -51,10 +51,6 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
         if (type === "CONTROLLER") {
             throw new Error(`Controller cannot be injection!`);
         }
-        //Cannot rely on injection middleware
-        // if (type === "MIDDLEWARE") {
-        //     throw new Error(`Middleware ${identifier ?? ""} cannot be injected!`);
-        // }
 
         if (!designType || designType.name === "Object") {
             isDelay = true;

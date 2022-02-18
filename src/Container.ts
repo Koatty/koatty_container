@@ -10,6 +10,7 @@ import * as helper from "koatty_lib";
 import { injectAutowired } from './Autowired';
 import { IContainer, ObjectDefinitionOptions, Application, ComponentType, TAGGED_CLS } from "./IContainer";
 import { injectAOP } from "./AOP";
+import { injectProperty } from "./Property";
 
 /**
  * IOC Container
@@ -121,6 +122,8 @@ export class Container implements IContainer {
 
             // inject autowired
             injectAutowired(target, target.prototype, this);
+            // inject properties
+            injectProperty(target, target.prototype, this);
             // inject AOP
             injectAOP(target, target.prototype, this);
 
