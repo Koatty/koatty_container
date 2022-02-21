@@ -4779,7 +4779,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "TAGGED_CLS = \"INJECT_TAGGED_CLS\""
+              "text": "TAGGED_CLS = \"TAGGED_CLS\""
             }
           ],
           "releaseTag": "Public",
@@ -4796,11 +4796,28 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "TAGGED_METHOD = \"INJECT_TAGGED_METHOD\""
+              "text": "TAGGED_METHOD = \"TAGGED_METHOD\""
             }
           ],
           "releaseTag": "Public",
           "name": "TAGGED_METHOD",
+          "variableTypeTokenRange": {
+            "startIndex": 0,
+            "endIndex": 0
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "koatty_container!TAGGED_PARAM:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "TAGGED_PARAM = \"TAGGED_PARAM\""
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "TAGGED_PARAM",
           "variableTypeTokenRange": {
             "startIndex": 0,
             "endIndex": 0
@@ -4813,7 +4830,7 @@
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "TAGGED_PROP = \"INJECT_TAGGED_PROP\""
+              "text": "TAGGED_PROP = \"TAGGED_PROP\""
             }
           ],
           "releaseTag": "Public",

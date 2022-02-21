@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-TAGGED_PROP = "INJECT_TAGGED_PROP"
+TAGGED_PROP = "TAGGED_PROP"
 ```

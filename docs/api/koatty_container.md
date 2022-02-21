@@ -53,6 +53,7 @@
 |  [TAGGED\_ARGS](./koatty_container.tagged_args.md) |  |
 |  [TAGGED\_CLS](./koatty_container.tagged_cls.md) |  |
 |  [TAGGED\_METHOD](./koatty_container.tagged_method.md) |  |
+|  [TAGGED\_PARAM](./koatty_container.tagged_param.md) |  |
 |  [TAGGED\_PROP](./koatty_container.tagged_prop.md) |  |
 
 ## Type Aliases

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-TAGGED_CLS = "INJECT_TAGGED_CLS"
+TAGGED_CLS = "TAGGED_CLS"
 ```
