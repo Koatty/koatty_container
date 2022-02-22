@@ -191,27 +191,25 @@ async function executeAspect(aopName: string | Function, props: any[]) {
 export function injectAOP(target: any, instance: any, container: Container) {
     // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
     const allMethods = getMethodNames(target);
-    const methods = allMethods.filter((m: string) =>
-        !["constructor", "init", "__before", "__after"].includes(m) && target.prototype.hasOwnProperty(m)
-    );
-    if (allMethods.includes("__before") || allMethods.includes("__after")) {
+    const methods = allMethods.filter((m: string) => !['constructor', 'init', '__before', '__after'].includes(m));
+    let hasDefault = false;
+    if (allMethods.includes('__before') || allMethods.includes('__after')) {
         // inject default AOP method
         injectDefaultAOP(target, instance, methods);
+        hasDefault = true;
     } else {
         const classMetaData = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target);
-        if (classMetaData) {
-            const { type, name, method } = classMetaData;
-            if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
-                methods.forEach((element) => {
-                    if ([AOPType.Before, AOPType.After].includes(type) && method === element) {
-                        // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
-                        defineAOPProperty(target, element, name, type);
-                    } else {
-                        // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
-                        defineAOPProperty(target, element, name, type);
+        const { type, name, method } = classMetaData || {};
+        if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
+            methods.forEach((element) => {
+                if (element === method) {
+                    if (hasDefault && (type === AOPType.BeforeEach || type === AOPType.AfterEach)) {
+                        return;
                     }
-                });
-            }
+                    // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
+                    defineAOPProperty(target, element, name, type);
+                }
+            });
         }
     }
 }
