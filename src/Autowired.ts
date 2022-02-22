@@ -110,7 +110,7 @@ export function injectAutowired(target: any, instance: any, container: Container
                 // Delay loading solves the problem of cyclic dependency
                 const app = container.getApp();
                 // tslint:disable-next-line: no-unused-expression
-                if (app && app.once) {
+                if (app?.once) {
                     app.once("appReady", () => {
                         // lazy inject autowired
                         injectAutowired(target, instance, container, true);
