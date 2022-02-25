@@ -190,7 +190,7 @@ async function executeAspect(aopName: string | Function, props: any[]) {
  */
 export function injectAOP(target: any, instance: any, container: Container) {
     // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
-    const allMethods = getMethodNames(target);
+    const allMethods = getMethodNames(target, true);
     const methods = allMethods.filter((m: string) => !['constructor', 'init', '__before', '__after'].includes(m));
     let hasDefault = false;
     if (allMethods.includes('__before') || allMethods.includes('__after')) {

@@ -3,7 +3,7 @@
  * @Usage: 
  * @Author: richen
  * @Date: 2022-02-18 14:29:10
- * @LastEditTime: 2022-02-21 14:21:38
+ * @LastEditTime: 2022-02-25 10:44:50
  */
 import * as helper from "koatty_lib";
 import { Container, IOCContainer } from "./Container";
@@ -42,7 +42,8 @@ export function injectValues(target: any, instance: any, container?: Container) 
  */
 export function Values(val: any | Function, defaultValue?: unknown): PropertyDecorator {
     return (target: any, propertyKey: string) => {
-        // identifier = identifier || helper.camelCase(propertyKey, { pascalCase: true });
+        const paramTypes = Reflect.getMetadata("design:type", target, propertyKey);
+        const types = paramTypes.name ? paramTypes.name : "object";
         IOCContainer.savePropertyData(TAGGED_ARGS, {
             name: propertyKey,
             method: function () {
@@ -51,7 +52,10 @@ export function Values(val: any | Function, defaultValue?: unknown): PropertyDec
                     value = val();
                 }
                 if (defaultValue !== undefined) {
-                    return helper.isTrueEmpty(value) ? defaultValue : value;
+                    value = helper.isTrueEmpty(value) ? defaultValue : value;
+                }
+                if (typeof value !== types) {
+                    throw new Error("The type of the value is not the same as the type of the parameter");
                 }
                 return value;
             }
