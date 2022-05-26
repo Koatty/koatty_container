@@ -5,7 +5,7 @@
     "scripts": {
         "build": "npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
         "build:cp": "node scripts/postBuild && copyfiles package.json LICENSE README.md dist/",
-        "build:js": "del-cli --force dist && npx rollup -c",
+        "build:js": "del-cli --force dist && npx rollup -c .rollup.config.js",
         "build:doc": "del-cli --force docs/api && npx api-documenter markdown --input temp --output docs/api",
         "build:dts": "del-cli --force temp && npx tsc && npx api-extractor run --local --verbose",
         "eslint": "eslint --ext .ts,.js ./",
