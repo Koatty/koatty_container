@@ -20,7 +20,7 @@ attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, 
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| Object |  |
-|  propertyName | string |  Container |
+|  propertyName | string | <i>(Optional)</i>  Container |
 
 <b>Returns:</b>
 

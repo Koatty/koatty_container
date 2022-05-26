@@ -17,7 +17,7 @@ getClass(identifier: string, type?: ComponentType): Function;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  identifier | string |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) |  |
+|  type | [ComponentType](./koatty_container.componenttype.md) | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

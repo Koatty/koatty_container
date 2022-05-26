@@ -18,7 +18,7 @@ export declare function RecursiveGetMetadata(metadataKey: any, target: any, prop
 |  --- | --- | --- |
 |  metadataKey | any | metadata key |
 |  target | any | the target of metadataKey |
-|  propertyKey | string \| symbol |  |
+|  propertyKey | string \| symbol | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

@@ -18,7 +18,7 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| Object |  |
-|  propertyName | string |  |
+|  propertyName | string | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

@@ -17,7 +17,7 @@ export declare function BeforeEach(aopName?: string | Function): ClassDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string \| Function |  |
+|  aopName | string \| Function | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

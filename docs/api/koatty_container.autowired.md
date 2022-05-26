@@ -17,10 +17,10 @@ export declare function Autowired(identifier?: string, type?: ComponentType, con
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) |  |
-|  constructArgs | any\[\] |  |
-|  isDelay | boolean |  |
+|  identifier | string | <i>(Optional)</i> |
+|  type | [ComponentType](./koatty_container.componenttype.md) | <i>(Optional)</i> |
+|  constructArgs | any\[\] | <i>(Optional)</i> |
+|  isDelay | boolean | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

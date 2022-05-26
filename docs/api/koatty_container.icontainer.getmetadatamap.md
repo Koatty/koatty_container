@@ -16,7 +16,7 @@ getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string |
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
 |  target | any |  |
-|  propertyKey | string \| symbol |  |
+|  propertyKey | string \| symbol | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

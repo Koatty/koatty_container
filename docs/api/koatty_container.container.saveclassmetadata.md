@@ -20,7 +20,7 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| Object |  |
-|  propertyName | string |  Container |
+|  propertyName | string | <i>(Optional)</i>  Container |
 
 <b>Returns:</b>
 

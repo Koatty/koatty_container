@@ -19,7 +19,7 @@ getInsByClass<T>(target: T, args?: any[]): T;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  target | T |  |
-|  args | any\[\] |  |
+|  args | any\[\] | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

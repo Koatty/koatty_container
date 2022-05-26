@@ -15,8 +15,8 @@ throw(message: string, code?: number, status?: any): never;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  message | string |  |
-|  code | number |  |
-|  status | any |  |
+|  code | number | <i>(Optional)</i> |
+|  status | any | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

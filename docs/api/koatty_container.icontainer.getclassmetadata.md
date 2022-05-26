@@ -17,7 +17,7 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 |  type | string |  |
 |  decoratorNameKey | string \| symbol |  |
 |  target | Function \| Object |  |
-|  propertyName | string |  |
+|  propertyName | string | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

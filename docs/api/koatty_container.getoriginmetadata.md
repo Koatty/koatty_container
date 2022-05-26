@@ -16,7 +16,7 @@ export declare function getOriginMetadata(metadataKey: string | symbol, target: 
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
 |  target | any |  |
-|  propertyKey | string \| symbol |  |
+|  propertyKey | string \| symbol | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

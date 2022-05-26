@@ -19,7 +19,7 @@ throw(status: number, message?: string): never;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  status | number |  |
-|  message | string |  |
+|  message | string | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

@@ -19,7 +19,7 @@ getMetadataMap(metadataKey: string | symbol, target: Function | Object, property
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
 |  target | Function \| Object |  |
-|  propertyKey | string \| symbol |  |
+|  propertyKey | string \| symbol | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

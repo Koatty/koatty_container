@@ -18,7 +18,7 @@ export declare function getPropertyNames(target: any, isSelfProperties?: boolean
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  target | any |  |
-|  isSelfProperties | boolean |  |
+|  isSelfProperties | boolean | <i>(Optional)</i> |
 
 <b>Returns:</b>
 

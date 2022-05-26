@@ -17,7 +17,7 @@ export declare function Aspect(identifier?: string): ClassDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string |  |
+|  identifier | string | <i>(Optional)</i> |
 
 <b>Returns:</b>
 
