@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.11](https://github.com/koatty/koatty_container/compare/v1.7.10...v1.7.11) (2023-01-09)
+
+
+### Bug Fixes
+
+* upgrade ([3308fc4](https://github.com/koatty/koatty_container/commit/3308fc42af9d506946469cd06a8a35515f9fa820))
+
 ### [1.7.10](https://github.com/koatty/koatty_container/compare/v1.7.7...v1.7.10) (2022-05-26)
 
 ### [1.7.7](https://github.com/koatty/koatty_container/compare/v1.7.6...v1.7.7) (2022-02-25)
