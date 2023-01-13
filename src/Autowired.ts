@@ -108,6 +108,7 @@ export function injectAutowired(target: any, instance: any, container: Container
         }
       } else {
         // Delay loading solves the problem of cyclic dependency
+        logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`)
         const app = container.getApp();
         // tslint:disable-next-line: no-unused-expression
         if (app?.once) {

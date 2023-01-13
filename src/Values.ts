@@ -3,10 +3,11 @@
  * @Usage: 
  * @Author: richen
  * @Date: 2022-02-18 14:29:10
- * @LastEditTime: 2023-01-10 00:05:15
+ * @LastEditTime: 2023-01-13 15:35:13
  */
 import * as helper from "koatty_lib";
 import { Container, IOCContainer } from "./Container";
+import { DefaultLogger as logger } from "koatty_logger";
 import { TAGGED_ARGS } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
@@ -23,6 +24,7 @@ export function injectValues(target: any, instance: any, container?: Container) 
   // tslint:disable-next-line: forin
   for (const metaKey in metaData) {
     const { name, method } = metaData[metaKey];
+    logger.Debug(`Register inject ${name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
     Reflect.defineProperty(instance, name, {
       enumerable: true,
       configurable: false,

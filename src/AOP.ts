@@ -5,7 +5,7 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-// import { DefaultLogger as logger } from "koatty_logger";
+import { DefaultLogger as logger } from "koatty_logger";
 import { Container, IOCContainer } from "./Container";
 import { TAGGED_AOP, TAGGED_CLS } from "./IContainer";
 import { getMethodNames } from "./Util";
@@ -173,7 +173,7 @@ async function executeAspect(aopName: string | Function, props: any[]) {
     // name = <string>aopName;
   }
   if (aspect && helper.isFunction(aspect.run)) {
-    // logger.Info(`Execute the aspect ${name}`);
+    logger.Debug(`Execute the aspect ${aopName}`);
     // tslint:disable-next-line: no-invalid-this
     await aspect.run(props);
   }
@@ -247,14 +247,14 @@ function injectDefaultAOP(target: any, instance: any, methods: string[]) {
   // const methods = getMethodNames(target, true).filter((m: string) =>
   //     !["constructor", "init", "__before", "__after"].includes(m)
   // );
-  // logger.Warn(`The ${target.name} class has a default AOP method, @BeforeEach and @AfterEach maybe not take effect`);
+  logger.Debug(`The ${target.name} class has default AOP method, @BeforeEach and @AfterEach not take effect`);
   methods.forEach((element) => {
     if (helper.isFunction(instance.__before)) {
-      // logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
+      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
       defineAOPProperty(target, element, "__before", AOPType.BeforeEach);
     }
     if (helper.isFunction(instance.__after)) {
-      // logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
+      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
       defineAOPProperty(target, element, "__after", AOPType.AfterEach);
     }
   });
@@ -275,7 +275,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
       async value(...props: any[]) {
         if ([AOPType.Before, AOPType.BeforeEach].includes(type)) {
           if (aopName === "__before") {
-            // logger.Info(`Execute the aspect ${classes.name}.__before`);
+            logger.Debug(`Execute the aspect ${classes.name}.__before`);
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__before, this, props);
           } else {
@@ -287,7 +287,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
           // tslint:disable-next-line: no-invalid-this
           const res = await Reflect.apply(oldMethod, this, props);
           if (aopName === "__after") {
-            // logger.Info(`Execute the aspect ${classes.name}.__after`);
+            logger.Debug(`Execute the aspect ${classes.name}.__after`);
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__after, this, props);
           } else {
