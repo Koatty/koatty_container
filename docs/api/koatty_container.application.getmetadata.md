@@ -11,5 +11,5 @@ app metadata
 <b>Signature:</b>
 
 ```typescript
-getMetaData: (key: string) => unknown;
+getMetaData: (key: string) => any;
 ```

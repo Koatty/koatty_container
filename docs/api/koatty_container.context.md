@@ -18,8 +18,8 @@ export interface Context
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getMetaData](./koatty_container.context.getmetadata.md) | (key: string) =&gt; unknown | context metadata Context |
-|  [setMetaData](./koatty_container.context.setmetadata.md) | (key: string, value: unknown) =&gt; Map&lt;string, unknown&gt; |  |
+|  [getMetaData](./koatty_container.context.getmetadata.md) | (key: string) =&gt; any | context metadata Context |
+|  [setMetaData](./koatty_container.context.setmetadata.md) | (key: string, value: unknown) =&gt; void |  |
 
 ## Methods
 

@@ -20,9 +20,9 @@ export interface Application
 |  --- | --- | --- |
 |  [config](./koatty_container.application.config.md) | (name: string, type?: string) =&gt; any |  |
 |  [env](./koatty_container.application.env.md) | string |  |
-|  [getMetaData](./koatty_container.application.getmetadata.md) | (key: string) =&gt; unknown | app metadata Application |
+|  [getMetaData](./koatty_container.application.getmetadata.md) | (key: string) =&gt; any | app metadata Application |
 |  [options](./koatty_container.application.options.md) | any |  |
-|  [setMetaData](./koatty_container.application.setmetadata.md) | (key: string, value: unknown) =&gt; Map&lt;string, unknown&gt; |  |
+|  [setMetaData](./koatty_container.application.setmetadata.md) | (key: string, value: unknown) =&gt; void |  |
 |  [use](./koatty_container.application.use.md) | (fn: Function) =&gt; any |  |
 
 ## Methods

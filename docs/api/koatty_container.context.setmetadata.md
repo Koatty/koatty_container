@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-setMetaData: (key: string, value: unknown) => Map<string, unknown>;
+setMetaData: (key: string, value: unknown) => void;
 ```
