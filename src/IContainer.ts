@@ -44,8 +44,8 @@ export interface Application {
   *
   * @memberof Application
   */
-  getMetaData: (key: string) => unknown;
-  setMetaData: (key: string, value: unknown) => Map<string, unknown>;
+  getMetaData: (key: string) => any[] | null;
+  setMetaData: (key: string, value: unknown) => void;
 }
 /**
  * Base Context.
@@ -69,8 +69,8 @@ export interface Context {
   *
   * @memberof Context
   */
-  getMetaData: (key: string) => unknown;
-  setMetaData: (key: string, value: unknown) => Map<string, unknown>;
+  getMetaData: (key: string) => any[] | null;
+  setMetaData: (key: string, value: unknown) => void;
 }
 
 /**
