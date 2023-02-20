@@ -44,7 +44,7 @@ export interface Application {
   *
   * @memberof Application
   */
-  getMetaData: (key: string) => any[] | null;
+  getMetaData: (key: string) => any;
   setMetaData: (key: string, value: unknown) => void;
 }
 /**
@@ -69,7 +69,7 @@ export interface Context {
   *
   * @memberof Context
   */
-  getMetaData: (key: string) => any[] | null;
+  getMetaData: (key: string) => any;
   setMetaData: (key: string, value: unknown) => void;
 }
 
