@@ -76,7 +76,8 @@
   "dependencies": {
     "koatty_lib": "^1.x.x",
     "koatty_logger": "^2.x.x",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.5.0"
   },
   "peerDependencies": {
     "koatty_lib": "^1.x.x",
