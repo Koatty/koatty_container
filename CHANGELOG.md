@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/koatty/koatty_container/compare/v1.7.14...v1.8.0) (2023-02-20)
+
+
+### Bug Fixes
+
+* interface ([41831a8](https://github.com/koatty/koatty_container/commit/41831a88634d97f5be18486c7a1b8113a734c102))
+* return type ([0855873](https://github.com/koatty/koatty_container/commit/0855873716ed06a00e9b7e652de9278dc7b58692))
+
 ### [1.7.14](https://github.com/koatty/koatty_container/compare/v1.7.12...v1.7.14) (2023-01-13)
 
 
