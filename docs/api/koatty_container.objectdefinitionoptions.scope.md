@@ -4,7 +4,7 @@
 
 ## ObjectDefinitionOptions.scope property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 scope?: Scope;

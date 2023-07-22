@@ -8,7 +8,7 @@ Aspect interface
 
   IAspect
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IAspect 
@@ -16,8 +16,8 @@ export interface IAspect
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [app](./koatty_container.iaspect.app.md) | any |  |
-|  [run](./koatty_container.iaspect.run.md) | (...args: any\[\]) =&gt; Promise&lt;any&gt; |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [app](./koatty_container.iaspect.app.md) |  | any |  |
+|  [run](./koatty_container.iaspect.run.md) |  | (...args: any\[\]) =&gt; Promise&lt;any&gt; |  |
 

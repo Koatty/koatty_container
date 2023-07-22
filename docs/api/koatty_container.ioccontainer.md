@@ -4,7 +4,7 @@
 
 ## IOCContainer variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 IOCContainer: Container

@@ -6,7 +6,7 @@
 
   TagPropsMetadata
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface TagPropsMetadata 
@@ -14,8 +14,8 @@ export interface TagPropsMetadata
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [key](./koatty_container.tagpropsmetadata.key.md) | string \| number \| symbol |  |
-|  [value](./koatty_container.tagpropsmetadata.value.md) | any |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [key](./koatty_container.tagpropsmetadata.key.md) |  | string \| number \| symbol |  |
+|  [value](./koatty_container.tagpropsmetadata.value.md) |  | any |  |
 

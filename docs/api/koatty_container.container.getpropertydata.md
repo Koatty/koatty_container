@@ -6,7 +6,7 @@
 
 get property data from class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, propertyName: string | symbol): any;
@@ -20,7 +20,7 @@ getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, pr
 |  target | Function \| Object |  |
 |  propertyName | string \| symbol |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

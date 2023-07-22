@@ -8,7 +8,7 @@ get instance from IOC container by class.
 
  T
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getInsByClass<T>(target: T, args?: any[]): T;
@@ -19,9 +19,9 @@ getInsByClass<T>(target: T, args?: any[]): T;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  target | T |  |
-|  args | any\[\] | <i>(Optional)</i> |
+|  args | any\[\] | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 T
 

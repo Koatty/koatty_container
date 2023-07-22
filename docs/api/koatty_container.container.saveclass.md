@@ -6,7 +6,7 @@
 
 save class to Container
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 saveClass(type: ComponentType, module: Function, identifier: string): void;
@@ -20,7 +20,7 @@ saveClass(type: ComponentType, module: Function, identifier: string): void;
 |  module | Function |  |
 |  identifier | string |  Container |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

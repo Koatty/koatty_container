@@ -4,7 +4,7 @@
 
 ## IContainer.attachPropertyData() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
@@ -19,7 +19,7 @@ attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Functio
 |  target | Function \| Object |  |
 |  propertyName | string \| symbol |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

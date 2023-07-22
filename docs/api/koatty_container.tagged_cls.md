@@ -4,7 +4,7 @@
 
 ## TAGGED\_CLS variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 TAGGED_CLS = "TAGGED_CLS"

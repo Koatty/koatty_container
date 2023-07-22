@@ -7,7 +7,7 @@
 Executed after execution of each method of the specified PointCut class.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function BeforeEach(aopName?: string | Function): ClassDecorator;
@@ -17,9 +17,9 @@ export declare function BeforeEach(aopName?: string | Function): ClassDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string \| Function | <i>(Optional)</i> |
+|  aopName | string \| Function | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 ClassDecorator
 

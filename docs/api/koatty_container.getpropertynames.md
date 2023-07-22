@@ -7,7 +7,7 @@
 Find all property on a given ES6 class
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function getPropertyNames(target: any, isSelfProperties?: boolean): string[];
@@ -18,9 +18,9 @@ export declare function getPropertyNames(target: any, isSelfProperties?: boolean
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  target | any |  |
-|  isSelfProperties | boolean | <i>(Optional)</i> |
+|  isSelfProperties | boolean | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 string\[\]
 

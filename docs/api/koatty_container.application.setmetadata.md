@@ -4,7 +4,7 @@
 
 ## Application.setMetaData property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setMetaData: (key: string, value: unknown) => void;

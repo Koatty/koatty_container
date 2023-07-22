@@ -4,7 +4,7 @@
 
 ## TagClsMetadata.originName property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 originName: string;

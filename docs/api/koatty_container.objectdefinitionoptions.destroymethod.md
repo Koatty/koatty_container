@@ -4,7 +4,7 @@
 
 ## ObjectDefinitionOptions.destroyMethod property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 destroyMethod?: string;

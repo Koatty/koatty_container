@@ -4,7 +4,7 @@
 
 ## TagPropsMetadata.value property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 value: any;

@@ -4,7 +4,7 @@
 
 ## IContainer.getClassMetadata() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | Object, propertyName?: string): any;
@@ -17,9 +17,9 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 |  type | string |  |
 |  decoratorNameKey | string \| symbol |  |
 |  target | Function \| Object |  |
-|  propertyName | string | <i>(Optional)</i> |
+|  propertyName | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

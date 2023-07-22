@@ -7,7 +7,7 @@
 Executed before specifying the PointCut method.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function Before(aopName: string | Function): MethodDecorator;
@@ -19,7 +19,7 @@ export declare function Before(aopName: string | Function): MethodDecorator;
 |  --- | --- | --- |
 |  aopName | string \| Function |  |
 
-<b>Returns:</b>
+**Returns:**
 
 MethodDecorator
 

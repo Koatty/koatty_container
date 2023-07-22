@@ -4,7 +4,7 @@
 
 ## getOriginMetadata() function
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function getOriginMetadata(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
@@ -16,9 +16,9 @@ export declare function getOriginMetadata(metadataKey: string | symbol, target: 
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
 |  target | any |  |
-|  propertyKey | string \| symbol | <i>(Optional)</i> |
+|  propertyKey | string \| symbol | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

@@ -6,7 +6,7 @@
 
 get identifier from class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getIdentifier(target: Function | Object): string;
@@ -18,7 +18,7 @@ getIdentifier(target: Function | Object): string;
 |  --- | --- | --- |
 |  target | Function \| Object |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

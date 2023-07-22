@@ -4,7 +4,7 @@
 
 ## IContainer.listClass() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 listClass(type: ComponentType): any[];
@@ -16,7 +16,7 @@ listClass(type: ComponentType): any[];
 |  --- | --- | --- |
 |  type | [ComponentType](./koatty_container.componenttype.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any\[\]
 

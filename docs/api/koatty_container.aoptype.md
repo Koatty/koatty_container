@@ -8,7 +8,7 @@ defined AOP type
 
   {<!-- -->number<!-- -->}
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare enum AOPType 

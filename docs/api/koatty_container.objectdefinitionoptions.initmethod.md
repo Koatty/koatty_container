@@ -4,7 +4,7 @@
 
 ## ObjectDefinitionOptions.initMethod property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 initMethod?: string;

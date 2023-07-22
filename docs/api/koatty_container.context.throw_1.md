@@ -4,7 +4,7 @@
 
 ## Context.throw() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 throw(message: string, code?: number, status?: any): never;
@@ -15,10 +15,10 @@ throw(message: string, code?: number, status?: any): never;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  message | string |  |
-|  code | number | <i>(Optional)</i> |
-|  status | any | <i>(Optional)</i> |
+|  code | number | _(Optional)_ |
+|  status | any | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 never
 

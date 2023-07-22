@@ -6,12 +6,12 @@
 
 get app
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getApp(): Application;
 ```
-<b>Returns:</b>
+**Returns:**
 
 [Application](./koatty_container.application.md)
 

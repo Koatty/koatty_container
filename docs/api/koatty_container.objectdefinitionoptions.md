@@ -8,7 +8,7 @@ BeanFactory Object interface
 
   ObjectDefinitionOptions
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ObjectDefinitionOptions 
@@ -16,12 +16,12 @@ export interface ObjectDefinitionOptions
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [args](./koatty_container.objectdefinitionoptions.args.md) | any\[\] |  |
-|  [destroyMethod?](./koatty_container.objectdefinitionoptions.destroymethod.md) | string | <i>(Optional)</i> |
-|  [initMethod?](./koatty_container.objectdefinitionoptions.initmethod.md) | string | <i>(Optional)</i> |
-|  [isAsync?](./koatty_container.objectdefinitionoptions.isasync.md) | boolean | <i>(Optional)</i> |
-|  [scope?](./koatty_container.objectdefinitionoptions.scope.md) | [Scope](./koatty_container.scope.md) | <i>(Optional)</i> |
-|  [type](./koatty_container.objectdefinitionoptions.type.md) | [ComponentType](./koatty_container.componenttype.md) |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [args](./koatty_container.objectdefinitionoptions.args.md) |  | any\[\] |  |
+|  [destroyMethod?](./koatty_container.objectdefinitionoptions.destroymethod.md) |  | string | _(Optional)_ |
+|  [initMethod?](./koatty_container.objectdefinitionoptions.initmethod.md) |  | string | _(Optional)_ |
+|  [isAsync?](./koatty_container.objectdefinitionoptions.isasync.md) |  | boolean | _(Optional)_ |
+|  [scope?](./koatty_container.objectdefinitionoptions.scope.md) |  | [Scope](./koatty_container.scope.md) | _(Optional)_ |
+|  [type](./koatty_container.objectdefinitionoptions.type.md) |  | [ComponentType](./koatty_container.componenttype.md) |  |
 

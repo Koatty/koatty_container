@@ -4,7 +4,7 @@
 
 ## TAGGED\_AOP variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 TAGGED_AOP = "TAGGED_AOP"

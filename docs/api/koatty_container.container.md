@@ -8,12 +8,12 @@ IOC Container
 
   Container  {<!-- -->IContainer<!-- -->}
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class Container implements IContainer 
 ```
-<b>Implements:</b> [IContainer](./koatty_container.icontainer.md)
+**Implements:** [IContainer](./koatty_container.icontainer.md)
 
 ## Methods
 
@@ -26,14 +26,14 @@ export declare class Container implements IContainer
 |  [getClass(identifier, type)](./koatty_container.container.getclass.md) |  | get class from IOC container by identifier. |
 |  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.container.getclassmetadata.md) |  | get single data from class or property |
 |  [getIdentifier(target)](./koatty_container.container.getidentifier.md) |  | get identifier from class |
-|  [getInsByClass(target, args)](./koatty_container.container.getinsbyclass.md) |  | get instance from IOC container by class. T |
+|  [getInsByClass(target, args)](./koatty_container.container.getinsbyclass.md) |  | <p>get instance from IOC container by class.</p><p> T</p> |
 |  [getInstance()](./koatty_container.container.getinstance.md) | <code>static</code> |  |
-|  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.container.getmetadatamap.md) |  | get metadata from class |
+|  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.container.getmetadatamap.md) |  | <p>get metadata from class</p> |
 |  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.container.getpropertydata.md) |  | get property data from class |
 |  [getType(target)](./koatty_container.container.gettype.md) |  | get component type from class |
 |  [listClass(type)](./koatty_container.container.listclass.md) |  | get all class from Container |
 |  [listPropertyData(decoratorNameKey, target)](./koatty_container.container.listpropertydata.md) |  | list property data from class |
-|  [reg(target, options)](./koatty_container.container.reg.md) |  | registering an instance of a class to an IOC container. T |
+|  [reg(target, options)](./koatty_container.container.reg.md) |  | <p>registering an instance of a class to an IOC container.</p><p> T</p> |
 |  [reg(identifier, target, options)](./koatty_container.container.reg_1.md) |  |  |
 |  [saveClass(type, module, identifier)](./koatty_container.container.saveclass.md) |  | save class to Container |
 |  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.saveclassmetadata.md) |  | save meta data to class or property |

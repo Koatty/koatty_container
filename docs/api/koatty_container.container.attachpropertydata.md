@@ -6,7 +6,7 @@
 
 attach property data to class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
@@ -21,7 +21,7 @@ attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Functio
 |  target | Function \| Object |  |
 |  propertyName | string \| symbol |  Container |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

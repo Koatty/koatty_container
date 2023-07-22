@@ -8,7 +8,7 @@ Base Context.
 
   Context  {<!-- -->Koa.Context<!-- -->}
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface Context 
@@ -16,15 +16,15 @@ export interface Context
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [getMetaData](./koatty_container.context.getmetadata.md) | (key: string) =&gt; any | context metadata Context |
-|  [setMetaData](./koatty_container.context.setmetadata.md) | (key: string, value: unknown) =&gt; void |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [getMetaData](./koatty_container.context.getmetadata.md) |  | (key: string) =&gt; any | <p>context metadata</p><p> Context</p> |
+|  [setMetaData](./koatty_container.context.setmetadata.md) |  | (key: string, value: unknown) =&gt; void |  |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [throw(status, message)](./koatty_container.context.throw.md) | Replace ctx.throw {<!-- -->(status: number, message?: string)<!-- -->}  {<!-- -->(message: string, code?: number, status?: HttpStatusCode)<!-- -->}  Context |
+|  [throw(status, message)](./koatty_container.context.throw.md) | <p>Replace ctx.throw</p><p> {<!-- -->(status: number, message?: string)<!-- -->}  {<!-- -->(message: string, code?: number, status?: HttpStatusCode)<!-- -->}  Context</p> |
 |  [throw(message, code, status)](./koatty_container.context.throw_1.md) |  |
 

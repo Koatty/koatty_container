@@ -8,7 +8,7 @@ registering an instance of a class to an IOC container.
 
  T
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 reg<T>(target: T, options?: ObjectDefinitionOptions): T;
@@ -19,9 +19,9 @@ reg<T>(target: T, options?: ObjectDefinitionOptions): T;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  target | T |  |
-|  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <i>(Optional)</i> |
+|  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 T
 

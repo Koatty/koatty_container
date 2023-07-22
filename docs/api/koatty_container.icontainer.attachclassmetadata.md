@@ -4,7 +4,7 @@
 
 ## IContainer.attachClassMetadata() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
@@ -18,9 +18,9 @@ attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, 
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| Object |  |
-|  propertyName | string | <i>(Optional)</i> |
+|  propertyName | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

@@ -5,12 +5,12 @@
 ## Container.getInstance() method
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static getInstance(): Container;
 ```
-<b>Returns:</b>
+**Returns:**
 
 [Container](./koatty_container.container.md)
 

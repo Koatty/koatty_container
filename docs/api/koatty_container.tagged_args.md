@@ -4,7 +4,7 @@
 
 ## TAGGED\_ARGS variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 TAGGED_ARGS = "TAGGED_ARGS"

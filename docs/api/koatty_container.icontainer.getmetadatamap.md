@@ -4,7 +4,7 @@
 
 ## IContainer.getMetadataMap() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
@@ -16,9 +16,9 @@ getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string |
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
 |  target | any |  |
-|  propertyKey | string \| symbol | <i>(Optional)</i> |
+|  propertyKey | string \| symbol | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

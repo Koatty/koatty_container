@@ -8,38 +8,38 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [Container](./koatty_container.container.md) | IOC Container  Container  {<!-- -->IContainer<!-- -->} |
+|  [Container](./koatty_container.container.md) | <p>IOC Container</p><p>  Container  {<!-- -->IContainer<!-- -->}</p> |
 
 ## Enumerations
 
 |  Enumeration | Description |
 |  --- | --- |
-|  [AOPType](./koatty_container.aoptype.md) | defined AOP type  {<!-- -->number<!-- -->} |
+|  [AOPType](./koatty_container.aoptype.md) | <p>defined AOP type</p><p>  {<!-- -->number<!-- -->}</p> |
 
 ## Functions
 
 |  Function | Description |
 |  --- | --- |
-|  [After(aopName)](./koatty_container.after.md) | Executed after specifying the PointCut method. |
-|  [AfterEach(aopName)](./koatty_container.aftereach.md) | Executed after execution of each method of the specified PointCut class. |
-|  [Aspect(identifier)](./koatty_container.aspect.md) | Indicates that an decorated class is a "aspect". |
-|  [Autowired(identifier, type, constructArgs, isDelay)](./koatty_container.autowired.md) | Marks a constructor method as to be autowired by Koatty"s dependency injection facilities. |
-|  [Before(aopName)](./koatty_container.before.md) | Executed before specifying the PointCut method. |
-|  [BeforeEach(aopName)](./koatty_container.beforeeach.md) | Executed after execution of each method of the specified PointCut class. |
+|  [After(aopName)](./koatty_container.after.md) | <p>Executed after specifying the PointCut method.</p> |
+|  [AfterEach(aopName)](./koatty_container.aftereach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
+|  [Aspect(identifier)](./koatty_container.aspect.md) | <p>Indicates that an decorated class is a "aspect".</p> |
+|  [Autowired(identifier, type, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a constructor method as to be autowired by Koatty"s dependency injection facilities.</p> |
+|  [Before(aopName)](./koatty_container.before.md) | <p>Executed before specifying the PointCut method.</p> |
+|  [BeforeEach(aopName)](./koatty_container.beforeeach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
-|  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | Find all property on a given ES6 class |
+|  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
 |  [RecursiveGetMetadata(metadataKey, target, propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [Application](./koatty_container.application.md) | Base Application  Application |
-|  [Context](./koatty_container.context.md) | Base Context.  Context  {<!-- -->Koa.Context<!-- -->} |
-|  [IAspect](./koatty_container.iaspect.md) | Aspect interface  IAspect |
-|  [IContainer](./koatty_container.icontainer.md) | Container interface  IContainer |
-|  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | BeanFactory Object interface  ObjectDefinitionOptions |
+|  [Application](./koatty_container.application.md) | <p>Base Application</p><p>  Application</p> |
+|  [Context](./koatty_container.context.md) | <p>Base Context.</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
+|  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
+|  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |
+|  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
 |  [ReflectResult](./koatty_container.reflectresult.md) |   ReflectResult |
 |  [TagClsMetadata](./koatty_container.tagclsmetadata.md) |   TagClsMetadata |
 |  [TagPropsMetadata](./koatty_container.tagpropsmetadata.md) |   TagPropsMetadata |

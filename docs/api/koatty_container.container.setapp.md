@@ -6,7 +6,7 @@
 
 set app
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 setApp(app: Application): void;
@@ -18,7 +18,7 @@ setApp(app: Application): void;
 |  --- | --- | --- |
 |  app | [Application](./koatty_container.application.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

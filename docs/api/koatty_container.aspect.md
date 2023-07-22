@@ -7,7 +7,7 @@
 Indicates that an decorated class is a "aspect".
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function Aspect(identifier?: string): ClassDecorator;
@@ -17,9 +17,9 @@ export declare function Aspect(identifier?: string): ClassDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string | <i>(Optional)</i> |
+|  identifier | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 ClassDecorator
 

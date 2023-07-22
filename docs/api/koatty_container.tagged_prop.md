@@ -4,7 +4,7 @@
 
 ## TAGGED\_PROP variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 TAGGED_PROP = "TAGGED_PROP"

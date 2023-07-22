@@ -8,7 +8,7 @@ Container interface
 
   IContainer
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IContainer 

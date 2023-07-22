@@ -6,7 +6,7 @@
 
 list property data from class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 listPropertyData(decoratorNameKey: string | symbol, target: Function | Object): any;
@@ -19,7 +19,7 @@ listPropertyData(decoratorNameKey: string | symbol, target: Function | Object): 
 |  decoratorNameKey | string \| symbol |  |
 |  target | Function \| Object |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

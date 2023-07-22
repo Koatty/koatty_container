@@ -8,7 +8,7 @@ context metadata
 
  Context
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getMetaData: (key: string) => any;

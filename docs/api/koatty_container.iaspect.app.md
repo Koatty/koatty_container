@@ -4,7 +4,7 @@
 
 ## IAspect.app property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 app: any;

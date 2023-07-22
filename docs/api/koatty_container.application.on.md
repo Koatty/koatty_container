@@ -4,7 +4,7 @@
 
 ## Application.on() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 on(event: string, callback: () => void): any;
@@ -17,7 +17,7 @@ on(event: string, callback: () => void): any;
 |  event | string |  |
 |  callback | () =&gt; void |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

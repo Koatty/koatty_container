@@ -8,7 +8,7 @@ Replace ctx.throw
 
  {<!-- -->(status: number, message?: string)<!-- -->}  {<!-- -->(message: string, code?: number, status?: HttpStatusCode)<!-- -->}  Context
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 throw(status: number, message?: string): never;
@@ -19,9 +19,9 @@ throw(status: number, message?: string): never;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  status | number |  |
-|  message | string | <i>(Optional)</i> |
+|  message | string | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 never
 

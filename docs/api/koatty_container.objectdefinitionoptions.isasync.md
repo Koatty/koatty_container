@@ -4,7 +4,7 @@
 
 ## ObjectDefinitionOptions.isAsync property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 isAsync?: boolean;

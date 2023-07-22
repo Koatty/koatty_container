@@ -6,7 +6,7 @@
 
 get instance from IOC container.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get(identifier: string, type?: ComponentType, args?: any[]): any;
@@ -17,10 +17,10 @@ get(identifier: string, type?: ComponentType, args?: any[]): any;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  identifier | string |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) | <i>(Optional)</i> |
-|  args | any\[\] | <i>(Optional)</i> |
+|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
+|  args | any\[\] | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

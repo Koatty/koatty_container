@@ -8,7 +8,7 @@ app metadata
 
  Application
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getMetaData: (key: string) => any;

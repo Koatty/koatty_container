@@ -6,7 +6,7 @@
 
 get class from IOC container by identifier.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getClass(identifier: string, type?: ComponentType): Function;
@@ -17,9 +17,9 @@ getClass(identifier: string, type?: ComponentType): Function;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  identifier | string |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) | <i>(Optional)</i> |
+|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 Function
 

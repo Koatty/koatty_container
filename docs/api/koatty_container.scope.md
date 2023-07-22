@@ -6,7 +6,7 @@
 
 @ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: MIT @ version: 2020-05-10 11:41:01
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type Scope = 'Singleton' | 'Prototype';

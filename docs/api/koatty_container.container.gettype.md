@@ -6,7 +6,7 @@
 
 get component type from class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getType(target: Function | Object): any;
@@ -18,7 +18,7 @@ getType(target: Function | Object): any;
 |  --- | --- | --- |
 |  target | Function \| Object |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

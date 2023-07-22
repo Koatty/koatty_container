@@ -4,7 +4,7 @@
 
 ## IContainer.getIdentifier() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getIdentifier(target: Function): string;
@@ -16,7 +16,7 @@ getIdentifier(target: Function): string;
 |  --- | --- | --- |
 |  target | Function |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

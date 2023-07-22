@@ -4,7 +4,7 @@
 
 ## Application.use property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 use: (fn: Function) => any;

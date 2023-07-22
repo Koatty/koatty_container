@@ -4,7 +4,7 @@
 
 ## TAGGED\_PARAM variable
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 TAGGED_PARAM = "TAGGED_PARAM"

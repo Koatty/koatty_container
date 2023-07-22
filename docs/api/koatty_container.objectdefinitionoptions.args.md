@@ -4,7 +4,7 @@
 
 ## ObjectDefinitionOptions.args property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 args: any[];

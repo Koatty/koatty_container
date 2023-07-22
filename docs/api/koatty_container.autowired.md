@@ -7,7 +7,7 @@
 Marks a constructor method as to be autowired by Koatty"s dependency injection facilities.
 
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function Autowired(identifier?: string, type?: ComponentType, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
@@ -17,12 +17,12 @@ export declare function Autowired(identifier?: string, type?: ComponentType, con
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string | <i>(Optional)</i> |
-|  type | [ComponentType](./koatty_container.componenttype.md) | <i>(Optional)</i> |
-|  constructArgs | any\[\] | <i>(Optional)</i> |
-|  isDelay | boolean | <i>(Optional)</i> |
+|  identifier | string | _(Optional)_ |
+|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
+|  constructArgs | any\[\] | _(Optional)_ |
+|  isDelay | boolean | _(Optional)_ |
 
-<b>Returns:</b>
+**Returns:**
 
 PropertyDecorator
 

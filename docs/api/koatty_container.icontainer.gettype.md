@@ -4,7 +4,7 @@
 
 ## IContainer.getType() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getType(target: Function): string;
@@ -16,7 +16,7 @@ getType(target: Function): string;
 |  --- | --- | --- |
 |  target | Function |  |
 
-<b>Returns:</b>
+**Returns:**
 
 string
 

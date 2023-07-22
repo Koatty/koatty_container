@@ -6,7 +6,7 @@
 
   ReflectResult
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ReflectResult 

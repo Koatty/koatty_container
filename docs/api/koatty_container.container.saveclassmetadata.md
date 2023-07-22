@@ -6,7 +6,7 @@
 
 save meta data to class or property
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
@@ -20,9 +20,9 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| Object |  |
-|  propertyName | string | <i>(Optional)</i>  Container |
+|  propertyName | string | _(Optional)_  Container |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 

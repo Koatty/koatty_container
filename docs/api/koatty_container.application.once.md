@@ -4,7 +4,7 @@
 
 ## Application.once() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 once(event: string, callback: () => void): any;
@@ -17,7 +17,7 @@ once(event: string, callback: () => void): any;
 |  event | string |  |
 |  callback | () =&gt; void |  |
 
-<b>Returns:</b>
+**Returns:**
 
 any
 

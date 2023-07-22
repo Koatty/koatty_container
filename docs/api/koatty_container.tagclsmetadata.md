@@ -6,7 +6,7 @@
 
   TagClsMetadata
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface TagClsMetadata 
@@ -14,8 +14,8 @@ export interface TagClsMetadata
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [id](./koatty_container.tagclsmetadata.id.md) | string |  |
-|  [originName](./koatty_container.tagclsmetadata.originname.md) | string |  |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [id](./koatty_container.tagclsmetadata.id.md) |  | string |  |
+|  [originName](./koatty_container.tagclsmetadata.originname.md) |  | string |  |
 

@@ -6,7 +6,7 @@
 
 save property data to class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
@@ -21,7 +21,7 @@ savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function 
 |  target | Function \| Object |  |
 |  propertyName | string \| symbol |  Container |
 
-<b>Returns:</b>
+**Returns:**
 
 void
 
