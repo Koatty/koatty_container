@@ -60,10 +60,10 @@ export function Aspect(identifier?: string): ClassDecorator {
  * Executed before specifying the PointCut method.
  *
  * @export
- * @param {(string | Function)} aopName
+ * @param {string} aopName
  * @returns {MethodDecorator}
  */
-export function Before(aopName: string | Function): MethodDecorator {
+export function Before(aopName: string): MethodDecorator {
   return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
     if (!aopName) {
       throw Error("AopName is required.");
@@ -80,7 +80,7 @@ export function Before(aopName: string | Function): MethodDecorator {
     //     },
     // };
     // return descriptor;
-    IOCContainer.saveClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
       method: methodName,
@@ -95,9 +95,9 @@ export function Before(aopName: string | Function): MethodDecorator {
  * @param {string} [aopName]
  * @returns {Function}
  */
-export function BeforeEach(aopName?: string | Function): ClassDecorator {
+export function BeforeEach(aopName: string): ClassDecorator {
   return (target: any) => {
-    IOCContainer.saveClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.BeforeEach,
       name: aopName
     }, target);
@@ -108,10 +108,10 @@ export function BeforeEach(aopName?: string | Function): ClassDecorator {
  * Executed after specifying the PointCut method.
  *
  * @export
- * @param {(string | Function)} aopName
+ * @param {string} aopName
  * @returns {MethodDecorator}
  */
-export function After(aopName: string | Function): MethodDecorator {
+export function After(aopName: string): MethodDecorator {
   return (target: any, methodName: symbol | string, descriptor: PropertyDescriptor) => {
     if (!aopName) {
       throw Error("AopName is required.");
@@ -129,7 +129,7 @@ export function After(aopName: string | Function): MethodDecorator {
     //     }
     // };
     // return descriptor;
-    IOCContainer.saveClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
       method: methodName,
@@ -144,9 +144,9 @@ export function After(aopName: string | Function): MethodDecorator {
  * @param {string} aopName
  * @returns {Function}
  */
-export function AfterEach(aopName?: string | Function): ClassDecorator {
+export function AfterEach(aopName: string): ClassDecorator {
   return (target: any) => {
-    IOCContainer.saveClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AfterEach,
       name: aopName
     }, target);
@@ -154,41 +154,14 @@ export function AfterEach(aopName?: string | Function): ClassDecorator {
 }
 
 /**
- * Execute aspect
- *
- * @param {(string | Function)} aopName
- * @param {any[]} props
- * @returns {*}  
- */
-async function executeAspect(aopName: string | Function, props: any[]) {
-  // tslint:disable-next-line: one-variable-per-declaration
-  let aspect;//, name = "";
-  if (helper.isClass(aopName)) {
-    // tslint:disable-next-line: no-invalid-this
-    aspect = IOCContainer.getInsByClass(aopName);
-    // name = IOCContainer.getIdentifier(<Function>aopName) || (<Function>aopName).name || "";
-  } else {
-    // tslint:disable-next-line: no-invalid-this
-    aspect = IOCContainer.get(<string>aopName, "COMPONENT");
-    // name = <string>aopName;
-  }
-  if (aspect && helper.isFunction(aspect.run)) {
-    logger.Debug(`Execute the aspect ${aopName}`);
-    // tslint:disable-next-line: no-invalid-this
-    await aspect.run(props);
-  }
-  return Promise.resolve();
-}
-
-/**
  * inject AOP
  *
  * @export
- * @param {*} target
+ * @param {Function} target
  * @param {*} instance
  * @param {Container} container
  */
-export function injectAOP(target: any, instance: any, container: Container) {
+export function injectAOP(target: Function, instance: unknown, container: Container) {
   const allMethods = getMethodNames(target);
   // only binding self method
   const selfMethods = getMethodNames(target, true);
@@ -200,19 +173,21 @@ export function injectAOP(target: any, instance: any, container: Container) {
     hasDefault = true;
   }
 
-  const classMetaData = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target);
-  const { type, name, method } = classMetaData || {};
-  if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
-    methodsFilter(selfMethods).forEach((element: string) => {
-      if (element === method) {
-        // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
-        if (hasDefault && (type === AOPType.BeforeEach || type === AOPType.AfterEach)) {
-          return;
+  const classMetaDatas: any[] = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) ?? [];
+  for (const classMetaData of classMetaDatas) {
+    const { type, name, method } = classMetaData || {};
+    if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
+      methodsFilter(selfMethods).forEach((element: string) => {
+        if (element === method) {
+          // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
+          if (hasDefault && (type === AOPType.BeforeEach || type === AOPType.AfterEach)) {
+            return;
+          }
+          // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
+          defineAOPProperty(target, element, name, type);
         }
-        // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
-        defineAOPProperty(target, element, name, type);
-      }
-    });
+      });
+    }
   }
 }
 
@@ -237,23 +212,24 @@ export function injectAOP(target: any, instance: any, container: Container) {
  * inject default AOP
  *
  * @export
- * @param {*} target
+ * @param {Function} target
  * @param {*} instance
  * @param {string[]} methods
  * @returns {*}
  */
-function injectDefaultAOP(target: any, instance: any, methods: string[]) {
+function injectDefaultAOP(target: Function, instance: any, methods: string[]) {
   // class methods
   // const methods = getMethodNames(target, true).filter((m: string) =>
   //     !["constructor", "init", "__before", "__after"].includes(m)
   // );
-  logger.Debug(`The ${target.name} class has default AOP method, @BeforeEach and @AfterEach not take effect`);
   methods.forEach((element) => {
     if (helper.isFunction(instance.__before)) {
+      logger.Debug(`The ${target.name} class has AOP method '__before', @BeforeEach is not take effect`);
       logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
       defineAOPProperty(target, element, "__before", AOPType.BeforeEach);
     }
     if (helper.isFunction(instance.__after)) {
+      logger.Debug(`The ${target.name} class has AOP method '__after', @AfterEach is not take effect`);
       logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
       defineAOPProperty(target, element, "__after", AOPType.AfterEach);
     }
@@ -267,7 +243,7 @@ function injectDefaultAOP(target: any, instance: any, methods: string[]) {
  * @param {string} protoName
  * @param {(string | Function)} aopName
  */
-function defineAOPProperty(classes: Function, protoName: string, aopName: string | Function, type: AOPType) {
+function defineAOPProperty(classes: Function, protoName: string, aopName: string, type: AOPType) {
   const oldMethod = Reflect.get(classes.prototype, protoName);
   if (oldMethod) {
     Reflect.defineProperty(classes.prototype, protoName, {
@@ -302,4 +278,21 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
   }
 }
 
+/**
+ * Execute aspect
+ *
+ * @param {string} aopName
+ * @param {any[]} props
+ * @returns {*}  
+ */
+async function executeAspect(aopName: string, props: any[]) {
+  // tslint:disable-next-line: one-variable-per-declaration
+  const aspect = IOCContainer.get(aopName, "COMPONENT");
+  if (aspect && helper.isFunction(aspect.run)) {
+    logger.Debug(`Execute the aspect ${aopName}`);
+    // tslint:disable-next-line: no-invalid-this
+    await aspect.run(props);
+  }
+  return Promise.resolve();
+}
 
