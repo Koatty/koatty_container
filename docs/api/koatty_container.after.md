@@ -10,14 +10,14 @@ Executed after specifying the PointCut method.
 **Signature:**
 
 ```typescript
-export declare function After(aopName: string | Function): MethodDecorator;
+export declare function After(aopName: string): MethodDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string \| Function |  |
+|  aopName | string |  |
 
 **Returns:**
 

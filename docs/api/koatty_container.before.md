@@ -10,14 +10,14 @@ Executed before specifying the PointCut method.
 **Signature:**
 
 ```typescript
-export declare function Before(aopName: string | Function): MethodDecorator;
+export declare function Before(aopName: string): MethodDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string \| Function |  |
+|  aopName | string |  |
 
 **Returns:**
 

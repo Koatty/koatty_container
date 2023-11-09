@@ -10,14 +10,14 @@ Executed after execution of each method of the specified PointCut class.
 **Signature:**
 
 ```typescript
-export declare function BeforeEach(aopName?: string | Function): ClassDecorator;
+export declare function BeforeEach(aopName: string): ClassDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string \| Function | _(Optional)_ |
+|  aopName | string |  |
 
 **Returns:**
 
