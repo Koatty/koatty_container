@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.5](https://github.com/koatty/koatty_container/compare/v1.8.4...v1.8.5) (2023-11-10)
+
+
+### Bug Fixes
+
+* 切面类参数分解问题 ([4028534](https://github.com/koatty/koatty_container/commit/4028534f816c3908e8e48a2c18f94bd679685393))
+
 ### [1.8.4](https://github.com/koatty/koatty_container/compare/v1.8.3...v1.8.4) (2023-11-10)
 
 
