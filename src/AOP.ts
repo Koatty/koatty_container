@@ -175,9 +175,13 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
 
   const classMetaDatas: any[] = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) ?? [];
   for (const classMetaData of classMetaDatas) {
-    const { type, name, method } = classMetaData || {};
+    // eslint-disable-next-line prefer-const
+    let { type, name, method } = classMetaData || {};
     if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
       methodsFilter(selfMethods).forEach((element: string) => {
+        if ([AOPType.BeforeEach, AOPType.AfterEach].includes(type)) {
+          method = element;
+        }
         if (element === method) {
           // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
           if (hasDefault && (type === AOPType.BeforeEach || type === AOPType.AfterEach)) {
@@ -255,7 +259,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__before, this, props);
           } else {
-            await executeAspect(aopName, props);
+            await executeAspect(aopName, this.ctx, props);
           }
           // tslint:disable-next-line: no-invalid-this
           return Reflect.apply(oldMethod, this, props);
@@ -267,7 +271,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__after, this, props);
           } else {
-            await executeAspect(aopName, props);
+            await executeAspect(aopName, this.ctx, props);
           }
           return res;
         }
@@ -285,13 +289,13 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
  * @param {any[]} props
  * @returns {*}  
  */
-async function executeAspect(aopName: string, props: any[]) {
+async function executeAspect(aopName: string, ctx: unknown, props: any[]) {
   // tslint:disable-next-line: one-variable-per-declaration
   const aspect = IOCContainer.get(aopName, "COMPONENT");
   if (aspect && helper.isFunction(aspect.run)) {
     logger.Debug(`Execute the aspect ${aopName}`);
     // tslint:disable-next-line: no-invalid-this
-    await aspect.run(props);
+    await aspect.run(ctx, props);
   }
   return Promise.resolve();
 }
