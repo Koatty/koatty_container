@@ -295,7 +295,7 @@ async function executeAspect(aopName: string, props: any[]) {
   if (aspect && helper.isFunction(aspect.run)) {
     logger.Debug(`Execute the aspect ${aopName}`);
     // tslint:disable-next-line: no-invalid-this
-    await aspect.run(props);
+    await aspect.run(...props);
   }
   return Promise.resolve();
 }
