@@ -259,7 +259,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__before, this, props);
           } else {
-            await executeAspect(aopName, this.ctx, props);
+            await executeAspect(aopName, props);
           }
           // tslint:disable-next-line: no-invalid-this
           return Reflect.apply(oldMethod, this, props);
@@ -271,7 +271,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
             // tslint:disable-next-line: no-invalid-this
             await Reflect.apply(this.__after, this, props);
           } else {
-            await executeAspect(aopName, this.ctx, props);
+            await executeAspect(aopName, props);
           }
           return res;
         }
@@ -289,13 +289,13 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
  * @param {any[]} props
  * @returns {*}  
  */
-async function executeAspect(aopName: string, ctx: unknown, props: any[]) {
+async function executeAspect(aopName: string, props: any[]) {
   // tslint:disable-next-line: one-variable-per-declaration
   const aspect = IOCContainer.get(aopName, "COMPONENT");
   if (aspect && helper.isFunction(aspect.run)) {
     logger.Debug(`Execute the aspect ${aopName}`);
     // tslint:disable-next-line: no-invalid-this
-    await aspect.run(ctx, props);
+    await aspect.run(props);
   }
   return Promise.resolve();
 }
