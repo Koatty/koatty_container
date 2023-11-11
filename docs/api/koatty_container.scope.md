@@ -4,7 +4,7 @@
 
 ## Scope type
 
-@ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: MIT @ version: 2020-05-10 11:41:01
+@ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: BSD (3-Clause) @ version: 2020-07-06 11:19:30
 
 **Signature:**
 
