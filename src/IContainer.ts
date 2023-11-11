@@ -1,8 +1,8 @@
 /**
  * @ author: richen
  * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
- * @ license: MIT
- * @ version: 2020-05-10 11:41:01
+ * @ license: BSD (3-Clause)
+ * @ version: 2020-07-06 11:19:30
  */
 export type Scope = 'Singleton' | 'Prototype';
 export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';

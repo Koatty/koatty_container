@@ -1,10 +1,8 @@
-/*
- * @Author: richen
- * @Date: 2020-12-17 20:04:07
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-01-10 00:05:05
- * @License: BSD (3-Clause)
- * @Copyright (c) - <richenlin(at)gmail.com>
+/**
+ * @ author: richen
+ * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
+ * @ license: BSD (3-Clause)
+ * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
 import { Container } from "./Container";

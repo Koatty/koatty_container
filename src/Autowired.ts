@@ -1,8 +1,8 @@
 /**
  * @ author: richen
  * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
- * @ license: MIT
- * @ version: 2020-05-10 11:03:58
+ * @ license: BSD (3-Clause)
+ * @ version: 2020-07-06 11:19:30
  */
 // tslint:disable-next-line: no-import-side-effect
 import "reflect-metadata";

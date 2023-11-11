@@ -1,9 +1,8 @@
-/*
- * @Description: 
- * @Usage: 
- * @Author: richen
- * @Date: 2022-02-18 14:29:10
- * @LastEditTime: 2023-01-13 15:35:13
+/**
+ * @ author: richen
+ * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
+ * @ license: BSD (3-Clause)
+ * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
 import { Container, IOCContainer } from "./Container";
