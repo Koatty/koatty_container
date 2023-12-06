@@ -166,11 +166,16 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
   // only binding self method
   const selfMethods = getMethodNames(target, true);
   const methodsFilter = (ms: string[]) => ms.filter((m: string) => !['constructor', 'init', '__before', '__after'].includes(m));
-  let hasDefault = false;
-  if (allMethods.includes('__before') || allMethods.includes('__after')) {
+  let hasDefaultBefore = false, hasDefaultAfter = false;
+  if (allMethods.includes('__before')) {
     // inject default AOP method
     injectDefaultAOP(target, instance, methodsFilter(selfMethods));
-    hasDefault = true;
+    hasDefaultBefore = true;
+  }
+  if (allMethods.includes('__after')) {
+    // inject default AOP method
+    injectDefaultAOP(target, instance, methodsFilter(selfMethods));
+    hasDefaultAfter = true;
   }
 
   const classMetaDatas: any[] = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) ?? [];
@@ -179,15 +184,22 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
     let { type, name, method } = classMetaData || {};
     if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
       methodsFilter(selfMethods).forEach((element: string) => {
-        if ([AOPType.BeforeEach, AOPType.AfterEach].includes(type)) {
+        // If the class has defined the default AOP method,
+        // @BeforeEach and @AfterEach will not take effect
+        if (type === AOPType.BeforeEach) {
+          if (hasDefaultBefore) {
+            return;
+          }
+          method = element;
+        }
+        if (type === AOPType.AfterEach) {
+          if (hasDefaultAfter) {
+            return;
+          }
           method = element;
         }
         if (element === method) {
-          // If the class has defined the default AOP method, @BeforeEach and @AfterEach will not take effect
-          if (hasDefault && (type === AOPType.BeforeEach || type === AOPType.AfterEach)) {
-            return;
-          }
-          // Logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
+          logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
           defineAOPProperty(target, element, name, type);
         }
       });
