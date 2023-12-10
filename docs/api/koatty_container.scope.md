@@ -9,5 +9,5 @@
 **Signature:**
 
 ```typescript
-export declare type Scope = 'Singleton' | 'Prototype';
+export type Scope = 'Singleton' | 'Prototype';
 ```
