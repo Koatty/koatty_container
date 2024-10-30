@@ -5,11 +5,11 @@
  * @ version: 2020-07-06 11:19:30
  */
 // tslint:disable-next-line: no-import-side-effect
-import "reflect-metadata";
 import * as helper from "koatty_lib";
-import { injectAutowired } from './Autowired';
-import { IContainer, ObjectDefinitionOptions, Application, ComponentType, TAGGED_CLS } from "./IContainer";
+import "reflect-metadata";
 import { injectAOP } from "./AOP";
+import { injectAutowired } from './Autowired';
+import { Application, ComponentType, IContainer, ObjectDefinitionOptions, TAGGED_CLS } from "./IContainer";
 import { injectValues } from "./Values";
 
 /**
@@ -214,7 +214,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Injectable
    */
-  public getMetadataMap(metadataKey: string | symbol, target: Function | Object, propertyKey?: string | symbol) {
+  public getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol) {
     // filter Object.create(null)
     if (typeof target === "object" && target.constructor) {
       target = target.constructor;
@@ -247,7 +247,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getIdentifier(target: Function | Object) {
+  public getIdentifier(target: Function | object) {
     let name = "";
     if (helper.isFunction(target)) {
       const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
@@ -269,7 +269,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getType(target: Function | Object) {
+  public getType(target: Function | object) {
     const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
     if (metaData) {
       return metaData.type;
@@ -334,7 +334,7 @@ export class Container implements IContainer {
    * @param {string} [propertyName]
    * @memberof Container
    */
-  public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string) {
+  public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
     if (propertyName) {
       const originMap = this.getMetadataMap(type, target, propertyName);
       originMap.set(decoratorNameKey, data);
@@ -354,7 +354,7 @@ export class Container implements IContainer {
    * @param {string} [propertyName]
    * @memberof Container
    */
-  public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string) {
+  public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
     let originMap;
     if (propertyName) {
       originMap = this.getMetadataMap(type, target, propertyName);
@@ -377,7 +377,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | Object, propertyName?: string) {
+  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string) {
     if (propertyName) {
       const originMap = this.getMetadataMap(type, target, propertyName);
       return originMap.get(decoratorNameKey);
@@ -396,7 +396,7 @@ export class Container implements IContainer {
    * @param {(string | symbol)} propertyName
    * @memberof Container
    */
-  public savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol) {
+  public savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     originMap.set(propertyName, data);
   }
@@ -410,7 +410,7 @@ export class Container implements IContainer {
    * @param {(string | symbol)} propertyName
    * @memberof Container
    */
-  public attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol) {
+  public attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     if (!originMap.has(propertyName)) {
       originMap.set(propertyName, []);
@@ -427,7 +427,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, propertyName: string | symbol) {
+  public getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     return originMap.get(propertyName);
   }
@@ -440,13 +440,13 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public listPropertyData(decoratorNameKey: string | symbol, target: Function | Object) {
+  public listPropertyData(decoratorNameKey: string | symbol, target: Function | object) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
-    const datas: any = {};
+    const data: any = {};
     for (const [key, value] of originMap) {
-      datas[key] = value;
+      data[key] = value;
     }
-    return datas;
+    return data;
   }
 }
 

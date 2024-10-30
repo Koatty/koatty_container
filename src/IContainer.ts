@@ -91,13 +91,13 @@ export interface IContainer {
   getIdentifier(target: Function): string;
   getType(target: Function): string;
   getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
-  saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
-  attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
-  getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | Object, propertyName?: string): any;
-  savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
-  attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
-  getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, propertyName: string | symbol): any;
-  listPropertyData(decoratorNameKey: string | symbol, target: Function | Object): any[];
+  saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
+  attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
+  getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
+  savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
+  attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
+  getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
+  listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any[];
 }
 
 

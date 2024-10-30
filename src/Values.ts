@@ -5,8 +5,8 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-import { Container, IOCContainer } from "./Container";
 import { DefaultLogger as logger } from "koatty_logger";
+import { Container, IOCContainer } from "./Container";
 import { TAGGED_ARGS } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
@@ -16,9 +16,9 @@ import { RecursiveGetMetadata } from "./Util";
  * @export
  * @param {*} target
  * @param {*} instance
- * @param {Container} [container]
+ * @param {Container} [_container]
  */
-export function injectValues(target: any, instance: any, container?: Container) {
+export function injectValues(target: any, instance: any, _container?: Container) {
   const metaData = RecursiveGetMetadata(TAGGED_ARGS, target);
   // tslint:disable-next-line: forin
   for (const metaKey in metaData) {
