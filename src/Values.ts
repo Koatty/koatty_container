@@ -35,18 +35,18 @@ export function injectValues(target: any, instance: any, _container?: Container)
  * Indicates that an decorated class instance property values.
  *
  * @export
- * @param {any | Function} val
+ * @param {string | Function} key
  * @param {unknown} [defaultValue]
  * @returns {*}  {PropertyDecorator}
  */
-export function Values(val: any | Function, defaultValue?: unknown): PropertyDecorator {
-  return (target: any, propertyKey: string) => {
+export function Values(key: string | Function, defaultValue?: unknown): PropertyDecorator {
+  return (target: object, propertyKey: string) => {
     const paramTypes = Reflect.getMetadata("design:type", target, propertyKey);
     const types = paramTypes.name || "object";
     IOCContainer.savePropertyData(TAGGED_ARGS, {
       name: propertyKey,
       method: () => {
-        let value = helper.isFunction(val) ? val() : val;
+        let value = helper.isFunction(key) ? key() : key;
         if (defaultValue !== undefined) {
           value = helper.isTrueEmpty(value) ? defaultValue : value;
         }

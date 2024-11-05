@@ -23,7 +23,7 @@ import { RecursiveGetMetadata } from "./Util";
  * @returns {PropertyDecorator}
  */
 export function Autowired(identifier?: string, type?: ComponentType, constructArgs?: any[], isDelay = false): PropertyDecorator {
-  return (target: any, propertyKey: string) => {
+  return (target: object, propertyKey: string) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
     identifier = identifier || (designType && designType.name !== "Object" ? designType.name : helper.camelCase(propertyKey, true));
 

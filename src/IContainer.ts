@@ -25,6 +25,9 @@ export const TAGGED_PARAM = 'TAGGED_PARAM';
 // used to store class method to be injected
 export const TAGGED_METHOD = 'TAGGED_METHOD';
 
+// used to store router 
+export const CONTROLLER_ROUTER = "CONTROLLER_ROUTER";
+
 /**
  * Base Application
  *
@@ -33,7 +36,7 @@ export const TAGGED_METHOD = 'TAGGED_METHOD';
  */
 export interface Application {
   env: string;
-  options: any;
+  options: object;
 
   use: (fn: Function) => any;
   config: (name: string, type?: string) => any;
@@ -44,7 +47,7 @@ export interface Application {
   *
   * @memberof Application
   */
-  getMetaData: (key: string) => any;
+  getMetaData: (key: string) => unknown;
   setMetaData: (key: string, value: unknown) => void;
 }
 /**
@@ -56,20 +59,11 @@ export interface Application {
  */
 export interface Context {
   /**
-   * Replace ctx.throw
-   *
-   * @type {(status: number, message?: string)}
-   * @type {(message: string, code?: number, status?: HttpStatusCode)}
-   * @memberof Context
-   */
-  throw(status: number, message?: string): never;
-  throw(message: string, code?: number, status?: any): never;
-  /**
   * context metadata
   *
   * @memberof Context
   */
-  getMetaData: (key: string) => any;
+  getMetaData: (key: string) => unknown;
   setMetaData: (key: string, value: unknown) => void;
 }
 
@@ -147,4 +141,28 @@ export interface TagPropsMetadata {
  */
 export interface ReflectResult {
   [key: string]: TagPropsMetadata[];
+}
+
+/**
+ * Interface for Controller
+ */
+export interface IController {
+  readonly app: Application;
+  readonly ctx: Context;
+}
+
+/**
+ * Interface for Middleware
+ */
+export interface IMiddleware {
+  run: (options: object, app: Application) => (ctx: object, next: Function) => Promise<any>;
+}
+
+/**
+ * Interface for Service
+ */
+export interface IService {
+  readonly app: Application;
+
+  // init(...arg: any[]): void;
 }
