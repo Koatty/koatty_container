@@ -6,7 +6,7 @@
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { Container, IOCContainer } from "./Container";
+import { Container, IOC } from "./Container";
 import { TAGGED_ARGS } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
@@ -43,7 +43,7 @@ export function Values(key: string | Function, defaultValue?: unknown): Property
   return (target: object, propertyKey: string) => {
     const paramTypes = Reflect.getMetadata("design:type", target, propertyKey);
     const types = paramTypes.name || "object";
-    IOCContainer.savePropertyData(TAGGED_ARGS, {
+    IOC.savePropertyData(TAGGED_ARGS, {
       name: propertyKey,
       method: () => {
         let value = helper.isFunction(key) ? key() : key;

@@ -8,7 +8,7 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import "reflect-metadata";
-import { Container, IOCContainer } from "./Container";
+import { Container, IOC } from "./Container";
 import { ComponentType, TAGGED_PROP } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
@@ -48,7 +48,7 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
 
     isDelay = !designType || designType.name === "Object";
 
-    IOCContainer.savePropertyData(TAGGED_PROP, {
+    IOC.savePropertyData(TAGGED_PROP, {
       type,
       identifier,
       delay: isDelay,

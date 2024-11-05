@@ -10,7 +10,7 @@
 
 import { DefaultLogger as log } from "koatty_logger";
 import "reflect-metadata";
-import { IOCContainer } from "./Container";
+import { IOC } from "./Container";
 import { CONTROLLER_ROUTER } from "./IContainer";
 
 /**
@@ -22,8 +22,8 @@ import { CONTROLLER_ROUTER } from "./IContainer";
  */
 export function Component(identifier?: string): ClassDecorator {
   return (target: Function) => {
-    identifier = identifier || IOCContainer.getIdentifier(target);
-    IOCContainer.saveClass("COMPONENT", target, identifier);
+    identifier = identifier || IOC.getIdentifier(target);
+    IOC.saveClass("COMPONENT", target, identifier);
   };
 }
 
@@ -39,9 +39,9 @@ export function Controller(path = "", options?: object): ClassDecorator {
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   options ? log.Debug("") : "";
   return (target: Function) => {
-    const identifier = IOCContainer.getIdentifier(target);
-    IOCContainer.saveClass("CONTROLLER", target, identifier);
-    IOCContainer.savePropertyData(CONTROLLER_ROUTER, path, target, identifier);
+    const identifier = IOC.getIdentifier(target);
+    IOC.saveClass("CONTROLLER", target, identifier);
+    IOC.savePropertyData(CONTROLLER_ROUTER, path, target, identifier);
   };
 }
 
@@ -54,8 +54,8 @@ export function Controller(path = "", options?: object): ClassDecorator {
  */
 export function Middleware(identifier?: string): ClassDecorator {
   return (target: Function) => {
-    identifier = identifier || IOCContainer.getIdentifier(target);
-    IOCContainer.saveClass("MIDDLEWARE", target, identifier);
+    identifier = identifier || IOC.getIdentifier(target);
+    IOC.saveClass("MIDDLEWARE", target, identifier);
   };
 }
 
@@ -68,7 +68,7 @@ export function Middleware(identifier?: string): ClassDecorator {
  */
 export function Service(identifier?: string): ClassDecorator {
   return (target: Function) => {
-    identifier = identifier || IOCContainer.getIdentifier(target);
-    IOCContainer.saveClass("SERVICE", target, identifier);
+    identifier = identifier || IOC.getIdentifier(target);
+    IOC.saveClass("SERVICE", target, identifier);
   };
 }

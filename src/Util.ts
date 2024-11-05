@@ -5,7 +5,7 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-import { Container } from "./Container";
+import { IOC } from "./Container";
 
 // get property of an object
 const functionPrototype = Object.getPrototypeOf(Function);
@@ -58,13 +58,12 @@ function ordinaryGetPrototypeOf(obj: any): any {
 export function RecursiveGetMetadata(metadataKey: any, target: any, _propertyKey?: string | symbol): any[] {
   // get metadata value of a metadata key on the prototype
   // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
-  const IOCContainer = Container.getInstance();
-  const metadata = IOCContainer.listPropertyData(metadataKey, target) ?? {};
+  const metadata = IOC.listPropertyData(metadataKey, target) ?? {};
   // get metadata value of a metadata key on the prototype chain
   let parent = ordinaryGetPrototypeOf(target);
   while (parent !== null) {
     // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
-    const parentMetadata = IOCContainer.listPropertyData(metadataKey, parent);
+    const parentMetadata = IOC.listPropertyData(metadataKey, parent);
     if (parentMetadata) {
       Object.assign(parentMetadata, metadata);
     }

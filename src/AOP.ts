@@ -6,7 +6,7 @@
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { Container, IOCContainer } from "./Container";
+import { Container, IOC } from "./Container";
 import { Application, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
 import { getMethodNames } from "./Util";
 
@@ -44,14 +44,14 @@ export interface IAspect {
  */
 export function Aspect(identifier?: string): ClassDecorator {
   return (target: Function) => {
-    identifier = identifier || IOCContainer.getIdentifier(target);
+    identifier = identifier || IOC.getIdentifier(target);
     if (!identifier.endsWith("Aspect")) {
       throw Error("Aspect class names must use a suffix `Aspect`.");
     }
     if (!Reflect.has(target.prototype, "run")) {
       throw Error("The aspect class must implement the `run` method.");
     }
-    IOCContainer.saveClass("COMPONENT", target, identifier);
+    IOC.saveClass("COMPONENT", target, identifier);
   };
 }
 
@@ -65,7 +65,7 @@ export function Aspect(identifier?: string): ClassDecorator {
 export function Before(aopName: string): MethodDecorator {
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
-    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
       method: methodName,
@@ -82,7 +82,7 @@ export function Before(aopName: string): MethodDecorator {
  */
 export function BeforeEach(aopName: string): ClassDecorator {
   return (target: Function) => {
-    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.BeforeEach,
       name: aopName
     }, target);
@@ -99,7 +99,7 @@ export function BeforeEach(aopName: string): ClassDecorator {
 export function After(aopName: string): MethodDecorator {
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: symbol | string, _descriptor: PropertyDescriptor) => {
-    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
       method: methodName,
@@ -116,7 +116,7 @@ export function After(aopName: string): MethodDecorator {
  */
 export function AfterEach(aopName: string): ClassDecorator {
   return (target: Function) => {
-    IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AfterEach,
       name: aopName
     }, target);
@@ -255,7 +255,7 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
  * @returns {*}  
  */
 async function executeAspect(aopName: string, props: any[]) {
-  const aspect = IOCContainer.get(aopName, "COMPONENT");
+  const aspect = IOC.get(aopName, "COMPONENT");
   if (aspect && helper.isFunction(aspect.run)) {
     await aspect.run(...props);
   }

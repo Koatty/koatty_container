@@ -401,11 +401,19 @@ export class Container implements IContainer {
   }
 }
 
-// export Singleton
-export const IOCContainer: Container = (function () {
+/**
+ * export Singleton.
+ * get the singleton instance of Container
+ */
+export const IOC: Container = (function () {
   if (!helper.isTrueEmpty(process.env.KOATTY_CONTAINER)) {
     throw Error("There are two different versions of the koatty_container module that are conflicting.");
   }
   process.env.KOATTY_CONTAINER = "true";
   return Container.getInstance();
 })();
+
+/**
+ * alias IOC
+ */
+export const IOCContainer = IOC; 
