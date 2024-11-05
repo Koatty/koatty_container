@@ -85,19 +85,15 @@ export class Container implements IContainer {
    */
   public reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
     options?: ObjectDefinitionOptions): T {
-    // 参数判断与赋值
-    if (typeof identifier === 'string') {
-      // 第一个参数是标识符字符串
+    if (helper.isString(identifier)) {
       identifier = identifier;
       if (target !== undefined) {
-        target = target as T; // 强制转换为目标对象
+        target = target as T;
       }
     } else {
-      // 检查第二个参数是否是选项对象
-      if (options && typeof options === 'object' && !Array.isArray(options)) {
+      if (options && helper.isObject(options)) {
         options = target as ObjectDefinitionOptions;
       }
-      // 第一个参数是目标对象
       target = identifier as T;
       identifier = this.getIdentifier(target);
     }

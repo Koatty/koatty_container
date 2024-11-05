@@ -5,29 +5,108 @@ import { ClassB } from "./ClassB";
 import { ClassC } from "./ClassC";
 import { MyDependency } from "./MyDependency";
 import { MyDependency2 } from "./MyDependency2";
-
+import { Test2Aspect } from "./Test2Aspect";
+import { Test3Aspect } from "./Test3Aspect";
+import { TestAspect } from "./TestAspect";
 
 describe("IOC", () => {
   beforeAll(() => {
     IOC.reg(MyDependency);
     IOC.reg(MyDependency2);
+    IOC.reg(TestAspect);
+    IOC.reg(Test2Aspect);
+    IOC.reg(Test3Aspect);
     IOC.reg("ClassA", ClassA);
     IOC.reg("ClassB", ClassB);
     IOC.reg("ClassC", ClassC);
   })
   it("Autowired", async () => {
     const ins: ClassA = IOC.get("ClassA");
-    assert.equal(ins.run(), "MyDependency.run");
+    assert.equal(await ins.run(), "MyDependency.run");
   })
 
   it("Inject", async () => {
     const ins: ClassB = IOC.get("ClassB");
-    assert.equal(ins.run(), "MyDependency2.run");
+    assert.equal(await ins.run(), "MyDependency2.run");
   })
 
   it("Extends", async () => {
     const ins: ClassC = IOC.get("ClassC");
-    assert.equal(ins.run(), "MyDependency.run");
+    assert.equal(await ins.run(), "MyDependency.run");
+  })
+
+  it("Before", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassC = IOC.get("ClassC");
+    await ins.run2("Before");
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("Before");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+  it("After", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassC = IOC.get("ClassC");
+    await ins.run3("After");
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("After");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+
+  it("BeforeEach", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassB = IOC.get("ClassB");
+    await ins.run();
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("Test2Aspect");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+  it("AfterEach", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassA = IOC.get("ClassA");
+    await ins.run();
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("Test3Aspect");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+  it("AfterEach", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassA = IOC.get("ClassA");
+    await ins.run();
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("Test3Aspect");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+
+  it("DefaultBeforeEach", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassC = IOC.get("ClassC");
+    await ins.run();
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("__before");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
+  })
+
+  it("DefaultAfterEach", async () => {
+    // 使用 jest.spyOn 来监控 console.log
+    const logSpy = jest.spyOn(console, 'log');
+    const ins: ClassC = IOC.get("ClassC");
+    await ins.run();
+    // 断言 console.log 被正确调用并输出预期内容
+    expect(logSpy).toHaveBeenCalledWith("__after");
+    // 恢复 spy 的原始功能
+    logSpy.mockRestore();
   })
 
 })

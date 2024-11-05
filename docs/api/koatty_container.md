@@ -29,6 +29,7 @@
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
+|  [OverridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
 |  [RecursiveGetMetadata(metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 
 ## Interfaces
