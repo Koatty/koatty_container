@@ -32,6 +32,7 @@ export interface IContainer
 |  [listPropertyData(decoratorNameKey, target)](./koatty_container.icontainer.listpropertydata.md) |  |
 |  [reg(target, options)](./koatty_container.icontainer.reg.md) |  |
 |  [reg(identifier, target, options)](./koatty_container.icontainer.reg_1.md) |  |
+|  [reg(identifier, target, options)](./koatty_container.icontainer.reg_2.md) |  |
 |  [saveClass(type, module, identifier)](./koatty_container.icontainer.saveclass.md) |  |
 |  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.saveclassmetadata.md) |  |
 |  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.savepropertydata.md) |  |

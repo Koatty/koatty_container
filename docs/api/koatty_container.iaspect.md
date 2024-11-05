@@ -18,6 +18,6 @@ export interface IAspect
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [app](./koatty_container.iaspect.app.md) |  | any |  |
+|  [app](./koatty_container.iaspect.app.md) |  | [Application](./koatty_container.application.md) |  |
 |  [run](./koatty_container.iaspect.run.md) |  | (...args: any\[\]) =&gt; Promise&lt;any&gt; |  |
 

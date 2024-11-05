@@ -9,7 +9,7 @@ get metadata value of a metadata key on the prototype chain of an object and pro
 **Signature:**
 
 ```typescript
-export declare function RecursiveGetMetadata(metadataKey: any, target: any, propertyKey?: string | symbol): any[];
+export declare function RecursiveGetMetadata(metadataKey: any, target: any, _propertyKey?: string | symbol): any[];
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ export declare function RecursiveGetMetadata(metadataKey: any, target: any, prop
 |  --- | --- | --- |
 |  metadataKey | any | metadata key |
 |  target | any | the target of metadataKey |
-|  propertyKey | string \| symbol | _(Optional)_ |
+|  \_propertyKey | string \| symbol | _(Optional)_ |
 
 **Returns:**
 

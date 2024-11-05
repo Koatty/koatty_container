@@ -29,7 +29,7 @@
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
-|  [RecursiveGetMetadata(metadataKey, target, propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
+|  [RecursiveGetMetadata(metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 
 ## Interfaces
 
@@ -39,6 +39,9 @@
 |  [Context](./koatty_container.context.md) | <p>Base Context.</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
 |  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |
+|  [IController](./koatty_container.icontroller.md) | Interface for Controller |
+|  [IMiddleware](./koatty_container.imiddleware.md) | Interface for Middleware |
+|  [IService](./koatty_container.iservice.md) | Interface for Service |
 |  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
 |  [ReflectResult](./koatty_container.reflectresult.md) |   ReflectResult |
 |  [TagClsMetadata](./koatty_container.tagclsmetadata.md) |   TagClsMetadata |
@@ -48,7 +51,9 @@
 
 |  Variable | Description |
 |  --- | --- |
-|  [IOCContainer](./koatty_container.ioccontainer.md) |  |
+|  [CONTROLLER\_ROUTER](./koatty_container.controller_router.md) |  |
+|  [IOC](./koatty_container.ioc.md) | export Singleton. get the singleton instance of Container |
+|  [IOCContainer](./koatty_container.ioccontainer.md) | alias IOC |
 |  [TAGGED\_AOP](./koatty_container.tagged_aop.md) |  |
 |  [TAGGED\_ARGS](./koatty_container.tagged_args.md) |  |
 |  [TAGGED\_CLS](./koatty_container.tagged_cls.md) |  |

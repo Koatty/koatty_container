@@ -9,7 +9,10 @@ get all class from Container
 **Signature:**
 
 ```typescript
-listClass(type: ComponentType): any[];
+listClass(type: ComponentType): {
+        id: string;
+        target: Function;
+    }[];
 ```
 
 ## Parameters
@@ -20,7 +23,7 @@ listClass(type: ComponentType): any[];
 
 **Returns:**
 
-any\[\]
+{ id: string; target: Function; }\[\]
 
  Container
 

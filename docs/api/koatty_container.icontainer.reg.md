@@ -7,7 +7,7 @@
 **Signature:**
 
 ```typescript
-reg<T>(target: T, options?: ObjectDefinitionOptions): T;
+reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
 ```
 
 ## Parameters

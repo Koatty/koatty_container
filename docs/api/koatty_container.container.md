@@ -27,7 +27,7 @@ export declare class Container implements IContainer
 |  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.container.getclassmetadata.md) |  | get single data from class or property |
 |  [getIdentifier(target)](./koatty_container.container.getidentifier.md) |  | get identifier from class |
 |  [getInsByClass(target, args)](./koatty_container.container.getinsbyclass.md) |  | <p>get instance from IOC container by class.</p><p> T</p> |
-|  [getInstance()](./koatty_container.container.getinstance.md) | <code>static</code> |  |
+|  [getInstance()](./koatty_container.container.getinstance.md) | <code>static</code> | <p>Static method to get the singleton instance of a class</p> |
 |  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.container.getmetadatamap.md) |  | <p>get metadata from class</p> |
 |  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.container.getpropertydata.md) |  | get property data from class |
 |  [getType(target)](./koatty_container.container.gettype.md) |  | get component type from class |

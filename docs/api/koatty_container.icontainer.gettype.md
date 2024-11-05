@@ -7,14 +7,14 @@
 **Signature:**
 
 ```typescript
-getType(target: Function): string;
+getType(target: Function | object): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | Function |  |
+|  target | Function \| object |  |
 
 **Returns:**
 

@@ -7,7 +7,7 @@
 **Signature:**
 
 ```typescript
-listPropertyData(decoratorNameKey: string | symbol, target: Function | Object): any[];
+listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any[];
 ```
 
 ## Parameters
@@ -15,7 +15,7 @@ listPropertyData(decoratorNameKey: string | symbol, target: Function | Object): 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  decoratorNameKey | string \| symbol |  |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 
 **Returns:**
 

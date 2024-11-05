@@ -11,5 +11,5 @@ context metadata
 **Signature:**
 
 ```typescript
-getMetaData: (key: string) => any;
+getMetaData: (key: string) => unknown;
 ```

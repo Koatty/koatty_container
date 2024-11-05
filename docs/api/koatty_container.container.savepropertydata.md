@@ -9,7 +9,7 @@ save property data to class
 **Signature:**
 
 ```typescript
-savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
+savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function 
 |  --- | --- | --- |
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 |  propertyName | string \| symbol |  Container |
 
 **Returns:**
