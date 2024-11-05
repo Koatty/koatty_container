@@ -16,6 +16,6 @@ export interface IController
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [app](./koatty_container.icontroller.app.md) | <code>readonly</code> | [Application](./koatty_container.application.md) |  |
+|  [app](./koatty_container.icontroller.app.md) | <code>readonly</code> | Application |  |
 |  [ctx](./koatty_container.icontroller.ctx.md) | <code>readonly</code> | [Context](./koatty_container.context.md) |  |
 

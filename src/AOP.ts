@@ -7,7 +7,8 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import { Container, IOC } from "./Container";
-import { Application, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
+import { Application } from "./IApplication";
+import { TAGGED_AOP, TAGGED_CLS } from "./IContainer";
 import { getMethodNames } from "./Util";
 
 /**
@@ -131,7 +132,7 @@ export function AfterEach(aopName: string): ClassDecorator {
  * @param {*} instance
  * @param {Container} container
  */
-export function injectAOP(target: Function, instance: unknown, container: Container) {
+export function injectAOP(target: Function, prototypeChain: unknown, container: Container) {
   const allMethods = getMethodNames(target);
   // only binding self method
   const selfMethods = getMethodNames(target, true);
@@ -139,12 +140,12 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
   let hasDefaultBefore = false, hasDefaultAfter = false;
   if (allMethods.includes('__before')) {
     // inject default AOP method
-    injectDefaultAOP(target, instance, methodsFilter(selfMethods));
+    injectDefaultAOP(target, prototypeChain, methodsFilter(selfMethods));
     hasDefaultBefore = true;
   }
   if (allMethods.includes('__after')) {
     // inject default AOP method
-    injectDefaultAOP(target, instance, methodsFilter(selfMethods));
+    injectDefaultAOP(target, prototypeChain, methodsFilter(selfMethods));
     hasDefaultAfter = true;
   }
 
@@ -199,18 +200,18 @@ function hasDefaultAOP(target: any): boolean {
  *
  * @export
  * @param {Function} target
- * @param {*} instance
+ * @param {object} prototypeChain
  * @param {string[]} methods
  * @returns {*}
  */
-function injectDefaultAOP(target: Function, instance: any, methods: string[]) {
+function injectDefaultAOP(target: Function, prototypeChain: any, methods: string[]) {
   methods.forEach((element) => {
-    if (helper.isFunction(instance.__before)) {
+    if (helper.isFunction(prototypeChain.__before)) {
       logger.Debug(`The ${target.name} class has AOP method '__before', @BeforeEach is not take effect`);
       logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
       defineAOPProperty(target, element, "__before", AOPType.BeforeEach);
     }
-    if (helper.isFunction(instance.__after)) {
+    if (helper.isFunction(prototypeChain.__after)) {
       logger.Debug(`The ${target.name} class has AOP method '__after', @AfterEach is not take effect`);
       logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
       defineAOPProperty(target, element, "__after", AOPType.AfterEach);

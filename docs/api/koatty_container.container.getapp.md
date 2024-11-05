@@ -13,7 +13,7 @@ getApp(): Application;
 ```
 **Returns:**
 
-[Application](./koatty_container.application.md)
+Application
 
  Container
 

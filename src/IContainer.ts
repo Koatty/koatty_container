@@ -1,4 +1,4 @@
-import { Application } from "./IApp";
+import { Application } from "./IApplication";
 
 /**
  * @ author: richen
@@ -56,9 +56,7 @@ export interface Context {
  */
 export interface IContainer {
   setApp(app: Application): void;
-  reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
-  reg<T extends object | Function>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-  reg<T extends object | Function>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T;
+  reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): T;
   get(identifier: string, type?: ComponentType, args?: any[]): any;
   getClass(identifier: string, type?: ComponentType): Function;
   getInsByClass<T extends object | Function>(target: T, args?: any[]): T;

@@ -9,7 +9,7 @@ get identifier from class
 **Signature:**
 
 ```typescript
-getIdentifier(target: Function | object): any;
+getIdentifier(target: Function | object): string;
 ```
 
 ## Parameters
@@ -20,7 +20,7 @@ getIdentifier(target: Function | object): any;
 
 **Returns:**
 
-any
+string
 
  Container
 

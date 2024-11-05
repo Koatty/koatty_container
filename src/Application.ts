@@ -9,7 +9,7 @@
  */
 
 import { EventEmitter } from "stream";
-import { Application } from "./IApp";
+import { Application } from "./IApplication";
 
 export class DefaultApp extends EventEmitter implements Application {
   env: string = "developer";

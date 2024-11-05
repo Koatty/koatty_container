@@ -23,7 +23,7 @@
 |  [After(aopName)](./koatty_container.after.md) | <p>Executed after specifying the PointCut method.</p> |
 |  [AfterEach(aopName)](./koatty_container.aftereach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
 |  [Aspect(identifier)](./koatty_container.aspect.md) | <p>Indicates that an decorated class is a "aspect".</p> |
-|  [Autowired(identifier, type, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a constructor method as to be autowired by Koatty"s dependency injection facilities.</p> |
+|  [Autowired(identifier, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a class property as to be autowired by Koatty"s dependency injection facilities.</p> |
 |  [Before(aopName)](./koatty_container.before.md) | <p>Executed before specifying the PointCut method.</p> |
 |  [BeforeEach(aopName)](./koatty_container.beforeeach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
@@ -35,7 +35,6 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [Application](./koatty_container.application.md) | <p>Base Application</p><p>  Application</p> |
 |  [Context](./koatty_container.context.md) | <p>Base Context.</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
 |  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |

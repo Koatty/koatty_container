@@ -11,14 +11,15 @@ registering an instance of a class to an IOC container.
 **Signature:**
 
 ```typescript
-reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
+reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): T;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | T |  |
+|  identifier | string \| T |  |
+|  target | T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 |  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 
 **Returns:**

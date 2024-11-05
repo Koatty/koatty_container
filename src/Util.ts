@@ -65,11 +65,35 @@ export function RecursiveGetMetadata(metadataKey: any, target: any, _propertyKey
     // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
     const parentMetadata = IOC.listPropertyData(metadataKey, parent);
     if (parentMetadata) {
-      Object.assign(parentMetadata, metadata);
+      mergeMetadata(parentMetadata, metadata);
     }
     parent = ordinaryGetPrototypeOf(parent);
   }
   return metadata;
+}
+
+/**
+ * Merge object properties and override the source object when
+ *  the property values in the new object are not undefined.
+ * @param parentMetadata source object metadata
+ * @param metadata object metadata
+ * @returns 
+ */
+function mergeMetadata(parentMetadata: Record<string, any>, metadata: Record<string, any>): Record<string, any> {
+  // Create a copy to store the final results, initialized with the parent class's metadata.
+  const result = { ...parentMetadata };
+
+  // Iterate through all keys in the metadata object.
+  for (const key in metadata) {
+    if (metadata.hasOwnProperty(key)) {
+      // Skip assignment if an item in the metadata is undefined.
+      if (metadata[key] !== undefined) {
+        result[key] = metadata[key];
+      }
+    }
+  }
+
+  return result;
 }
 
 /**

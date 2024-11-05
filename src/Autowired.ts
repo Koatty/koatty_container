@@ -49,7 +49,7 @@ export function Autowired(identifier?: string, cType?: ComponentType, constructA
     isDelay = !designType || designType.name === "Object";
 
     IOC.savePropertyData(TAGGED_PROP, {
-      cType,
+      type: cType,
       identifier,
       delay: isDelay,
       args: constructArgs ?? []
@@ -75,6 +75,7 @@ export function Inject(paramName: string, cType?: ComponentType): ParameterDecor
     const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
     let identifier = paramTypes[parameterIndex]?.name;
     identifier = identifier || helper.camelCase(paramName, true);
+    propertyKey = paramName;
 
     if (cType === undefined) {
       if (identifier.includes("Controller")) {
@@ -93,7 +94,7 @@ export function Inject(paramName: string, cType?: ComponentType): ParameterDecor
     }
 
     IOC.savePropertyData(TAGGED_PROP, {
-      cType,
+      type: cType,
       identifier,
       delay: true,
       args: []
@@ -105,12 +106,12 @@ export function Inject(paramName: string, cType?: ComponentType): ParameterDecor
  * inject autowired class
  *
  * @export
- * @param {*} target
- * @param {*} instance
+ * @param {Function} target
+ * @param {object} instance
  * @param {Container} container
  * @param {boolean} [isLazy=false]
  */
-export function injectAutowired(target: any, instance: any, container: Container, isLazy = false) {
+export function injectAutowired(target: Function, prototypeChain: object, container: Container, isLazy = false) {
   const metaData = RecursiveGetMetadata(TAGGED_PROP, target);
   for (const metaKey in metaData) {
     const { type, identifier, delay, args } =
@@ -124,7 +125,7 @@ export function injectAutowired(target: any, instance: any, container: Container
         }
         logger.Debug(
           `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
-        Reflect.defineProperty(instance, metaKey, {
+        Reflect.defineProperty(prototypeChain, metaKey, {
           enumerable: true,
           configurable: false,
           writable: true,
@@ -136,7 +137,7 @@ export function injectAutowired(target: any, instance: any, container: Container
         const app = container.getApp();
         // lazy inject autowired
         if (app?.once) {
-          app.once("appReady", () => injectAutowired(target, instance, container, true));
+          app.once("appReady", () => injectAutowired(target, prototypeChain, container, true));
         }
       }
     }

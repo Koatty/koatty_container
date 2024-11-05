@@ -33,8 +33,7 @@ export declare class Container implements IContainer
 |  [getType(target)](./koatty_container.container.gettype.md) |  | get component type from class |
 |  [listClass(type)](./koatty_container.container.listclass.md) |  | get all class from Container |
 |  [listPropertyData(decoratorNameKey, target)](./koatty_container.container.listpropertydata.md) |  | list property data from class |
-|  [reg(target, options)](./koatty_container.container.reg.md) |  | <p>registering an instance of a class to an IOC container.</p><p> T</p> |
-|  [reg(identifier, target, options)](./koatty_container.container.reg_1.md) |  |  |
+|  [reg(identifier, target, options)](./koatty_container.container.reg.md) |  | <p>registering an instance of a class to an IOC container.</p><p> T</p> |
 |  [saveClass(type, module, identifier)](./koatty_container.container.saveclass.md) |  | save class to Container |
 |  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.saveclassmetadata.md) |  | save meta data to class or property |
 |  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.container.savepropertydata.md) |  | save property data to class |

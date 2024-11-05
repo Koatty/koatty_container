@@ -8,14 +8,13 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "./AOP";
-import { DefaultApp } from "./App";
+import { DefaultApp } from "./Application";
 import { injectAutowired } from './Autowired';
-import { Application } from "./IApp";
+import { Application } from "./IApplication";
 import {
   ComponentType, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
-import { injectValues } from "./Values";
 
 /**
  * IOC Container
@@ -83,16 +82,27 @@ export class Container implements IContainer {
    * @returns {T}
    * @memberof Container
    */
-  public reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T extends object | Function>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T extends object | Function>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T {
-    if (helper.isClass(identifier) || helper.isFunction(identifier)) {
-      options = target;
-      target = (identifier as any);
+  public reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
+    options?: ObjectDefinitionOptions): T {
+    // 参数判断与赋值
+    if (typeof identifier === 'string') {
+      // 第一个参数是标识符字符串
+      identifier = identifier;
+      if (target !== undefined) {
+        target = target as T; // 强制转换为目标对象
+      }
+    } else {
+      // 检查第二个参数是否是选项对象
+      if (options && typeof options === 'object' && !Array.isArray(options)) {
+        options = target as ObjectDefinitionOptions;
+      }
+      // 第一个参数是目标对象
+      target = identifier as T;
       identifier = this.getIdentifier(target);
     }
+
     if (!helper.isClass(target)) {
-      return target;
+      throw new Error("target is not a class");
     }
 
     let instance = this.instanceMap.get(target);
@@ -107,7 +117,7 @@ export class Container implements IContainer {
         ...options
       };
       // inject options once
-      Reflect.defineProperty(target.prototype, "_options", {
+      Reflect.defineProperty((<Function>target).prototype, "_options", {
         enumerable: false,
         configurable: false,
         writable: true,
@@ -115,25 +125,23 @@ export class Container implements IContainer {
       });
 
       // define app as getter
-      Reflect.defineProperty(target.prototype, "app", {
+      Reflect.defineProperty((<Function>target).prototype, "app", {
         get: () => this.app,
         configurable: false,
         enumerable: false
       });
 
       // inject autowired
-      injectAutowired(target, target.prototype, this);
-      // inject properties values
-      injectValues(target, target.prototype, this);
+      injectAutowired(<Function>target, (<Function>target).prototype, this);
       // inject AOP
-      injectAOP(target, target.prototype, this);
+      injectAOP(<Function>target, (<Function>target).prototype, this);
 
-      if (!this.getClass(options.type, identifier)) {
-        this.saveClass(options.type, target, identifier);
+      if (!this.getClass(<string>identifier, options.type)) {
+        this.saveClass(options.type, <Function>target, <string>identifier);
       }
 
       // instantiation
-      instance = Reflect.construct(target, options.args);
+      instance = Reflect.construct(<Function>target, options.args);
       if (options.scope === "Singleton") {
         instance = Object.seal(instance);
       }
@@ -147,12 +155,12 @@ export class Container implements IContainer {
    * get instance from IOC container.
    *
    * @param {string} identifier
-   * @param {ComponentType} [type="SERVICE"]
+   * @param {ComponentType} [type="COMPONENT"]
    * @param {any[]} [args=[]]
    * @returns {*}
    * @memberof Container
    */
-  public get(identifier: string, type: ComponentType = "SERVICE", args: any[] = []): any {
+  public get(identifier: string, type: ComponentType = "COMPONENT", args: any[] = []): any {
     const target = this.getClass(identifier, type);
     if (!target) {
       return null;
@@ -237,7 +245,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getIdentifier(target: Function | object) {
+  public getIdentifier(target: Function | object): string {
     if (helper.isFunction(target)) {
       const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
       return metaData ? metaData.id ?? "" : target.name ?? "";
