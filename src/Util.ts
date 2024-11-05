@@ -104,23 +104,17 @@ export function OverridePrototypeValue<T extends object>(instance: T): void {
   if (!instance || typeof instance !== 'object') {
     throw new Error("Invalid instance provided.");
   }
-
-  // get object own properties
-  const ownProperties = Object.keys(instance);
-
-  let prototype = Object.getPrototypeOf(instance);
-  while (prototype !== null) {
-    Object.keys(prototype).forEach(propertyName => {
-      // check property is defined
-      if (!ownProperties.includes(propertyName) ||
-        (instance as any)[propertyName] === undefined) {
-        // override property's value
-        (instance as any)[propertyName] = (prototype as any)[propertyName];
+  // get object properties
+  for (const propertyName in instance) {
+    // check property is undefined
+    if (instance[propertyName] === undefined) {
+      const protoValue = Object.getPrototypeOf(instance)[propertyName];
+      if (protoValue !== undefined) {
+        instance[propertyName] = protoValue;
       }
-    });
-    // move to next
-    prototype = Object.getPrototypeOf(prototype);
+    }
   }
+
 }
 
 /**
