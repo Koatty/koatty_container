@@ -13,7 +13,7 @@ import { MyDependency2 } from "./MyDependency2";
 
 export class ClassB {
 
-  private readonly myDependency2: MyDependency2;
+  protected readonly myDependency2: MyDependency2;
 
 
   constructor(@Inject("myDependency2") myDependency2: MyDependency2) {

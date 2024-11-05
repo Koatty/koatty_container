@@ -97,6 +97,33 @@ function mergeMetadata(parentMetadata: Record<string, any>, metadata: Record<str
 }
 
 /**
+ * Override object's property to PrototypeValue
+ * @param instance 
+ */
+export function OverridePrototypeValue<T extends object>(instance: T): void {
+  if (!instance || typeof instance !== 'object') {
+    throw new Error("Invalid instance provided.");
+  }
+
+  // get object own properties
+  const ownProperties = Object.keys(instance);
+
+  let prototype = Object.getPrototypeOf(instance);
+  while (prototype !== null) {
+    Object.keys(prototype).forEach(propertyName => {
+      // check property is defined
+      if (!ownProperties.includes(propertyName) ||
+        (instance as any)[propertyName] === undefined) {
+        // override property's value
+        (instance as any)[propertyName] = (prototype as any)[propertyName];
+      }
+    });
+    // move to next
+    prototype = Object.getPrototypeOf(prototype);
+  }
+}
+
+/**
 *
 *
 * @param {(string | symbol)} metadataKey

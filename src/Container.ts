@@ -15,6 +15,7 @@ import {
   ComponentType, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
+import { OverridePrototypeValue } from "./Util";
 
 /**
  * IOC Container
@@ -142,6 +143,8 @@ export class Container implements IContainer {
 
       // instantiation
       instance = Reflect.construct(<Function>target, options.args);
+      OverridePrototypeValue(instance);
+
       if (options.scope === "Singleton") {
         instance = Object.seal(instance);
       }

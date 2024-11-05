@@ -96,7 +96,7 @@ export function Inject(paramName: string, cType?: ComponentType): ParameterDecor
     IOC.savePropertyData(TAGGED_PROP, {
       type: cType,
       identifier,
-      delay: true,
+      delay: false,
       args: []
     }, target, propertyKey);
   };
@@ -116,13 +116,26 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
   for (const metaKey in metaData) {
     const { type, identifier, delay, args } =
       metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
+    isLazy = isLazy || delay;
     if (type && identifier) {
-      if (!delay || isLazy) {
-        const dep = container.get(identifier, type, args);
-        if (!dep) {
+      const dep = container.get(identifier, type, args);
+      if (!dep) {
+        if (!isLazy) {
           throw new Error(
             `Component ${metaData[metaKey].identifier ?? ""} not found. It's autowired in class ${target.name}`);
         }
+        isLazy = true;
+      }
+
+      if (isLazy) {
+        // Delay loading solves the problem of cyclic dependency
+        logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`)
+        const app = container.getApp();
+        // lazy inject autowired
+        if (app?.once) {
+          app.once("appReady", () => injectAutowired(target, prototypeChain, container, true));
+        }
+      } else {
         logger.Debug(
           `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
         Reflect.defineProperty(prototypeChain, metaKey, {
@@ -131,14 +144,6 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
           writable: true,
           value: dep
         });
-      } else {
-        // Delay loading solves the problem of cyclic dependency
-        logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`)
-        const app = container.getApp();
-        // lazy inject autowired
-        if (app?.once) {
-          app.once("appReady", () => injectAutowired(target, prototypeChain, container, true));
-        }
       }
     }
   }

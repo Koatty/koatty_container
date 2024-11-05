@@ -8,15 +8,11 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { Autowired } from "../src/Autowired";
-import { MyDependency } from "./MyDependency";
+import { ClassA } from "./ClassA";
 
-export class ClassA {
-  @Autowired()
-  protected readonly myDependency: MyDependency;
+export class ClassC extends ClassA {
 
   run() {
     return this.myDependency.run();
   }
-
 }
