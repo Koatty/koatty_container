@@ -8,9 +8,11 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "./AOP";
+import { DefaultApp } from "./App";
 import { injectAutowired } from './Autowired';
+import { Application } from "./IApp";
 import {
-  Application, ComponentType, IContainer,
+  ComponentType, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
 import { injectValues } from "./Values";
@@ -45,6 +47,7 @@ export class Container implements IContainer {
    * @memberof Container
    */
   private constructor() {
+    this.app = new DefaultApp();
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();

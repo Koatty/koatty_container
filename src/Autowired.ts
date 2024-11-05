@@ -13,16 +13,16 @@ import { ComponentType, TAGGED_PROP } from "./IContainer";
 import { RecursiveGetMetadata } from "./Util";
 
 /**
- * Marks a constructor method as to be autowired by Koatty"s dependency injection facilities.
+ * Marks a class property as to be autowired by Koatty"s dependency injection facilities.
  *
  * @export
  * @param {string} [identifier]
- * @param {ComponentType} [type]
+ * @param {ComponentType} [cType]
  * @param {any[]} [constructArgs]
  * @param {boolean} [isDelay=false]
  * @returns {PropertyDecorator}
  */
-export function Autowired(identifier?: string, type?: ComponentType, constructArgs?: any[], isDelay = false): PropertyDecorator {
+export function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[], isDelay = false): PropertyDecorator {
   return (target: object, propertyKey: string) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
     identifier = identifier || (designType && designType.name !== "Object" ? designType.name : helper.camelCase(propertyKey, true));
@@ -30,26 +30,26 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
     if (!identifier) {
       throw Error("identifier cannot be empty when circular dependency exists");
     }
-    if (type === undefined) {
+    if (cType === undefined) {
       if (identifier.includes("Controller")) {
-        type = "CONTROLLER";
+        cType = "CONTROLLER";
       } else if (identifier.includes("Middleware")) {
-        type = "MIDDLEWARE";
+        cType = "MIDDLEWARE";
       } else if (identifier.includes("Service")) {
-        type = "SERVICE";
+        cType = "SERVICE";
       } else {
-        type = "COMPONENT";
+        cType = "COMPONENT";
       }
     }
     //Cannot rely on injection controller
-    if (type === "CONTROLLER") {
+    if (cType === "CONTROLLER") {
       throw new Error(`Controller bean cannot be injection!`);
     }
 
     isDelay = !designType || designType.name === "Object";
 
     IOC.savePropertyData(TAGGED_PROP, {
-      type,
+      cType,
       identifier,
       delay: isDelay,
       args: constructArgs ?? []
@@ -57,16 +57,49 @@ export function Autowired(identifier?: string, type?: ComponentType, constructAr
   };
 }
 /**
- * Marks a constructor method as to be Inject by Koatty"s dependency injection facilities.
- * alias for AutoWired
+ * Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.
+ * 
  * @export
  * @param {string} [identifier]
- * @param {ComponentType} [type]
+ * @param {ComponentType} [cType]
  * @param {any[]} [constructArgs]
  * @param {boolean} [isDelay=false]
  * @returns {PropertyDecorator}
  */
-export const Inject = Autowired;
+export function Inject(paramName: string, cType?: ComponentType): ParameterDecorator {
+  return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
+    if (propertyKey) {
+      throw new Error("the Inject decorator only used by constructor method");
+    }
+    // 获取成员参数类型
+    const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
+    let identifier = paramTypes[parameterIndex]?.name;
+    identifier = identifier || helper.camelCase(paramName, true);
+
+    if (cType === undefined) {
+      if (identifier.includes("Controller")) {
+        cType = "CONTROLLER";
+      } else if (identifier.includes("Middleware")) {
+        cType = "MIDDLEWARE";
+      } else if (identifier.includes("Service")) {
+        cType = "SERVICE";
+      } else {
+        cType = "COMPONENT";
+      }
+    }
+    //Cannot rely on injection controller
+    if (cType === "CONTROLLER") {
+      throw new Error(`Controller bean cannot be injection!`);
+    }
+
+    IOC.savePropertyData(TAGGED_PROP, {
+      cType,
+      identifier,
+      delay: true,
+      args: []
+    }, target, propertyKey);
+  };
+}
 
 /**
  * inject autowired class

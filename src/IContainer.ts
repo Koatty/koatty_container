@@ -1,3 +1,5 @@
+import { Application } from "./IApp";
+
 /**
  * @ author: richen
  * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
@@ -28,28 +30,7 @@ export const TAGGED_METHOD = 'TAGGED_METHOD';
 // used to store router 
 export const CONTROLLER_ROUTER = "CONTROLLER_ROUTER";
 
-/**
- * Base Application
- *
- * @export
- * @interface Application
- */
-export interface Application {
-  env: string;
-  options: object;
 
-  use: (fn: Function) => any;
-  config: (name: string, type?: string) => any;
-  on(event: string, callback: () => void): any;
-  once(event: string, callback: () => void): any;
-  /**
-  * app metadata
-  *
-  * @memberof Application
-  */
-  getMetaData: (key: string) => unknown;
-  setMetaData: (key: string, value: unknown) => void;
-}
 /**
  * Base Context.
  *
