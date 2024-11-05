@@ -64,7 +64,7 @@ export function Aspect(identifier?: string): ClassDecorator {
  */
 export function Before(aopName: string): MethodDecorator {
   if (!aopName) throw Error("AopName is required.");
-  return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
+  return (target: any, methodName: string, _descriptor: PropertyDescriptor) => {
     IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
@@ -98,7 +98,7 @@ export function BeforeEach(aopName: string): ClassDecorator {
  */
 export function After(aopName: string): MethodDecorator {
   if (!aopName) throw Error("AopName is required.");
-  return (target: any, methodName: symbol | string, descriptor: PropertyDescriptor) => {
+  return (target: any, methodName: symbol | string, _descriptor: PropertyDescriptor) => {
     IOCContainer.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
@@ -149,6 +149,7 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
   }
 
   const classMetaDatas: any[] = container.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) ?? [];
+  // eslint-disable-next-line prefer-const
   for (let { type, name, method } of classMetaDatas) {
     if (name && [AOPType.Before, AOPType.BeforeEach, AOPType.After, AOPType.AfterEach].includes(type)) {
       methodsFilter(selfMethods).forEach((element: string) => {
@@ -181,6 +182,7 @@ export function injectAOP(target: Function, instance: unknown, container: Contai
  * @param {*} target
  * @returns {*}  {boolean}
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function hasDefaultAOP(target: any): boolean {
   const allMethods = getMethodNames(target).filter((m: string) =>
     !["constructor", "init"].includes(m)
@@ -231,11 +233,13 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
     async value(...props: any[]) {
       if ([AOPType.Before, AOPType.BeforeEach].includes(type)) {
         logger.Debug(`Execute the before aspect ${classes.name} ${aopName}`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         aopName === "__before" ? await Reflect.apply(this.__before, this, props) : await executeAspect(aopName, props);
       }
       const res = await Reflect.apply(oldMethod, this, props);
       if ([AOPType.After, AOPType.AfterEach].includes(type)) {
         logger.Debug(`Execute the after aspect ${classes.name} ${aopName}`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         aopName === "__after" ? await Reflect.apply(this.__after, this, props) : await executeAspect(aopName, props);
       }
       return res;
