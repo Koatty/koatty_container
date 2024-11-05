@@ -81,16 +81,17 @@ export interface Context {
  */
 export interface IContainer {
   setApp(app: Application): void;
-  reg<T>(target: T, options?: ObjectDefinitionOptions): T;
-  reg<T>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
+  reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
+  reg<T extends object | Function>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
+  reg<T extends object | Function>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T;
   get(identifier: string, type?: ComponentType, args?: any[]): any;
   getClass(identifier: string, type?: ComponentType): Function;
-  getInsByClass<T>(target: T, args?: any[]): T;
+  getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
   saveClass(type: ComponentType, module: Function, identifier: string): void;
   listClass(type: ComponentType): any[];
-  getIdentifier(target: Function): string;
-  getType(target: Function): string;
-  getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
+  getIdentifier(target: Function | object): string;
+  getType(target: Function | object): string;
+  getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
   saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
   attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
   getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;

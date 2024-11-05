@@ -64,13 +64,9 @@ export function RecursiveGetMetadata(metadataKey: any, target: any, _propertyKey
   let parent = ordinaryGetPrototypeOf(target);
   while (parent !== null) {
     // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
-    const metadata = IOCContainer.listPropertyData(metadataKey, parent);
-    if (metadata) {
-      for (const n in metadata) {
-        if (!Object.hasOwnProperty.call(metadata, n)) {
-          metadata[n] = metadata[n];
-        }
-      }
+    const parentMetadata = IOCContainer.listPropertyData(metadataKey, parent);
+    if (parentMetadata) {
+      Object.assign(parentMetadata, metadata);
     }
     parent = ordinaryGetPrototypeOf(parent);
   }
@@ -113,17 +109,17 @@ export function getOriginMetadata(metadataKey: string | symbol, target: any, pro
  * @returns {string[]}
  */
 export function getMethodNames(target: any, isSelfProperties = false): string[] {
-  const result: any[] = [];
-  const enumerableOwnKeys: any[] = Object.getOwnPropertyNames(target.prototype);
+  const result: Set<string> = new Set();
+  const enumerableOwnKeys = Object.getOwnPropertyNames(target.prototype);
   if (!isSelfProperties) {
     // searching prototype chain for methods
     let parent = ordinaryGetPrototypeOf(target);
     while (helper.isClass(parent) && parent.constructor) {
-      const allOwnKeysOnPrototype: any[] = Object.getOwnPropertyNames(parent.prototype);
+      const allOwnKeysOnPrototype = Object.getOwnPropertyNames(parent.prototype);
       // get methods from es6 class
       allOwnKeysOnPrototype.forEach((k) => {
-        if (!result.includes(k) && helper.isFunction(parent.prototype[k])) {
-          result.push(k);
+        if (helper.isFunction(parent.prototype[k])) {
+          result.add(k);
         }
       });
       parent = ordinaryGetPrototypeOf(parent);
@@ -132,11 +128,11 @@ export function getMethodNames(target: any, isSelfProperties = false): string[] 
 
   // leave out those methods on Object's prototype
   enumerableOwnKeys.forEach((k) => {
-    if (!result.includes(k) && helper.isFunction(target.prototype[k])) {
-      result.push(k);
+    if (helper.isFunction(target.prototype[k])) {
+      result.add(k);
     }
   });
-  return result;
+  return Array.from(result);
 }
 
 /**
@@ -148,17 +144,17 @@ export function getMethodNames(target: any, isSelfProperties = false): string[] 
  * @returns {string[]}
  */
 export function getPropertyNames(target: any, isSelfProperties = false): string[] {
-  const result: any[] = [];
-  const enumerableOwnKeys: any[] = Object.getOwnPropertyNames(target);
+  const result: Set<string> = new Set();
+  const enumerableOwnKeys = Object.getOwnPropertyNames(target);
   if (!isSelfProperties) {
     // searching prototype chain for methods
     let parent = ordinaryGetPrototypeOf(target);
     while (helper.isClass(parent) && parent.constructor) {
-      const allOwnKeysOnPrototype: any[] = Object.getOwnPropertyNames(parent);
+      const allOwnKeysOnPrototype = Object.getOwnPropertyNames(parent);
       // get methods from es6 class
       allOwnKeysOnPrototype.forEach((k) => {
-        if (!result.includes(k) && !helper.isFunction(parent.prototype[k])) {
-          result.push(k);
+        if (!helper.isFunction(parent.prototype[k])) {
+          result.add(k);
         }
       });
       parent = ordinaryGetPrototypeOf(parent);
@@ -167,10 +163,10 @@ export function getPropertyNames(target: any, isSelfProperties = false): string[
 
   // leave out those methods on Object's prototype
   enumerableOwnKeys.forEach((k) => {
-    if (!result.includes(k) && !helper.isFunction(target.prototype[k])) {
-      result.push(k);
+    if (!helper.isFunction(target.prototype[k])) {
+      result.add(k);
     }
   });
-  return result;
+  return Array.from(result);
 }
 

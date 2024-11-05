@@ -25,8 +25,8 @@ import { injectValues } from "./Values";
 export class Container implements IContainer {
   private app: Application;
   private classMap: Map<string, Function>;
-  private instanceMap: WeakMap<Object | Function, any>;
-  private metadataMap: WeakMap<Object | Function, Map<string | symbol, any>>;
+  private instanceMap: WeakMap<object | Function, any>;
+  private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
   private static instance: Container;
 
   /**
@@ -80,9 +80,9 @@ export class Container implements IContainer {
    * @returns {T}
    * @memberof Container
    */
-  public reg<T>(target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T {
+  public reg<T extends object | Function>(target: T, options?: ObjectDefinitionOptions): T;
+  public reg<T extends object | Function>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
+  public reg<T extends object | Function>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T {
     if (helper.isClass(identifier) || helper.isFunction(identifier)) {
       options = target;
       target = (identifier as any);
@@ -186,7 +186,7 @@ export class Container implements IContainer {
    * @returns {T}
    * @memberof Container
    */
-  public getInsByClass<T>(target: T, args: any[] = []): T {
+  public getInsByClass<T extends object | Function>(target: T, args: any[] = []): T {
     if (!helper.isClass(target)) {
       return null;
     }
@@ -234,7 +234,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getIdentifier(target: Function | Object) {
+  public getIdentifier(target: Function | object) {
     if (helper.isFunction(target)) {
       const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
       return metaData ? metaData.id ?? "" : target.name ?? "";
@@ -300,7 +300,7 @@ export class Container implements IContainer {
    * @param {string} [propertyName]
    * @memberof Container
    */
-  public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string) {
+  public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
     const originMap = this.getMetadataMap(type, target, propertyName);
     originMap.set(decoratorNameKey, data);
   }
@@ -315,7 +315,7 @@ export class Container implements IContainer {
    * @param {string} [propertyName]
    * @memberof Container
    */
-  public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string) {
+  public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
     const originMap = this.getMetadataMap(type, target, propertyName);
     if (!originMap.has(decoratorNameKey)) {
       originMap.set(decoratorNameKey, []);
@@ -333,7 +333,7 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | Object, propertyName?: string) {
+  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string) {
     const originMap = this.getMetadataMap(type, target, propertyName);
     return originMap.get(decoratorNameKey);
   }
