@@ -7,7 +7,7 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOC } from "./Container";
-import { AOPType, IContainer, ObjectDefinitionOptions, TAGGED_AOP, TAGGED_ARGS, TAGGED_CLS, TAGGED_PROP } from "./IContainer";
+import { AOPType, IAspect, IContainer, ObjectDefinitionOptions, TAGGED_AOP, TAGGED_ARGS, TAGGED_CLS, TAGGED_PROP } from "./IContainer";
 
 // get property of an object
 const functionPrototype = Object.getPrototypeOf(Function);
@@ -349,11 +349,10 @@ function defineAOPProperty(classes: Function, protoName: string, aopName: string
  * @returns {*}  
  */
 async function executeAspect(aopName: string, props: any[]) {
-  const aspect = IOC.get(aopName, "COMPONENT");
-  if (aspect && helper.isFunction(aspect.run)) {
-    await aspect.run(...props);
-  }
-  return Promise.resolve();
+  const aspect: IAspect = IOC.get(aopName, "COMPONENT");
+  if (!aspect || !helper.isFunction(aspect.run))
+    throw Error(`Failed to obtain slice class ${aopName} instance`);
+  return aspect.run(...props);
 }
 
 
