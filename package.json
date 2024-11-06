@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "1.8.10",
+  "version": "1.9.0",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -80,8 +80,8 @@
   },
   "dependencies": {
     "koatty_container": "file:",
-    "koatty_lib": "^1.4.0",
-    "koatty_logger": "^2.1.8"
+    "koatty_lib": "^1.x.x",
+    "koatty_logger": "^2.x.x"
   },
   "peerDependencies": {
     "koatty_lib": "^1.x.x",

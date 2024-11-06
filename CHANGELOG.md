@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/koatty/koatty_container/compare/v1.8.10...v1.9.0) (2024-11-06)
+
 ### [1.8.10](https://github.com/koatty/koatty_container/compare/v1.8.9...v1.8.10) (2023-12-11)
 
 
