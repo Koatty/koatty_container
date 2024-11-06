@@ -29,14 +29,40 @@ export const TAGGED_METHOD = 'TAGGED_METHOD';
 export const CONTROLLER_ROUTER = "CONTROLLER_ROUTER";
 
 /**
+ * defined AOP type
+ *
+ * @export
+ * @enum {number}
+ */
+export enum AOPType {
+  "Before" = "Before",
+  "BeforeEach" = "BeforeEach",
+  "After" = "After",
+  "AfterEach" = "AfterEach"
+}
+
+/**
+ * Aspect interface
+ *
+ * @export
+ * @interface IAspect
+ */
+export interface IAspect {
+  app: Application;
+
+  run: (...args: any[]) => Promise<any>;
+}
+
+
+/**
  * Base Application interface
  *
  * @export
  * @interface Application
  */
 export interface Application {
-  env: string;
-  options: object;
+  env?: string;
+  options?: object;
 
   use?: Function;
   config?: Function;
@@ -46,8 +72,8 @@ export interface Application {
    * @param event 
    * @param callback 
    */
-  on(event: string, callback: () => void): any;
-  once(event: string, callback: () => void): any;
+  on?: (event: string, callback: () => void) => any;
+  once?: (event: string, callback: () => void) => any;
   /**
   * app metadata
   *
@@ -81,23 +107,179 @@ export interface Context {
  * @interface IContainer
  */
 export interface IContainer {
+  /**
+     * set app
+     *
+     * @param {Koatty} app
+     * @returns
+     * @memberof Container
+     */
   setApp(app: Application): void;
-  reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): T;
+  /**
+   * get app
+   *
+   * @returns
+   * @memberof Container
+   */
+  getApp(): Application;
+  /**
+   * registering an instance of a class to an IOC container.
+   *
+   * @template T
+   * @param {T} target
+   * @param {ObjectDefinitionOptions} [options]
+   * @returns {void}
+   * @memberof Container
+   */
+  reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): void;
+  /**
+   * get instance from IOC container.
+   *
+   * @param {string} identifier
+   * @param {ComponentType} [type="COMPONENT"]
+   * @param {any[]} [args=[]]
+   * @returns {*}
+   * @memberof Container
+   */
   get(identifier: string, type?: ComponentType, args?: any[]): any;
+  /**
+   * get class from IOC container by identifier.
+   *
+   * @param {string} identifier
+   * @param {ComponentType} [type="SERVICE"]
+   * @returns {Function}
+   * @memberof Container
+   */
   getClass(identifier: string, type?: ComponentType): Function;
+  /**
+   * get instance from IOC container by class.
+   *
+   * @template T
+   * @param {T} target
+   * @param {any[]} [args=[]]
+   * @returns {T}
+   * @memberof Container
+   */
   getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
-  saveClass(type: ComponentType, module: Function, identifier: string): void;
-  listClass(type: ComponentType): any[];
-  getIdentifier(target: Function | object): string;
-  getType(target: Function | object): string;
+  /**
+   * get metadata from class
+   *
+   * @static
+   * @param {(string | symbol)} metadataKey
+   * @param {(Function | object)} target
+   * @param {(string | symbol)} [propertyKey]
+   * @returns
+   * @memberof Injectable
+   */
   getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
+  /**
+   * get identifier from class
+   *
+   * @param {Function | Object} target
+   * @returns
+   * @memberof Container
+   */
+  getIdentifier(target: Function | object): string;
+  /**
+   * get component type from class
+   *
+   * @param {Function} target
+   * @returns
+   * @memberof Container
+   */
+  getType(target: Function | object): any;
+  /**
+   * save class to Container
+   *
+   * @param {ComponentType} type
+   * @param {Function} module
+   * @param {string} identifier
+   * @memberof Container
+   */
+  saveClass(type: ComponentType, module: Function, identifier: string): void;
+  /**
+   * get all class from Container
+   *
+   * @param {ComponentType} type
+   * @returns
+   * @memberof Container
+   */
+  listClass(type: ComponentType): {
+    id: string;
+    target: Function;
+  }[];
+  /**
+   * save meta data to class or property
+   *
+   * @param {string} type
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {*} data
+   * @param {(Function | object)} target
+   * @param {string} [propertyName]
+   * @memberof Container
+   */
   saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
+  /**
+   * attach data to class or property
+   *
+   * @param {string} type
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {*} data
+   * @param {(Function | object)} target
+   * @param {string} [propertyName]
+   * @memberof Container
+   */
   attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
+  /**
+   * get single data from class or property
+   *
+   * @param {string} type
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {(Function | object)} target
+   * @param {string} [propertyName]
+   * @returns
+   * @memberof Container
+   */
   getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
+  /**
+   * save property data to class
+   *
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {*} data
+   * @param {(Function | object)} target
+   * @param {(string | symbol)} propertyName
+   * @memberof Container
+   */
   savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
+  /**
+   * attach property data to class
+   *
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {*} data
+   * @param {(Function | object)} target
+   * @param {(string | symbol)} propertyName
+   * @memberof Container
+   */
   attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
+  /**
+   * get property data from class
+   *
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {(Function | object)} target
+   * @param {(string | symbol)} propertyName
+   * @returns
+   * @memberof Container
+   */
   getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
-  listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any[];
+  /**
+   * list property data from class
+   *
+   * @param {(string | symbol)} decoratorNameKey
+   * @param {(Function | object)} target
+   * @returns
+   * @memberof Container
+   */
+  listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
 }
 
 

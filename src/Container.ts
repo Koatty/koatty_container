@@ -7,15 +7,12 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
-import { injectAOP } from "./AOP";
-import { injectAutowired } from './Autowired';
 import {
   Application,
   ComponentType, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
-import { OverridePrototypeValue } from "./Util";
-import { injectValues } from "./Values";
+import { injectAOP, injectAutowired, injectValues, OverridePrototypeValue } from "./Util";
 
 /**
  * IOC Container
@@ -80,11 +77,11 @@ export class Container implements IContainer {
    * @template T
    * @param {T} target
    * @param {ObjectDefinitionOptions} [options]
-   * @returns {T}
+   * @returns {void}
    * @memberof Container
    */
   public reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
-    options?: ObjectDefinitionOptions): T {
+    options?: ObjectDefinitionOptions): void {
     if (helper.isString(identifier)) {
       identifier = identifier;
       if (target !== undefined) {
@@ -102,8 +99,7 @@ export class Container implements IContainer {
       throw new Error("target is not a class");
     }
 
-    let instance = this.instanceMap.get(target);
-    if (!instance) {
+    if (!this.instanceMap.get(target)) {
       options = {
         isAsync: false,
         initMethod: "constructor",
@@ -113,13 +109,6 @@ export class Container implements IContainer {
         args: [],
         ...options
       };
-      // inject options once
-      Reflect.defineProperty((<Function>target).prototype, "_options", {
-        enumerable: false,
-        configurable: false,
-        writable: true,
-        value: options
-      });
 
       // define app as getter
       Reflect.defineProperty((<Function>target).prototype, "app", {
@@ -129,27 +118,47 @@ export class Container implements IContainer {
       });
 
       // inject autowired
-      injectAutowired(<Function>target, (<Function>target).prototype, this);
+      injectAutowired(<Function>target, (<Function>target).prototype, this, options);
       // inject properties values
-      injectValues(target, (<Function>target).prototype, this);
+      injectValues(<Function>target, (<Function>target).prototype, this, options);
       // inject AOP
-      injectAOP(<Function>target, (<Function>target).prototype, this);
+      injectAOP(<Function>target, (<Function>target).prototype, this, options);
 
+      // inject options once
+      Reflect.defineProperty((<Function>target).prototype, "_options", {
+        enumerable: false,
+        configurable: false,
+        writable: true,
+        value: options
+      });
+      // save class to metadata
       if (!this.getClass(<string>identifier, options.type)) {
         this.saveClass(options.type, <Function>target, <string>identifier);
       }
-
-      // instantiation
-      instance = Reflect.construct(<Function>target, options.args);
-      OverridePrototypeValue(instance);
-
-      if (options.scope === "Singleton") {
-        instance = Object.seal(instance);
+      // async instance
+      if (options.isAsync) {
+        this.app.on("appReady", () => this._setInstance(target, options));
       }
-      // registration
-      this.instanceMap.set(target, instance);
+
+      this._setInstance(target, options);
     }
-    return instance;
+  }
+
+  /**
+   * save instance to instanceMap
+   * @param target 
+   * @param options 
+   */
+  private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
+    // instantiation
+    let instance = Reflect.construct(<Function>target, options.args);
+    OverridePrototypeValue(instance);
+
+    if (options.scope === "Singleton") {
+      instance = Object.seal(instance);
+    }
+    // registration
+    this.instanceMap.set(target, instance);
   }
 
   /**

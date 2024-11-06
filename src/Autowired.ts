@@ -6,11 +6,9 @@
  */
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
-import { DefaultLogger as logger } from "koatty_logger";
 import "reflect-metadata";
-import { Container, IOC } from "./Container";
+import { IOC } from "./Container";
 import { ComponentType, TAGGED_PROP } from "./IContainer";
-import { RecursiveGetMetadata } from "./Util";
 
 /**
  * Marks a class property as to be autowired by Koatty"s dependency injection facilities.
@@ -22,10 +20,12 @@ import { RecursiveGetMetadata } from "./Util";
  * @param {boolean} [isDelay=false]
  * @returns {PropertyDecorator}
  */
-export function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[], isDelay = false): PropertyDecorator {
+export function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[],
+  isDelay = false): PropertyDecorator {
   return (target: object, propertyKey: string) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
-    identifier = identifier || (designType && designType.name !== "Object" ? designType.name : helper.camelCase(propertyKey, true));
+    identifier = identifier || (designType && designType.name !== "Object" ?
+      designType.name : helper.camelCase(propertyKey, true));
 
     if (!identifier) {
       throw Error("identifier cannot be empty when circular dependency exists");
@@ -100,51 +100,4 @@ export function Inject(paramName: string, cType?: ComponentType): ParameterDecor
       args: []
     }, target, propertyKey);
   };
-}
-
-/**
- * inject autowired class
- *
- * @export
- * @param {Function} target
- * @param {object} instance
- * @param {Container} container
- * @param {boolean} [isLazy=false]
- */
-export function injectAutowired(target: Function, prototypeChain: object, container: Container, isLazy = false) {
-  const metaData = RecursiveGetMetadata(TAGGED_PROP, target);
-  for (const metaKey in metaData) {
-    const { type, identifier, delay, args } =
-      metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
-    isLazy = isLazy || delay;
-    if (type && identifier) {
-      const dep = container.get(identifier, type, args);
-      if (!dep) {
-        if (!isLazy) {
-          throw new Error(
-            `Component ${metaData[metaKey].identifier ?? ""} not found. It's autowired in class ${target.name}`);
-        }
-        isLazy = true;
-      }
-
-      if (isLazy) {
-        // Delay loading solves the problem of cyclic dependency
-        logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`)
-        const app = container.getApp();
-        // lazy inject autowired
-        if (app?.once) {
-          app.once("appReady", () => injectAutowired(target, prototypeChain, container, true));
-        }
-      } else {
-        logger.Debug(
-          `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
-        Reflect.defineProperty(prototypeChain, metaKey, {
-          enumerable: true,
-          configurable: false,
-          writable: true,
-          value: dep
-        });
-      }
-    }
-  }
 }
