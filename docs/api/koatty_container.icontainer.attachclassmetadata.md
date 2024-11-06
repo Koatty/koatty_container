@@ -4,6 +4,8 @@
 
 ## IContainer.attachClassMetadata() method
 
+attach data to class or property
+
 **Signature:**
 
 ```typescript
@@ -18,7 +20,7 @@ attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, 
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| object |  |
-|  propertyName | string | _(Optional)_ |
+|  propertyName | string | _(Optional)_  Container |
 
 **Returns:**
 

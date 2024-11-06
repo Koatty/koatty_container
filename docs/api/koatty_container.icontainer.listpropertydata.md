@@ -4,10 +4,12 @@
 
 ## IContainer.listPropertyData() method
 
+list property data from class
+
 **Signature:**
 
 ```typescript
-listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any[];
+listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
 ```
 
 ## Parameters
@@ -19,5 +21,7 @@ listPropertyData(decoratorNameKey: string | symbol, target: Function | object): 
 
 **Returns:**
 
-any\[\]
+any
+
+ Container
 

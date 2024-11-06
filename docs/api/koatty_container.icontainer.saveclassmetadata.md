@@ -4,6 +4,8 @@
 
 ## IContainer.saveClassMetadata() method
 
+save meta data to class or property
+
 **Signature:**
 
 ```typescript
@@ -18,7 +20,7 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| object |  |
-|  propertyName | string | _(Optional)_ |
+|  propertyName | string | _(Optional)_  Container |
 
 **Returns:**
 

@@ -30,7 +30,9 @@
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
 |  [Inject(paramName, cType)](./koatty_container.inject.md) | <p>Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.</p> |
-|  [injectValues(target, instance, \_container)](./koatty_container.injectvalues.md) | <p>Inject class instance property</p> |
+|  [injectAOP(target, prototypeChain, container, \_options)](./koatty_container.injectaop.md) | <p>inject AOP</p> |
+|  [injectAutowired(target, prototypeChain, container, options, isLazy)](./koatty_container.injectautowired.md) | <p>inject autowired class</p> |
+|  [injectValues(target, instance, \_container, \_options)](./koatty_container.injectvalues.md) | Inject class instance property |
 |  [OverridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
 |  [RecursiveGetMetadata(metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 |  [Values(value, defaultValue)](./koatty_container.values.md) | <p>Indicates that an decorated class instance property values.</p> |
@@ -40,6 +42,7 @@
 |  Interface | Description |
 |  --- | --- |
 |  [Application](./koatty_container.application.md) | <p>Base Application interface</p><p>  Application</p> |
+|  [Constructor](./koatty_container.constructor.md) | Defined constructor interface |
 |  [Context](./koatty_container.context.md) | <p>Base Context interface</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
 |  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |

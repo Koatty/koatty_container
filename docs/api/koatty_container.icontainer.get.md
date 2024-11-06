@@ -4,21 +4,27 @@
 
 ## IContainer.get() method
 
+get an instance from the IOC container.
+
+ T
+
 **Signature:**
 
 ```typescript
-get(identifier: string, type?: ComponentType, args?: any[]): any;
+get<T>(identifier: string | Constructor<T>, type?: ComponentType, ...args: any[]): T;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string |  |
+|  identifier | string \| [Constructor](./koatty_container.constructor.md)<!-- -->&lt;T&gt; |  |
 |  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
-|  args | any\[\] | _(Optional)_ |
+|  args | any\[\] |  |
 
 **Returns:**
 
-any
+T
+
+{<!-- -->T<!-- -->}
 

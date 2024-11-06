@@ -4,6 +4,8 @@
 
 ## IContainer.getPropertyData() method
 
+get property data from class
+
 **Signature:**
 
 ```typescript
@@ -21,4 +23,6 @@ getPropertyData(decoratorNameKey: string | symbol, target: Function | object, pr
 **Returns:**
 
 any
+
+ Container
 

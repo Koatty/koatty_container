@@ -4,6 +4,10 @@
 
 ## IContainer.getInsByClass() method
 
+get instance from IOC container by class.
+
+ T
+
 **Signature:**
 
 ```typescript
@@ -20,4 +24,6 @@ getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
 **Returns:**
 
 T
+
+{<!-- -->T<!-- -->}  Container
 

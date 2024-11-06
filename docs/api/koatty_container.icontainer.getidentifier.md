@@ -4,6 +4,8 @@
 
 ## IContainer.getIdentifier() method
 
+get identifier from class
+
 **Signature:**
 
 ```typescript
@@ -19,4 +21,6 @@ getIdentifier(target: Function | object): string;
 **Returns:**
 
 string
+
+ Container
 

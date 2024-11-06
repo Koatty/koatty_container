@@ -4,6 +4,9 @@
 
 ## IContainer.getMetadataMap() method
 
+get metadata from class
+
+
 **Signature:**
 
 ```typescript
@@ -21,4 +24,6 @@ getMetadataMap(metadataKey: string | symbol, target: Function | object, property
 **Returns:**
 
 any
+
+ Injectable
 

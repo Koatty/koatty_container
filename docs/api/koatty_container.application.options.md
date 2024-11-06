@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-options: object;
+options?: object;
 ```

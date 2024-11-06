@@ -6,20 +6,20 @@
 
 Inject class instance property
 
-
 **Signature:**
 
 ```typescript
-export declare function injectValues(target: any, instance: any, _container?: Container): void;
+export declare function injectValues(target: Function, instance: object, _container?: IContainer, _options?: ObjectDefinitionOptions): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | any |  |
-|  instance | any |  |
-|  \_container | [Container](./koatty_container.container.md) | _(Optional)_ |
+|  target | Function |  |
+|  instance | object |  |
+|  \_container | [IContainer](./koatty_container.icontainer.md) | _(Optional)_ |
+|  \_options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 
 **Returns:**
 

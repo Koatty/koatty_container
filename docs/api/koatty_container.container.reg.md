@@ -11,7 +11,7 @@ registering an instance of a class to an IOC container.
 **Signature:**
 
 ```typescript
-reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): T;
+reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): void;
 ```
 
 ## Parameters
@@ -24,7 +24,7 @@ reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefi
 
 **Returns:**
 
-T
+void
 
-{<!-- -->T<!-- -->}  Container
+{<!-- -->void<!-- -->}  Container
 

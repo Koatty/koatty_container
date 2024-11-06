@@ -4,6 +4,8 @@
 
 ## IContainer.savePropertyData() method
 
+save property data to class
+
 **Signature:**
 
 ```typescript
@@ -17,7 +19,7 @@ savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function 
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
 |  target | Function \| object |  |
-|  propertyName | string \| symbol |  |
+|  propertyName | string \| symbol |  Container |
 
 **Returns:**
 

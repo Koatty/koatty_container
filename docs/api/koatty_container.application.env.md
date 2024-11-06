@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-env: string;
+env?: string;
 ```

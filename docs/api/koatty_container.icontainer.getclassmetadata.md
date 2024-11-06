@@ -4,6 +4,8 @@
 
 ## IContainer.getClassMetadata() method
 
+get single data from class or property
+
 **Signature:**
 
 ```typescript
@@ -22,4 +24,6 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 **Returns:**
 
 any
+
+ Container
 

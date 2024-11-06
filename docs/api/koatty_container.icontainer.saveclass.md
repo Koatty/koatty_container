@@ -4,6 +4,8 @@
 
 ## IContainer.saveClass() method
 
+save class to Container
+
 **Signature:**
 
 ```typescript
@@ -16,7 +18,7 @@ saveClass(type: ComponentType, module: Function, identifier: string): void;
 |  --- | --- | --- |
 |  type | [ComponentType](./koatty_container.componenttype.md) |  |
 |  module | Function |  |
-|  identifier | string |  |
+|  identifier | string |  Container |
 
 **Returns:**
 
