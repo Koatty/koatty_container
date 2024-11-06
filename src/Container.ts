@@ -8,14 +8,14 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "./AOP";
-import { DefaultApp } from "./Application";
 import { injectAutowired } from './Autowired';
-import { Application } from "./IApplication";
 import {
+  Application,
   ComponentType, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
 import { OverridePrototypeValue } from "./Util";
+import { injectValues } from "./Values";
 
 /**
  * IOC Container
@@ -47,7 +47,7 @@ export class Container implements IContainer {
    * @memberof Container
    */
   private constructor() {
-    this.app = new DefaultApp();
+    this.app = Object.create(null);
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
@@ -130,6 +130,8 @@ export class Container implements IContainer {
 
       // inject autowired
       injectAutowired(<Function>target, (<Function>target).prototype, this);
+      // inject properties values
+      injectValues(target, (<Function>target).prototype, this);
       // inject AOP
       injectAOP(<Function>target, (<Function>target).prototype, this);
 

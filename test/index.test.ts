@@ -1,5 +1,4 @@
 import assert from "assert";
-import { DefaultApp } from "../src/Application";
 import { IOC } from "../src/Container";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
@@ -23,7 +22,7 @@ describe("IOC", () => {
   })
 
   test("SetOrGetApp", () => {
-    const app = new DefaultApp();
+    const app = Object.create(null);
     app.env = "production";
     IOC.setApp(app);
 
@@ -43,6 +42,11 @@ describe("IOC", () => {
   test("getType", async () => {
     const id = IOC.getType(ClassA)
     assert.equal(id, "COMPONENT")
+  })
+
+  test("Values", async () => {
+    const ins: ClassA = IOC.get("ClassA")
+    assert.equal(ins.config, "dev")
   })
 
   test("Autowired", async () => {

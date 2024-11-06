@@ -7,8 +7,7 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import { Container, IOC } from "./Container";
-import { Application } from "./IApplication";
-import { TAGGED_AOP, TAGGED_CLS } from "./IContainer";
+import { Application, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
 import { getMethodNames } from "./Util";
 
 /**
