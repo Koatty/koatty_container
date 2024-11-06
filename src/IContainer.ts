@@ -25,9 +25,6 @@ export const TAGGED_PARAM = 'TAGGED_PARAM';
 // used to store class method to be injected
 export const TAGGED_METHOD = 'TAGGED_METHOD';
 
-// used to store router 
-export const CONTROLLER_ROUTER = "CONTROLLER_ROUTER";
-
 /**
  * defined AOP type
  *
@@ -42,25 +39,11 @@ export enum AOPType {
 }
 
 /**
- * Aspect interface
- *
- * @export
- * @interface IAspect
- */
-export interface IAspect {
-  app: Application;
-
-  run: (...args: any[]) => Promise<any>;
-}
-
-/**
  * Defined constructor interface
  */
 export interface Constructor<T> {
   new(...args: any[]): T;
 }
-
-
 
 /**
  * Base Application interface
@@ -308,57 +291,13 @@ export interface ObjectDefinitionOptions {
 }
 
 /**
- *
- *
- * @export
- * @interface TagClsMetadata
- */
-export interface TagClsMetadata {
-  id: string;
-  originName: string;
-}
-
-/**
- *
+ * Aspect interface
  *
  * @export
- * @interface TagPropsMetadata
+ * @interface IAspect
  */
-export interface TagPropsMetadata {
-  key: string | number | symbol;
-  value: any;
-}
+export interface IAspect {
+  app: Application;
 
-/**
- *
- *
- * @export
- * @interface ReflectResult
- */
-export interface ReflectResult {
-  [key: string]: TagPropsMetadata[];
-}
-
-/**
- * Interface for Controller
- */
-export interface IController {
-  readonly app: Application;
-  readonly ctx: Context;
-}
-
-/**
- * Interface for Middleware
- */
-export interface IMiddleware {
-  run: (options: object, app: Application) => (ctx: object, next: Function) => Promise<any>;
-}
-
-/**
- * Interface for Service
- */
-export interface IService {
-  readonly app: Application;
-
-  // init(...arg: any[]): void;
+  run: (...args: any[]) => Promise<any>;
 }

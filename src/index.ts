@@ -6,7 +6,6 @@
  */
 export * from "./AOP";
 export * from "./Autowired";
-export * from "./Inject";
 export * from "./Container";
 export * from "./IContainer";
 export * from "./Util";
