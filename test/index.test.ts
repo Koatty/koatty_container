@@ -45,7 +45,7 @@ describe("IOC", () => {
   })
 
   test("Values", async () => {
-    const ins: ClassA = IOC.get("ClassA")
+    const ins = IOC.get(ClassA);
     assert.equal(ins.config, "dev")
   })
 

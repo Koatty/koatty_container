@@ -53,6 +53,14 @@ export interface IAspect {
   run: (...args: any[]) => Promise<any>;
 }
 
+/**
+ * Defined constructor interface
+ */
+export interface Constructor<T> {
+  new(...args: any[]): T;
+}
+
+
 
 /**
  * Base Application interface
@@ -132,21 +140,22 @@ export interface IContainer {
    * @memberof Container
    */
   reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): void;
+
   /**
-   * get instance from IOC container.
+   * get an instance from the IOC container.
    *
-   * @param {string} identifier
+   * @template T
+   * @param {string | Constructor<T>} identifier
    * @param {ComponentType} [type="COMPONENT"]
-   * @param {any[]} [args=[]]
-   * @returns {*}
-   * @memberof Container
+   * @param {...any[]} args
+   * @returns {T}
    */
-  get(identifier: string, type?: ComponentType, args?: any[]): any;
+  get<T>(identifier: string | Constructor<T>, type?: ComponentType, ...args: any[]): T;
   /**
    * get class from IOC container by identifier.
    *
    * @param {string} identifier
-   * @param {ComponentType} [type="SERVICE"]
+   * @param {ComponentType} [type="COMPONENT"]
    * @returns {Function}
    * @memberof Container
    */

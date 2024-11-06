@@ -9,7 +9,7 @@ import * as helper from "koatty_lib";
 import "reflect-metadata";
 import {
   Application,
-  ComponentType, IContainer,
+  ComponentType, Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
 import { injectAOP, injectAutowired, injectValues, OverridePrototypeValue } from "./Util";
@@ -170,19 +170,25 @@ export class Container implements IContainer {
    * @returns {*}
    * @memberof Container
    */
-  public get(identifier: string, type: ComponentType = "COMPONENT", args: any[] = []): any {
-    const target = this.getClass(identifier, type);
-    if (!target) {
-      return null;
+  public get<T>(identifier: string | Constructor<T>, type: ComponentType = "COMPONENT",
+    ...args: any[]): T {
+    let target: T;
+    if (helper.isClass(<any>identifier)) {
+      target = <T>identifier;
+    } else {
+      target = <T>this.getClass(<string>identifier, type);
+      if (!target) {
+        return null;
+      }
     }
-    // get instance from the Container
-    const instance: any = this.instanceMap.get(target);
+
     // require Prototype instance
     if (args.length > 0) {
       // instantiation
-      return Reflect.construct(target, args);
+      return Reflect.construct(<Function>target, args) as T;
     } else {
-      return instance;
+      // get instance from the Container
+      return this.instanceMap.get(<Function>target) as T;
     }
   }
 
@@ -190,11 +196,11 @@ export class Container implements IContainer {
    * get class from IOC container by identifier.
    *
    * @param {string} identifier
-   * @param {ComponentType} [type="SERVICE"]
+   * @param {ComponentType} [type="COMPONENT"]
    * @returns {Function}
    * @memberof Container
    */
-  public getClass(identifier: string, type: ComponentType = "SERVICE"): Function {
+  public getClass(identifier: string, type: ComponentType = "COMPONENT"): Function {
     return this.classMap.get(`${type}:${identifier}`);
   }
 
