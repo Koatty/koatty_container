@@ -1,4 +1,5 @@
 import assert from "assert";
+import { DefaultApp } from "../src/Application";
 import { IOC } from "../src/Container";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
@@ -20,22 +21,46 @@ describe("IOC", () => {
     IOC.reg("ClassB", ClassB);
     IOC.reg("ClassC", ClassC);
   })
-  it("Autowired", async () => {
+
+  test("SetOrGetApp", () => {
+    const app = new DefaultApp();
+    app.env = "production";
+    IOC.setApp(app);
+
+    assert.equal(IOC.getApp().env, "production")
+  })
+
+  test("getInsByClass", async () => {
+    const ins = IOC.getInsByClass(ClassA);
+    expect(ins).toBeInstanceOf(ClassA);
+  })
+
+  test("getIdentifier", async () => {
+    const id = IOC.getIdentifier(ClassA)
+    assert.equal(id, "ClassA")
+  })
+
+  test("getType", async () => {
+    const id = IOC.getType(ClassA)
+    assert.equal(id, "COMPONENT")
+  })
+
+  test("Autowired", async () => {
     const ins: ClassA = IOC.get("ClassA");
     assert.equal(await ins.run(), "MyDependency.run");
   })
 
-  it("Inject", async () => {
+  test("Inject", async () => {
     const ins: ClassB = IOC.get("ClassB");
     assert.equal(await ins.run(), "MyDependency2.run");
   })
 
-  it("Extends", async () => {
+  test("Extends", async () => {
     const ins: ClassC = IOC.get("ClassC");
     assert.equal(await ins.run(), "MyDependency.run");
   })
 
-  it("Before", async () => {
+  test("Before", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassC = IOC.get("ClassC");
@@ -45,7 +70,7 @@ describe("IOC", () => {
     // 恢复 spy 的原始功能
     logSpy.mockRestore();
   })
-  it("After", async () => {
+  test("After", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassC = IOC.get("ClassC");
@@ -56,7 +81,7 @@ describe("IOC", () => {
     logSpy.mockRestore();
   })
 
-  it("BeforeEach", async () => {
+  test("BeforeEach", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassB = IOC.get("ClassB");
@@ -66,7 +91,7 @@ describe("IOC", () => {
     // 恢复 spy 的原始功能
     logSpy.mockRestore();
   })
-  it("AfterEach", async () => {
+  test("AfterEach", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassA = IOC.get("ClassA");
@@ -76,7 +101,7 @@ describe("IOC", () => {
     // 恢复 spy 的原始功能
     logSpy.mockRestore();
   })
-  it("AfterEach", async () => {
+  test("AfterEach", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassA = IOC.get("ClassA");
@@ -87,7 +112,7 @@ describe("IOC", () => {
     logSpy.mockRestore();
   })
 
-  it("DefaultBeforeEach", async () => {
+  test("DefaultBeforeEach", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassC = IOC.get("ClassC");
@@ -98,7 +123,7 @@ describe("IOC", () => {
     logSpy.mockRestore();
   })
 
-  it("DefaultAfterEach", async () => {
+  test("DefaultAfterEach", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');
     const ins: ClassC = IOC.get("ClassC");
