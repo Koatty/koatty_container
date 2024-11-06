@@ -16,5 +16,5 @@ export interface IService
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [app](./koatty_container.iservice.app.md) | <code>readonly</code> | Application |  |
+|  [app](./koatty_container.iservice.app.md) | <code>readonly</code> | [Application](./koatty_container.application.md) |  |
 

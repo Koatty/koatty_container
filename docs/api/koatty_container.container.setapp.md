@@ -16,7 +16,7 @@ setApp(app: Application): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  app | Application |  |
+|  app | [Application](./koatty_container.application.md) |  |
 
 **Returns:**
 

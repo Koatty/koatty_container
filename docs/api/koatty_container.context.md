@@ -4,7 +4,7 @@
 
 ## Context interface
 
-Base Context.
+Base Context interface
 
   Context  {<!-- -->Koa.Context<!-- -->}
 
