@@ -9,7 +9,7 @@ get single data from class or property
 **Signature:**
 
 ```typescript
-getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | Object, propertyName?: string): any;
+getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 |  --- | --- | --- |
 |  type | string |  |
 |  decoratorNameKey | string \| symbol |  |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 |  propertyName | string | _(Optional)_ |
 
 **Returns:**

@@ -4,20 +4,27 @@
 
 ## IContainer.reg() method
 
+registering an instance of a class to an IOC container.
+
+ T
+
 **Signature:**
 
 ```typescript
-reg<T>(target: T, options?: ObjectDefinitionOptions): T;
+reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | T |  |
+|  identifier | string \| T |  |
+|  target | T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 |  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
 
 **Returns:**
 
-T
+void
+
+{<!-- -->void<!-- -->}  Container
 

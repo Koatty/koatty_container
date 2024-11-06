@@ -4,7 +4,7 @@
 
 ## Application interface
 
-Base Application
+Base Application interface
 
   Application
 
@@ -18,17 +18,12 @@ export interface Application
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [config](./koatty_container.application.config.md) |  | (name: string, type?: string) =&gt; any |  |
-|  [env](./koatty_container.application.env.md) |  | string |  |
-|  [getMetaData](./koatty_container.application.getmetadata.md) |  | (key: string) =&gt; any | <p>app metadata</p><p> Application</p> |
-|  [options](./koatty_container.application.options.md) |  | any |  |
+|  [config?](./koatty_container.application.config.md) |  | Function | _(Optional)_ |
+|  [env?](./koatty_container.application.env.md) |  | string | _(Optional)_ |
+|  [getMetaData](./koatty_container.application.getmetadata.md) |  | (key: string) =&gt; unknown | <p>app metadata</p><p> Application</p> |
+|  [on?](./koatty_container.application.on.md) |  | (event: string, callback: () =&gt; void) =&gt; any | _(Optional)_ event |
+|  [once?](./koatty_container.application.once.md) |  | (event: string, callback: () =&gt; void) =&gt; any | _(Optional)_ |
+|  [options?](./koatty_container.application.options.md) |  | object | _(Optional)_ |
 |  [setMetaData](./koatty_container.application.setmetadata.md) |  | (key: string, value: unknown) =&gt; void |  |
-|  [use](./koatty_container.application.use.md) |  | (fn: Function) =&gt; any |  |
-
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [on(event, callback)](./koatty_container.application.on.md) |  |
-|  [once(event, callback)](./koatty_container.application.once.md) |  |
+|  [use?](./koatty_container.application.use.md) |  | Function | _(Optional)_ |
 

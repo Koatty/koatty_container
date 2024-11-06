@@ -4,10 +4,12 @@
 
 ## IContainer.attachPropertyData() method
 
+attach property data to class
+
 **Signature:**
 
 ```typescript
-attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName: string | symbol): void;
+attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
 ```
 
 ## Parameters
@@ -16,8 +18,8 @@ attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Functio
 |  --- | --- | --- |
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
-|  target | Function \| Object |  |
-|  propertyName | string \| symbol |  |
+|  target | Function \| object |  |
+|  propertyName | string \| symbol |  Container |
 
 **Returns:**
 

@@ -4,6 +4,8 @@
 
 ## IOCContainer variable
 
+alias IOC
+
 **Signature:**
 
 ```typescript

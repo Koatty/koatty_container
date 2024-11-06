@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-config: (name: string, type?: string) => any;
+config?: Function;
 ```

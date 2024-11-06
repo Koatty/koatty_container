@@ -9,7 +9,7 @@ get property data from class
 **Signature:**
 
 ```typescript
-getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, propertyName: string | symbol): any;
+getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ getPropertyData(decoratorNameKey: string | symbol, target: Function | Object, pr
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  decoratorNameKey | string \| symbol |  |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 |  propertyName | string \| symbol |  |
 
 **Returns:**

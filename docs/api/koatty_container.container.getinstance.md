@@ -4,6 +4,8 @@
 
 ## Container.getInstance() method
 
+Static method to get the singleton instance of a class
+
 
 **Signature:**
 
@@ -14,5 +16,4 @@ static getInstance(): Container;
 
 [Container](./koatty_container.container.md)
 
- ValidateUtil
 

@@ -10,7 +10,7 @@ get metadata from class
 **Signature:**
 
 ```typescript
-getMetadataMap(metadataKey: string | symbol, target: Function | Object, propertyKey?: string | symbol): any;
+getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ getMetadataMap(metadataKey: string | symbol, target: Function | Object, property
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 |  propertyKey | string \| symbol | _(Optional)_ |
 
 **Returns:**

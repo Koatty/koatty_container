@@ -4,10 +4,12 @@
 
 ## IContainer.attachClassMetadata() method
 
+attach data to class or property
+
 **Signature:**
 
 ```typescript
-attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
+attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
 ```
 
 ## Parameters
@@ -17,8 +19,8 @@ attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, 
 |  type | string |  |
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
-|  target | Function \| Object |  |
-|  propertyName | string | _(Optional)_ |
+|  target | Function \| object |  |
+|  propertyName | string | _(Optional)_  Container |
 
 **Returns:**
 

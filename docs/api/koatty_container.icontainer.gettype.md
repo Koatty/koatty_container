@@ -4,19 +4,23 @@
 
 ## IContainer.getType() method
 
+get component type from class
+
 **Signature:**
 
 ```typescript
-getType(target: Function): string;
+getType(target: Function | object): any;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | Function |  |
+|  target | Function \| object |  |
 
 **Returns:**
 
-string
+any
+
+ Container
 

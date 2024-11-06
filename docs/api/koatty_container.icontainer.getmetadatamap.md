@@ -4,10 +4,13 @@
 
 ## IContainer.getMetadataMap() method
 
+get metadata from class
+
+
 **Signature:**
 
 ```typescript
-getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string | symbol): any;
+getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
 ```
 
 ## Parameters
@@ -15,10 +18,12 @@ getMetadataMap(metadataKey: string | symbol, target: any, propertyKey?: string |
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  metadataKey | string \| symbol |  |
-|  target | any |  |
+|  target | Function \| object |  |
 |  propertyKey | string \| symbol | _(Optional)_ |
 
 **Returns:**
 
 any
+
+ Injectable
 

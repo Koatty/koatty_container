@@ -4,10 +4,12 @@
 
 ## IContainer.saveClassMetadata() method
 
+save meta data to class or property
+
 **Signature:**
 
 ```typescript
-saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | Object, propertyName?: string): void;
+saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
 ```
 
 ## Parameters
@@ -17,8 +19,8 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 |  type | string |  |
 |  decoratorNameKey | string \| symbol |  |
 |  data | any |  |
-|  target | Function \| Object |  |
-|  propertyName | string | _(Optional)_ |
+|  target | Function \| object |  |
+|  propertyName | string | _(Optional)_  Container |
 
 **Returns:**
 

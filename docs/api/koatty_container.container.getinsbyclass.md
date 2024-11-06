@@ -11,7 +11,7 @@ get instance from IOC container by class.
 **Signature:**
 
 ```typescript
-getInsByClass<T>(target: T, args?: any[]): T;
+getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
 ```
 
 ## Parameters

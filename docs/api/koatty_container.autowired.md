@@ -4,13 +4,13 @@
 
 ## Autowired() function
 
-Marks a constructor method as to be autowired by Koatty"s dependency injection facilities.
+Marks a class property as to be autowired by Koatty"s dependency injection facilities.
 
 
 **Signature:**
 
 ```typescript
-export declare function Autowired(identifier?: string, type?: ComponentType, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
+export declare function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ export declare function Autowired(identifier?: string, type?: ComponentType, con
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  identifier | string | _(Optional)_ |
-|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
+|  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
 |  constructArgs | any\[\] | _(Optional)_ |
 |  isDelay | boolean | _(Optional)_ |
 

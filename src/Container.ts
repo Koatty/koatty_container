@@ -7,10 +7,12 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
-import { injectAOP } from "./AOP";
-import { injectAutowired } from './Autowired';
-import { Application, ComponentType, IContainer, ObjectDefinitionOptions, TAGGED_CLS } from "./IContainer";
-import { injectValues } from "./Values";
+import {
+  Application,
+  ComponentType, Constructor, IContainer,
+  ObjectDefinitionOptions, TAGGED_CLS
+} from "./IContainer";
+import { injectAOP, injectAutowired, injectValues, OverridePrototypeValue } from "./Util";
 
 /**
  * IOC Container
@@ -21,17 +23,16 @@ import { injectValues } from "./Values";
  */
 export class Container implements IContainer {
   private app: Application;
-  private classMap: Map<any, any>;
-  private instanceMap: WeakMap<any, any>;
-  private metadataMap: WeakMap<any, any>;
+  private classMap: Map<string, Function>;
+  private instanceMap: WeakMap<object | Function, any>;
+  private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
   private static instance: Container;
 
   /**
-   * 
+   * Static method to get the singleton instance of a class
    *
    * @static
    * @returns
-   * @memberof ValidateUtil
    */
   static getInstance() {
     return this.instance || (this.instance = new Container());
@@ -43,6 +44,7 @@ export class Container implements IContainer {
    * @memberof Container
    */
   private constructor() {
+    this.app = Object.create(null);
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
@@ -75,23 +77,29 @@ export class Container implements IContainer {
    * @template T
    * @param {T} target
    * @param {ObjectDefinitionOptions} [options]
-   * @returns {T}
+   * @returns {void}
    * @memberof Container
    */
-  public reg<T>(target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T>(identifier: string, target: T, options?: ObjectDefinitionOptions): T;
-  public reg<T>(identifier: any, target?: any, options?: ObjectDefinitionOptions): T {
-    if (helper.isClass(identifier) || helper.isFunction(identifier)) {
-      options = target;
-      target = (identifier as any);
+  public reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
+    options?: ObjectDefinitionOptions): void {
+    if (helper.isString(identifier)) {
+      identifier = identifier;
+      if (target !== undefined) {
+        target = target as T;
+      }
+    } else {
+      if (options && helper.isObject(options)) {
+        options = target as ObjectDefinitionOptions;
+      }
+      target = identifier as T;
       identifier = this.getIdentifier(target);
     }
+
     if (!helper.isClass(target)) {
-      return target;
+      throw new Error("target is not a class");
     }
 
-    let instance = this.instanceMap.get(target);
-    if (!instance) {
+    if (!this.instanceMap.get(target)) {
       options = {
         isAsync: false,
         initMethod: "constructor",
@@ -101,70 +109,86 @@ export class Container implements IContainer {
         args: [],
         ...options
       };
-      options.args = options.args.length ? options.args : [];
-      // inject options once
-      Reflect.defineProperty(target.prototype, "_options", {
-        enumerable: false,
-        configurable: false,
-        writable: true,
-        value: options
-      });
 
       // define app as getter
-      const app = this.app;
-      Reflect.defineProperty(target.prototype, "app", {
-        get() {
-          return app;
-        },
+      Reflect.defineProperty((<Function>target).prototype, "app", {
+        get: () => this.app,
         configurable: false,
         enumerable: false
       });
 
       // inject autowired
-      injectAutowired(target, target.prototype, this);
+      injectAutowired(<Function>target, (<Function>target).prototype, this, options);
       // inject properties values
-      injectValues(target, target.prototype, this);
+      injectValues(<Function>target, (<Function>target).prototype, this, options);
       // inject AOP
-      injectAOP(target, target.prototype, this);
+      injectAOP(<Function>target, (<Function>target).prototype, this, options);
 
-      const ref = this.getClass(options.type, identifier);
-      if (!ref) {
-        this.saveClass(options.type, target, identifier);
+      // inject options once
+      Reflect.defineProperty((<Function>target).prototype, "_options", {
+        enumerable: false,
+        configurable: false,
+        writable: true,
+        value: options
+      });
+      // save class to metadata
+      if (!this.getClass(<string>identifier, options.type)) {
+        this.saveClass(options.type, <Function>target, <string>identifier);
+      }
+      // async instance
+      if (options.isAsync) {
+        this.app.on("appReady", () => this._setInstance(target, options));
       }
 
-      // instantiation
-      instance = Reflect.construct(target, options.args);
-      if (options.scope === "Singleton") {
-        instance = Object.seal(instance);
-      }
-      // registration
-      this.instanceMap.set(target, instance);
+      this._setInstance(target, options);
     }
-    return instance;
+  }
+
+  /**
+   * save instance to instanceMap
+   * @param target 
+   * @param options 
+   */
+  private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
+    // instantiation
+    let instance = Reflect.construct(<Function>target, options.args);
+    OverridePrototypeValue(instance);
+
+    if (options.scope === "Singleton") {
+      instance = Object.seal(instance);
+    }
+    // registration
+    this.instanceMap.set(target, instance);
   }
 
   /**
    * get instance from IOC container.
    *
    * @param {string} identifier
-   * @param {ComponentType} [type="SERVICE"]
+   * @param {ComponentType} [type="COMPONENT"]
    * @param {any[]} [args=[]]
    * @returns {*}
    * @memberof Container
    */
-  public get(identifier: string, type: ComponentType = "SERVICE", args: any[] = []): any {
-    const target = this.getClass(identifier, type);
-    if (!target) {
-      return null;
+  public get<T>(identifier: string | Constructor<T>, type: ComponentType = "COMPONENT",
+    ...args: any[]): T {
+    let target: T;
+    if (helper.isClass(<any>identifier)) {
+      target = <T>identifier;
+    } else {
+      target = <T>this.getClass(<string>identifier, type);
+      if (!target) {
+        return null;
+      }
     }
-    // get instance from the Container
-    const instance: any = this.instanceMap.get(target);
+
     // require Prototype instance
     if (args.length > 0) {
       // instantiation
-      return Reflect.construct(target, args);
+      return Reflect.construct(<Function>target, args) as T;
     } else {
-      return instance;
+      // get instance from the Container
+      return this.instanceMap.get(<Function>target) as T;
     }
   }
 
@@ -172,11 +196,11 @@ export class Container implements IContainer {
    * get class from IOC container by identifier.
    *
    * @param {string} identifier
-   * @param {ComponentType} [type="SERVICE"]
+   * @param {ComponentType} [type="COMPONENT"]
    * @returns {Function}
    * @memberof Container
    */
-  public getClass(identifier: string, type: ComponentType = "SERVICE"): Function {
+  public getClass(identifier: string, type: ComponentType = "COMPONENT"): Function {
     return this.classMap.get(`${type}:${identifier}`);
   }
 
@@ -189,7 +213,7 @@ export class Container implements IContainer {
    * @returns {T}
    * @memberof Container
    */
-  public getInsByClass<T>(target: T, args: any[] = []): T {
+  public getInsByClass<T extends object | Function>(target: T, args: any[] = []): T {
     if (!helper.isClass(target)) {
       return null;
     }
@@ -222,22 +246,12 @@ export class Container implements IContainer {
     if (!this.metadataMap.has(target)) {
       this.metadataMap.set(target, new Map());
     }
-    if (propertyKey) {
-      // for property or method
-      const key = `${helper.toString(metadataKey)}:${helper.toString(propertyKey)}`;
-      const map = this.metadataMap.get(target);
-      if (!map.has(key)) {
-        map.set(key, new Map());
-      }
-      return map.get(key);
-    } else {
-      // for class
-      const map = this.metadataMap.get(target);
-      if (!map.has(metadataKey)) {
-        map.set(metadataKey, new Map());
-      }
-      return map.get(metadataKey);
+    const key = propertyKey ? `${helper.toString(metadataKey)}:${helper.toString(propertyKey)}` : metadataKey;
+    const map = this.metadataMap.get(target);
+    if (!map.has(key)) {
+      map.set(key, new Map());
     }
+    return map.get(key);
   }
 
   /**
@@ -247,19 +261,12 @@ export class Container implements IContainer {
    * @returns
    * @memberof Container
    */
-  public getIdentifier(target: Function | object) {
-    let name = "";
+  public getIdentifier(target: Function | object): string {
     if (helper.isFunction(target)) {
       const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
-      if (metaData) {
-        name = metaData.id ?? "";
-      } else {
-        name = (<Function>target).name ?? "";
-      }
-    } else {
-      name = target.constructor ? (target.constructor.name ?? "") : "";
+      return metaData ? metaData.id ?? "" : target.name ?? "";
     }
-    return name;
+    return target.constructor ? target.constructor.name ?? "" : "";
   }
 
   /**
@@ -273,19 +280,12 @@ export class Container implements IContainer {
     const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
     if (metaData) {
       return metaData.type;
-    } else {
-      let name = (<Function>target).name ?? "";
-      name = name || (target.constructor ? (target.constructor.name ?? "") : "");
-      if (~name.indexOf("Controller")) {
-        return "CONTROLLER";
-      } else if (~name.indexOf("Middleware")) {
-        return "MIDDLEWARE";
-      } else if (~name.indexOf("Service")) {
-        return "SERVICE";
-      } else {
-        return "COMPONENT";
-      }
     }
+    const name = (<Function>target).name || (target.constructor ? target.constructor.name : "");
+    return name.includes("Controller") ? "CONTROLLER" :
+      name.includes("Middleware") ? "MIDDLEWARE" :
+        name.includes("Service") ? "SERVICE" :
+          "COMPONENT";
   }
 
   /**
@@ -312,16 +312,9 @@ export class Container implements IContainer {
    * @memberof Container
    */
   public listClass(type: ComponentType) {
-    const modules: any[] = [];
-    this.classMap.forEach((v, k) => {
-      if (k.startsWith(type)) {
-        modules.push({
-          id: k,
-          target: v
-        });
-      }
-    });
-    return modules;
+    return Array.from(this.classMap.entries())
+      .filter(([k]) => k.startsWith(type))
+      .map(([k, v]) => ({ id: k, target: v }));
   }
 
   /**
@@ -335,13 +328,8 @@ export class Container implements IContainer {
    * @memberof Container
    */
   public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
-    if (propertyName) {
-      const originMap = this.getMetadataMap(type, target, propertyName);
-      originMap.set(decoratorNameKey, data);
-    } else {
-      const originMap = this.getMetadataMap(type, target);
-      originMap.set(decoratorNameKey, data);
-    }
+    const originMap = this.getMetadataMap(type, target, propertyName);
+    originMap.set(decoratorNameKey, data);
   }
 
   /**
@@ -355,12 +343,7 @@ export class Container implements IContainer {
    * @memberof Container
    */
   public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string) {
-    let originMap;
-    if (propertyName) {
-      originMap = this.getMetadataMap(type, target, propertyName);
-    } else {
-      originMap = this.getMetadataMap(type, target);
-    }
+    const originMap = this.getMetadataMap(type, target, propertyName);
     if (!originMap.has(decoratorNameKey)) {
       originMap.set(decoratorNameKey, []);
     }
@@ -378,13 +361,8 @@ export class Container implements IContainer {
    * @memberof Container
    */
   public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string) {
-    if (propertyName) {
-      const originMap = this.getMetadataMap(type, target, propertyName);
-      return originMap.get(decoratorNameKey);
-    } else {
-      const originMap = this.getMetadataMap(type, target);
-      return originMap.get(decoratorNameKey);
-    }
+    const originMap = this.getMetadataMap(type, target, propertyName);
+    return originMap.get(decoratorNameKey);
   }
 
   /**
@@ -450,11 +428,19 @@ export class Container implements IContainer {
   }
 }
 
-// export Singleton
-export const IOCContainer: Container = (function () {
+/**
+ * export Singleton.
+ * get the singleton instance of Container
+ */
+export const IOC: Container = (function () {
   if (!helper.isTrueEmpty(process.env.KOATTY_CONTAINER)) {
     throw Error("There are two different versions of the koatty_container module that are conflicting.");
   }
   process.env.KOATTY_CONTAINER = "true";
   return Container.getInstance();
 })();
+
+/**
+ * alias IOC
+ */
+export const IOCContainer = IOC; 

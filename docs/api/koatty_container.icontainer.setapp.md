@@ -4,6 +4,8 @@
 
 ## IContainer.setApp() method
 
+set app
+
 **Signature:**
 
 ```typescript
@@ -19,4 +21,6 @@ setApp(app: Application): void;
 **Returns:**
 
 void
+
+ Container
 

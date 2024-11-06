@@ -9,14 +9,14 @@ get identifier from class
 **Signature:**
 
 ```typescript
-getIdentifier(target: Function | Object): string;
+getIdentifier(target: Function | object): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | Function \| Object |  |
+|  target | Function \| object |  |
 
 **Returns:**
 

@@ -4,6 +4,8 @@
 
 ## IContainer.getClass() method
 
+get class from IOC container by identifier.
+
 **Signature:**
 
 ```typescript
@@ -20,4 +22,6 @@ getClass(identifier: string, type?: ComponentType): Function;
 **Returns:**
 
 Function
+
+{<!-- -->Function<!-- -->}  Container
 

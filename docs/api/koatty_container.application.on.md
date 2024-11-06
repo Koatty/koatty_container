@@ -2,22 +2,12 @@
 
 [Home](./index.md) &gt; [koatty\_container](./koatty_container.md) &gt; [Application](./koatty_container.application.md) &gt; [on](./koatty_container.application.on.md)
 
-## Application.on() method
+## Application.on property
+
+event
 
 **Signature:**
 
 ```typescript
-on(event: string, callback: () => void): any;
+on?: (event: string, callback: () => void) => any;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  event | string |  |
-|  callback | () =&gt; void |  |
-
-**Returns:**
-
-any
-
