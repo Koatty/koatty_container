@@ -71,7 +71,7 @@ export class UserService {
 
 ```js
 
-export class CartController extends {
+export class CartController {
 
   private bookService = new BookService();
   private userService = new UserService(); 
@@ -83,7 +83,7 @@ export class CartController extends {
 
 ```js
 
-export class HistoryController extends {
+export class HistoryController {
 
   private bookService = new BookService();
   private userService = new UserService(); 
@@ -111,7 +111,20 @@ export class HistoryController extends {
 - 2、谁负责根据依赖关系组装组件？
 - 3、销毁时，如何按依赖顺序正确销毁？
 
-解决这一问题的核心方案就是IoC。
+解决这一问题的核心方案就是IoC。使用IoC容器来托管类的实例化以及依赖管理，使得开发人员专注于业务而不用去考虑依赖问题：
+
+```js
+
+export class HistoryController {
+  @Autowired()
+  private bookService: BookService;
+  @Autowired()
+  private userService: UserService; 
+
+  ...
+}
+```
+在`HistoryController`类加载的时候，IoC容器会自动注入bookService以及userService两个属性。
 
 ## 组件分类
 
