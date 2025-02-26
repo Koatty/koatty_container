@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.1](https://github.com/koatty/koatty_container/compare/v1.10.0...v1.10.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* add export ([56bfc9a](https://github.com/koatty/koatty_container/commit/56bfc9a10a654fec3a040da5ec11528e26f17ee9))
+* rename function ([5e9e141](https://github.com/koatty/koatty_container/commit/5e9e14144218cf16f2a27a0a9564d594fcd8b392))
+
 ## [1.10.0](https://github.com/koatty/koatty_container/compare/v1.9.4...v1.10.0) (2025-02-26)
 
 
