@@ -59,7 +59,7 @@ function ordinaryGetPrototypeOf(obj: any): any {
  * @param _propertyKey 
  * @returns 
  */
-export function RecursiveGetMetadata(container: IContainer, metadataKey: any, target: any,
+export function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any,
   _propertyKey?: string | symbol): any[] {
   // get metadata value of a metadata key on the prototype
   // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
@@ -105,7 +105,7 @@ function mergeMetadata(parentMetadata: Record<string, any>, metadata: Record<str
  * Override object's property to PrototypeValue
  * @param instance 
  */
-export function OverridePrototypeValue<T extends object>(instance: T): void {
+export function overridePrototypeValue<T extends object>(instance: T): void {
   if (!instance || typeof instance !== 'object') {
     throw new Error("Invalid instance provided.");
   }

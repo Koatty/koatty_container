@@ -10,7 +10,7 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import { IContainer, ObjectDefinitionOptions, TAGGED_ARGS } from "../container/IContainer";
-import { RecursiveGetMetadata } from "../utils/Util";
+import { recursiveGetMetadata } from "../utils/Util";
 
 /**
  * Inject class instance property
@@ -21,7 +21,7 @@ import { RecursiveGetMetadata } from "../utils/Util";
  */
 export function injectValues(target: Function, prototypeChain: object,
   container?: IContainer, _options?: ObjectDefinitionOptions) {
-  const metaData = RecursiveGetMetadata(container, TAGGED_ARGS, target);
+  const metaData = recursiveGetMetadata(container, TAGGED_ARGS, target);
   for (const { name, method } of Object.values(metaData)) {
     logger.Debug(`Register inject ${name} properties => value: ${JSON.stringify(metaData[name])}`);
     let targetValue = method;

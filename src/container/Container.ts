@@ -12,7 +12,7 @@ import { injectAutowired } from "../processor/Autowired-processor";
 import { injectValues } from "../processor/Values-processor";
 import {
   getComponentTypeByClassName,
-  OverridePrototypeValue
+  overridePrototypeValue
 } from "../utils/Util";
 import {
   Application,
@@ -153,7 +153,7 @@ export class Container implements IContainer {
    */
   private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
     const instance = Reflect.construct(<Function>target, options.args);
-    OverridePrototypeValue(instance);
+    overridePrototypeValue(instance);
     if (options.scope === "Singleton") {
       Object.seal(instance);
     }
@@ -210,7 +210,7 @@ export class Container implements IContainer {
     // 2. OR scope is Prototype (ignore instanceMap)
     if (args.length > 0 || isPrototype) {
       const instance = Reflect.construct(<Function>target, args, <Function>target);
-      OverridePrototypeValue(<Function>instance);
+      overridePrototypeValue(<Function>instance);
       return instance as T;
     }
 
