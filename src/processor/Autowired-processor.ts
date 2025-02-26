@@ -9,7 +9,7 @@
  */
 import { DefaultLogger as logger } from "koatty_logger";
 import { IContainer, ObjectDefinitionOptions, TAGGED_PROP } from "../container/IContainer";
-import { RecursiveGetMetadata } from "../utils/Util";
+import { recursiveGetMetadata } from "../utils/Util";
 
 /**
  * inject autowired class
@@ -23,7 +23,7 @@ import { RecursiveGetMetadata } from "../utils/Util";
  */
 export function injectAutowired(target: Function, prototypeChain: object, container: IContainer,
   options?: ObjectDefinitionOptions, isLazy = false) {
-  const metaData = RecursiveGetMetadata(container, TAGGED_PROP, target);
+  const metaData = recursiveGetMetadata(container, TAGGED_PROP, target);
   for (const metaKey in metaData) {
     const { type, identifier, delay, args } =
       metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
