@@ -9,4 +9,5 @@ export * from "./container/IContainer";
 export * from "./decorator/AOP";
 export * from "./decorator/Autowired";
 export * from "./decorator/Values";
+export * from "./utils/Util";
 
