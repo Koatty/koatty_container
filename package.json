@@ -79,7 +79,6 @@
     "typescript": "^5.x.x"
   },
   "dependencies": {
-    "koatty_container": "file:",
     "koatty_lib": "^1.x.x",
     "koatty_logger": "^2.x.x"
   },
