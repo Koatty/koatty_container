@@ -3,13 +3,16 @@
  * @Usage: 
  * @Author: richen
  * @Date: 2025-02-26 17:11:05
- * @LastEditTime: 2025-02-26 17:42:47
+ * @LastEditTime: 2025-02-26 18:11:10
  * @License: BSD (3-Clause)
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { IContainer, ObjectDefinitionOptions, TAGGED_ARGS } from "../container/IContainer";
+import {
+  IContainer, ObjectDefinitionOptions,
+  TAGGED_ARGS
+} from "../container/IContainer";
 import { recursiveGetMetadata } from "../utils/Util";
 
 /**

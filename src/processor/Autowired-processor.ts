@@ -8,7 +8,10 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 import { DefaultLogger as logger } from "koatty_logger";
-import { IContainer, ObjectDefinitionOptions, TAGGED_PROP } from "../container/IContainer";
+import {
+  IContainer, ObjectDefinitionOptions,
+  TAGGED_PROP
+} from "../container/IContainer";
 import { recursiveGetMetadata } from "../utils/Util";
 
 /**
