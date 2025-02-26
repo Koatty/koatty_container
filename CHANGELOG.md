@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/koatty/koatty_container/compare/v1.9.4...v1.10.0) (2025-02-26)
+
+
+### Features
+
+* refactor decorators and improve dependency injection ([1b47c1b](https://github.com/koatty/koatty_container/commit/1b47c1b3e9532e34196921ec0e5f2ac7c000c3f9))
+
+
+### Bug Fixes
+
+* make app property enumerable in Container class ([8701841](https://github.com/koatty/koatty_container/commit/870184135532c93c57c8f08b046b42b55ce30ad0))
+
 ### [1.9.4](https://github.com/koatty/koatty_container/compare/v1.9.3...v1.9.4) (2024-11-06)
 
 ### [1.9.3](https://github.com/koatty/koatty_container/compare/v1.9.2...v1.9.3) (2024-11-06)

@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "1.9.4",
+  "version": "1.10.0",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
