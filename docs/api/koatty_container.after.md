@@ -10,14 +10,14 @@ Executed after specifying the PointCut method.
 **Signature:**
 
 ```typescript
-export declare function After(aopName: string): MethodDecorator;
+export declare function After<T>(paramName: ClassOrString<T>): MethodDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
 
 **Returns:**
 

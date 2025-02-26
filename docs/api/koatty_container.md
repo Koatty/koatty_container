@@ -20,21 +20,19 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [After(aopName)](./koatty_container.after.md) | <p>Executed after specifying the PointCut method.</p> |
-|  [AfterEach(aopName)](./koatty_container.aftereach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
+|  [After(paramName)](./koatty_container.after.md) | <p>Executed after specifying the PointCut method.</p> |
+|  [AfterEach(paramName)](./koatty_container.aftereach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
 |  [Aspect(identifier)](./koatty_container.aspect.md) | <p>Indicates that an decorated class is a "aspect".</p> |
-|  [Autowired(identifier, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a class property as to be autowired by Koatty"s dependency injection facilities.</p> |
-|  [Before(aopName)](./koatty_container.before.md) | <p>Executed before specifying the PointCut method.</p> |
-|  [BeforeEach(aopName)](./koatty_container.beforeeach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
+|  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a class property as to be autowired by Koatty"s dependency injection facilities.</p> |
+|  [Before(paramName)](./koatty_container.before.md) | <p>Executed before specifying the PointCut method.</p> |
+|  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
+|  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | @<!-- -->description: |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
 |  [Inject(paramName, cType)](./koatty_container.inject.md) | <p>Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.</p> |
-|  [injectAOP(target, prototypeChain, container, \_options)](./koatty_container.injectaop.md) | <p>inject AOP</p> |
-|  [injectAutowired(target, prototypeChain, container, options, isLazy)](./koatty_container.injectautowired.md) | <p>inject autowired class</p> |
-|  [injectValues(target, instance, \_container, \_options)](./koatty_container.injectvalues.md) | Inject class instance property |
-|  [OverridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
-|  [RecursiveGetMetadata(metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
+|  [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
+|  [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
 |  [Values(value, defaultValue)](./koatty_container.values.md) | <p>Indicates that an decorated class instance property values.</p> |
 
 ## Interfaces
@@ -46,19 +44,12 @@
 |  [Context](./koatty_container.context.md) | <p>Base Context interface</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
 |  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |
-|  [IController](./koatty_container.icontroller.md) | Interface for Controller |
-|  [IMiddleware](./koatty_container.imiddleware.md) | Interface for Middleware |
-|  [IService](./koatty_container.iservice.md) | Interface for Service |
 |  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
-|  [ReflectResult](./koatty_container.reflectresult.md) |   ReflectResult |
-|  [TagClsMetadata](./koatty_container.tagclsmetadata.md) |   TagClsMetadata |
-|  [TagPropsMetadata](./koatty_container.tagpropsmetadata.md) |   TagPropsMetadata |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [CONTROLLER\_ROUTER](./koatty_container.controller_router.md) |  |
 |  [IOC](./koatty_container.ioc.md) | export Singleton. get the singleton instance of Container |
 |  [IOCContainer](./koatty_container.ioccontainer.md) | alias IOC |
 |  [TAGGED\_AOP](./koatty_container.tagged_aop.md) |  |
@@ -72,6 +63,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [ClassOrString](./koatty_container.classorstring.md) |  |
 |  [ComponentType](./koatty_container.componenttype.md) |  |
 |  [Scope](./koatty_container.scope.md) | @ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: BSD (3-Clause) @ version: 2020-07-06 11:19:30 |
 

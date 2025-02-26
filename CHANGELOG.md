@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.1](https://github.com/koatty/koatty_container/compare/v1.10.0...v1.10.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* add export ([56bfc9a](https://github.com/koatty/koatty_container/commit/56bfc9a10a654fec3a040da5ec11528e26f17ee9))
+* rename function ([5e9e141](https://github.com/koatty/koatty_container/commit/5e9e14144218cf16f2a27a0a9564d594fcd8b392))
+
+## [1.10.0](https://github.com/koatty/koatty_container/compare/v1.9.4...v1.10.0) (2025-02-26)
+
+
+### Features
+
+* refactor decorators and improve dependency injection ([1b47c1b](https://github.com/koatty/koatty_container/commit/1b47c1b3e9532e34196921ec0e5f2ac7c000c3f9))
+
+
+### Bug Fixes
+
+* make app property enumerable in Container class ([8701841](https://github.com/koatty/koatty_container/commit/870184135532c93c57c8f08b046b42b55ce30ad0))
+
+### [1.9.4](https://github.com/koatty/koatty_container/compare/v1.9.3...v1.9.4) (2024-11-06)
+
+### [1.9.3](https://github.com/koatty/koatty_container/compare/v1.9.2...v1.9.3) (2024-11-06)
+
+
+### Bug Fixes
+
+* export component ([0a6cf83](https://github.com/koatty/koatty_container/commit/0a6cf83ae8c0c6d684e02d5f914876d904db5703))
+
 ### [1.9.2](https://github.com/koatty/koatty_container/compare/v1.9.1...v1.9.2) (2024-11-06)
 
 ### [1.9.1](https://github.com/koatty/koatty_container/compare/v1.9.0...v1.9.1) (2024-11-06)

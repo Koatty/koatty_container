@@ -5,8 +5,8 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-import { IOC } from "./Container";
-import { TAGGED_ARGS } from "./IContainer";
+import { IOC } from "../container/Container";
+import { TAGGED_ARGS } from "../container/IContainer";
 
 /**
  * Indicates that an decorated class instance property values.

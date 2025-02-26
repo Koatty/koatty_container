@@ -926,8 +926,9 @@ packages:
     resolution: {integrity: sha512-PChz8UaKQAVNHghsHcPyx1OMHoFRUEA7rJSK/mDhdq85bk+PLsUHUBqTQTFt18VJZbmxBovM65fezlheQRsSDA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@ungap/structured-clone@1.2.0':
-    resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+  '@ungap/structured-clone@1.3.0':
+    resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+
 
   JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -4198,7 +4199,7 @@ snapshots:
       '@typescript-eslint/types': 8.12.2
       eslint-visitor-keys: 3.4.3
 
-  '@ungap/structured-clone@1.2.0': {}
+  '@ungap/structured-clone@1.3.0': {}
 
   JSONStream@1.3.5:
     dependencies:
@@ -4839,7 +4840,7 @@ snapshots:
       '@humanwhocodes/config-array': 0.13.0
       '@humanwhocodes/module-importer': 1.0.1
       '@nodelib/fs.walk': 1.2.8
-      '@ungap/structured-clone': 1.2.0
+      '@ungap/structured-clone': 1.3.0
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
@@ -5690,15 +5691,10 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  koatty_container@file:(koatty_container@1.9.2)(koatty_lib@1.4.0):
+  koatty_container@file:(koatty_container@1.9.4)(koatty_lib@1.4.0):
     dependencies:
       koatty_lib: 1.4.0
-      koatty_logger: koatty_container@file:(koatty_container@1.9.2)(koatty_lib@1.4.0)
-
-  koatty_container@file:(koatty_lib@1.4.0)(koatty_logger@2.1.8(koatty_lib@1.4.0)(tslib@2.6.2)):
-    dependencies:
-      koatty_lib: 1.4.0
-      koatty_logger: 2.1.8(koatty_lib@1.4.0)(tslib@2.6.2)
+      koatty_logger: koatty_container@file:(koatty_container@1.9.4)(koatty_lib@1.4.0)
 
   koatty_lib@1.4.0:
     dependencies:
@@ -5710,7 +5706,7 @@ snapshots:
   koatty_logger@2.1.8(koatty_lib@1.4.0)(tslib@2.6.2):
     dependencies:
       koatty_lib: 1.4.0
-      koatty_logger: koatty_container@file:(koatty_container@1.9.2)(koatty_lib@1.4.0)
+      koatty_logger: koatty_container@file:(koatty_container@1.9.4)(koatty_lib@1.4.0)
       tslib: 2.6.2
       winston: 3.16.0
       winston-daily-rotate-file: 4.7.1(winston@3.16.0)
