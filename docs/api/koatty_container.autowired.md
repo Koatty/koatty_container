@@ -10,14 +10,14 @@ Marks a class property as to be autowired by Koatty"s dependency injection facil
 **Signature:**
 
 ```typescript
-export declare function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
+export declare function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string | _(Optional)_ |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ |
 |  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
 |  constructArgs | any\[\] | _(Optional)_ |
 |  isDelay | boolean | _(Optional)_ |

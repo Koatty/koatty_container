@@ -8,9 +8,9 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { AfterEach } from "../src/AOP";
-import { Autowired } from "../src/Autowired";
-import { Values } from "../src/Values";
+import { AfterEach } from "../src/decorator/AOP";
+import { Autowired } from "../src/decorator/Autowired";
+import { Values } from "../src/decorator/Values";
 import { MyDependency } from "./MyDependency";
 import { MyDependency2 } from "./MyDependency2";
 import { Test3Aspect } from "./Test3Aspect";

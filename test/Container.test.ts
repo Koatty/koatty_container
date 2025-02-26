@@ -1,5 +1,5 @@
 import assert from "assert";
-import { IOC } from "../src/Container";
+import { IOC } from "../src/container/Container";
 import { ClassA } from "./ClassA";
 import { MyDependency } from "./MyDependency";
 import { MyDependency2 } from "./MyDependency2";

@@ -7,16 +7,18 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
+import { injectAOP } from "../processor/AOP-processor";
+import { injectAutowired } from "../processor/Autowired-processor";
+import { injectValues } from "../processor/Values-processor";
+import {
+  getComponentTypeByClassName,
+  OverridePrototypeValue
+} from "../utils/Util";
 import {
   Application,
   ComponentType, Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
-import {
-  getComponentTypeByClassName, injectAOP, injectAutowired,
-  injectValues,
-  OverridePrototypeValue
-} from "./Util";
 
 /**
  * IOC Container
@@ -168,11 +170,11 @@ export class Container implements IContainer {
    */
   private _injection<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
     // inject autowired
-    injectAutowired(<Function>target, (<Function>target).prototype, this, options);
+    injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
     // inject properties values
-    injectValues(<Function>target, (<Function>target).prototype, this, options);
+    injectValues(<Function>target, (<Function>target).prototype, IOC, options);
     // inject AOP
-    injectAOP(<Function>target, (<Function>target).prototype, this, options);
+    injectAOP(<Function>target, (<Function>target).prototype, IOC, options);
   }
 
   /**
