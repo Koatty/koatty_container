@@ -12,7 +12,11 @@ import {
   ComponentType, Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
-import { injectAOP, injectAutowired, injectValues, OverridePrototypeValue } from "./Util";
+import {
+  getComponentTypeByClassName, injectAOP, injectAutowired,
+  injectValues,
+  OverridePrototypeValue
+} from "./Util";
 
 /**
  * IOC Container
@@ -88,7 +92,7 @@ export class Container implements IContainer {
         target = target as T;
       }
     } else {
-      if (options && helper.isObject(options)) {
+      if (target && helper.isObject(target)) {
         options = target as ObjectDefinitionOptions;
       }
       target = identifier as T;
@@ -107,7 +111,7 @@ export class Container implements IContainer {
         scope: "Singleton",
         type: "COMPONENT",
         args: [],
-        ...options
+        ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
       };
 
       // define app as getter
@@ -117,13 +121,8 @@ export class Container implements IContainer {
         enumerable: false
       });
 
-      // inject autowired
-      injectAutowired(<Function>target, (<Function>target).prototype, this, options);
-      // inject properties values
-      injectValues(<Function>target, (<Function>target).prototype, this, options);
-      // inject AOP
-      injectAOP(<Function>target, (<Function>target).prototype, this, options);
-
+      // inject
+      this._injection(target, options);
       // inject options once
       Reflect.defineProperty((<Function>target).prototype, "_options", {
         enumerable: false,
@@ -131,6 +130,7 @@ export class Container implements IContainer {
         writable: true,
         value: options
       });
+
       // save class to metadata
       if (!this.getClass(<string>identifier, options.type)) {
         this.saveClass(options.type, <Function>target, <string>identifier);
@@ -150,15 +150,29 @@ export class Container implements IContainer {
    * @param options 
    */
   private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
-    // instantiation
-    let instance = Reflect.construct(<Function>target, options.args);
+    const instance = Reflect.construct(<Function>target, options.args);
     OverridePrototypeValue(instance);
-
     if (options.scope === "Singleton") {
-      instance = Object.seal(instance);
+      Object.seal(instance);
     }
+
     // registration
     this.instanceMap.set(target, instance);
+  }
+
+  /**
+   * @description: injection prototype
+   * @param {T} target
+   * @param {ObjectDefinitionOptions} options
+   * @return {*}
+   */
+  private _injection<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
+    // inject autowired
+    injectAutowired(<Function>target, (<Function>target).prototype, this, options);
+    // inject properties values
+    injectValues(<Function>target, (<Function>target).prototype, this, options);
+    // inject AOP
+    injectAOP(<Function>target, (<Function>target).prototype, this, options);
   }
 
   /**
@@ -170,26 +184,36 @@ export class Container implements IContainer {
    * @returns {*}
    * @memberof Container
    */
-  public get<T>(identifier: string | Constructor<T>, type: ComponentType = "COMPONENT",
+  public get<T>(identifier: string | Constructor<T>, type?: ComponentType,
     ...args: any[]): T {
-    let target: T;
+    let className;
     if (helper.isClass(<any>identifier)) {
-      target = <T>identifier;
+      className = (<Constructor<T>>identifier)?.name;
     } else {
-      target = <T>this.getClass(<string>identifier, type);
-      if (!target) {
-        return null;
-      }
+      className = <string>identifier;
+    }
+    if (!type) {
+      type = getComponentTypeByClassName(className);
+    }
+    const target = <T>this.getClass(className, type);
+    if (!target) {
+      return null;
     }
 
-    // require Prototype instance
-    if (args.length > 0) {
-      // instantiation
-      return Reflect.construct(<Function>target, args) as T;
-    } else {
-      // get instance from the Container
-      return this.instanceMap.get(<Function>target) as T;
+    const options = Reflect.get((<Function>target).prototype, "_options");
+    const isPrototype = options?.scope === "Prototype";
+
+    // Create new instance when:
+    // 1. Explicit args provided
+    // 2. OR scope is Prototype (ignore instanceMap)
+    if (args.length > 0 || isPrototype) {
+      const instance = Reflect.construct(<Function>target, args, <Function>target);
+      OverridePrototypeValue(<Function>instance);
+      return instance as T;
     }
+
+    // Return cached instance for Singleton
+    return this.instanceMap.get(<Function>target) as T;
   }
 
   /**
@@ -281,11 +305,8 @@ export class Container implements IContainer {
     if (metaData) {
       return metaData.type;
     }
-    const name = (<Function>target).name || (target.constructor ? target.constructor.name : "");
-    return name.includes("Controller") ? "CONTROLLER" :
-      name.includes("Middleware") ? "MIDDLEWARE" :
-        name.includes("Service") ? "SERVICE" :
-          "COMPONENT";
+    const identifier = (<Function>target).name || (target.constructor ? target.constructor.name : "");
+    return getComponentTypeByClassName(identifier);
   }
 
   /**
@@ -443,4 +464,4 @@ export const IOC: Container = (function () {
 /**
  * alias IOC
  */
-export const IOCContainer = IOC; 
+export const IOCContainer = IOC;

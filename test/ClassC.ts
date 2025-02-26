@@ -10,6 +10,7 @@
 
 import { After, Before } from "../src/AOP";
 import { ClassA } from "./ClassA";
+import { TestAspect } from "./TestAspect";
 
 export class ClassC extends ClassA {
   name: string;
@@ -30,12 +31,12 @@ export class ClassC extends ClassA {
     return this.myDependency.run();
   }
 
-  @Before("TestAspect")
+  @Before(TestAspect)
   run2(event: string) {
     return true;
   }
 
-  @After("TestAspect")
+  @After(TestAspect)
   run3(event: string) {
     return true;
   }

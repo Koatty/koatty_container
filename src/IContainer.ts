@@ -25,6 +25,8 @@ export const TAGGED_PARAM = 'TAGGED_PARAM';
 // used to store class method to be injected
 export const TAGGED_METHOD = 'TAGGED_METHOD';
 
+export type ClassOrString<T> = string | (new () => T);
+
 /**
  * defined AOP type
  *
@@ -286,8 +288,8 @@ export interface ObjectDefinitionOptions {
   initMethod?: string;
   destroyMethod?: string;
   scope?: Scope;
-  type: ComponentType;
-  args: any[];
+  type?: ComponentType;
+  args?: any[];
 }
 
 /**

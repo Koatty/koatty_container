@@ -5,8 +5,9 @@
  * @ version: 2020-07-06 11:19:30
  */
 
+import { Helper } from "koatty_lib";
 import { IOC } from "./Container";
-import { AOPType, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
+import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
 
 
 /**
@@ -36,7 +37,11 @@ export function Aspect(identifier?: string): ClassDecorator {
  * @param {string} aopName
  * @returns {MethodDecorator}
  */
-export function Before(aopName: string): MethodDecorator {
+export function Before<T>(paramName: ClassOrString<T>): MethodDecorator {
+  let aopName = paramName;
+  if (!Helper.isString(paramName)) {
+    aopName = paramName?.name;
+  }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
@@ -54,7 +59,12 @@ export function Before(aopName: string): MethodDecorator {
  * @param {string} [aopName]
  * @returns {Function}
  */
-export function BeforeEach(aopName: string): ClassDecorator {
+export function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator {
+  let aopName = paramName;
+  if (!Helper.isString(paramName)) {
+    aopName = paramName?.name;
+  }
+  if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.BeforeEach,
@@ -70,7 +80,11 @@ export function BeforeEach(aopName: string): ClassDecorator {
  * @param {string} aopName
  * @returns {MethodDecorator}
  */
-export function After(aopName: string): MethodDecorator {
+export function After<T>(paramName: ClassOrString<T>): MethodDecorator {
+  let aopName = paramName;
+  if (!Helper.isString(paramName)) {
+    aopName = paramName?.name;
+  }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: symbol | string, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
@@ -88,7 +102,12 @@ export function After(aopName: string): MethodDecorator {
  * @param {string} aopName
  * @returns {Function}
  */
-export function AfterEach(aopName: string): ClassDecorator {
+export function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator {
+  let aopName = paramName;
+  if (!Helper.isString(paramName)) {
+    aopName = paramName?.name;
+  }
+  if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AfterEach,
