@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      koatty_container:
-        specifier: 'file:'
-        version: file:(koatty_lib@1.4.0)(koatty_logger@2.1.8(koatty_lib@1.4.0)(tslib@2.6.2))
       koatty_lib:
         specifier: ^1.x.x
         version: 1.4.0
@@ -5694,11 +5691,6 @@ snapshots:
     dependencies:
       koatty_lib: 1.4.0
       koatty_logger: koatty_container@file:(koatty_container@1.9.4)(koatty_lib@1.4.0)
-
-  koatty_container@file:(koatty_lib@1.4.0)(koatty_logger@2.1.8(koatty_lib@1.4.0)(tslib@2.6.2)):
-    dependencies:
-      koatty_lib: 1.4.0
-      koatty_logger: 2.1.8(koatty_lib@1.4.0)(tslib@2.6.2)
 
   koatty_lib@1.4.0:
     dependencies:
