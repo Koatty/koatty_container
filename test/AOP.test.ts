@@ -1,4 +1,4 @@
-import { IOC } from "../src/Container";
+import { IOC } from "../src/container/Container";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
 import { ClassC } from "./ClassC";

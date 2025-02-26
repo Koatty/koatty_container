@@ -8,8 +8,8 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { BeforeEach } from "../src/AOP";
-import { Inject } from "../src/Autowired";
+import { BeforeEach } from "../src/decorator/AOP";
+import { Inject } from "../src/decorator/Autowired";
 import { MyDependency2 } from "./MyDependency2";
 import { Test2Aspect } from "./Test2Aspect";
 

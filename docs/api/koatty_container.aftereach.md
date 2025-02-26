@@ -10,14 +10,14 @@ Executed after execution of each method of the specified PointCut class.
 **Signature:**
 
 ```typescript
-export declare function AfterEach(aopName: string): ClassDecorator;
+export declare function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  aopName | string |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
 
 **Returns:**
 

@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-type: ComponentType;
+type?: ComponentType;
 ```

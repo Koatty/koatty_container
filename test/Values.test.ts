@@ -1,6 +1,6 @@
 import assert from "assert";
-import { IOC } from "../src/Container";
-import { Values } from "../src/Values";
+import { IOC } from "../src/container/Container";
+import { Values } from "../src/decorator/Values";
 
 
 describe("Values", () => {

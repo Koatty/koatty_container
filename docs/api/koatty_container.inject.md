@@ -10,14 +10,14 @@ Marks a constructor method's parameter as to be Inject by Koatty"s dependency in
 **Signature:**
 
 ```typescript
-export declare function Inject(paramName: string, cType?: ComponentType): ParameterDecorator;
+export declare function Inject<T>(paramName?: ClassOrString<T>, cType?: ComponentType): ParameterDecorator;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | string |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ |
 |  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
 
 **Returns:**

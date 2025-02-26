@@ -3,12 +3,12 @@
  * @Usage: 
  * @Author: richen
  * @Date: 2024-11-05 22:52:59
- * @LastEditTime: 2024-11-05 23:11:28
+ * @LastEditTime: 2025-02-26 17:46:51
  * @License: BSD (3-Clause)
  * @Copyright (c): <richenlin(at)gmail.com>
  */
-import { Aspect } from "../src/AOP";
-import { IAspect } from "../src/IContainer";
+import { IAspect } from "../src/container/IContainer";
+import { Aspect } from "../src/decorator/AOP";
 
 @Aspect()
 export class Test2Aspect implements IAspect {

@@ -7,9 +7,9 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
-import { IOC } from "./Container";
-import { ClassOrString, ComponentType, TAGGED_PROP } from "./IContainer";
-import { getComponentTypeByClassName } from "./Util";
+import { IOC } from "../container/Container";
+import { ClassOrString, ComponentType, TAGGED_PROP } from "../container/IContainer";
+import { getComponentTypeByClassName } from "../utils/Util";
 
 /**
  * Marks a class property as to be autowired by Koatty"s dependency injection facilities.

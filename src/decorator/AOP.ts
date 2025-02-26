@@ -6,8 +6,8 @@
  */
 
 import { Helper } from "koatty_lib";
-import { IOC } from "./Container";
-import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "./IContainer";
+import { IOC } from "../container/Container";
+import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
 
 
 /**
