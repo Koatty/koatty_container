@@ -9,7 +9,10 @@
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { AOPType, IAspect, IContainer, ObjectDefinitionOptions, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
+import {
+  AOPType, IAspect, IContainer, ObjectDefinitionOptions,
+  TAGGED_AOP, TAGGED_CLS
+} from "../container/IContainer";
 import { getMethodNames } from "../utils/Util";
 
 /**
