@@ -7,8 +7,8 @@
  * @License: BSD (3-Clause)
  * @Copyright (c): <richenlin(at)gmail.com>
  */
-import { IAspect } from "koatty_container";
 import { Aspect } from "../src/AOP";
+import { IAspect } from "../src/IContainer";
 
 @Aspect()
 export class TestAspect implements IAspect {

@@ -7,7 +7,10 @@
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOC } from "./Container";
-import { AOPType, IAspect, IContainer, ObjectDefinitionOptions, TAGGED_AOP, TAGGED_ARGS, TAGGED_CLS, TAGGED_PROP } from "./IContainer";
+import {
+  AOPType, IAspect, IContainer, ObjectDefinitionOptions,
+  TAGGED_AOP, TAGGED_ARGS, TAGGED_CLS, TAGGED_PROP
+} from "./IContainer";
 
 // get property of an object
 const functionPrototype = Object.getPrototypeOf(Function);
@@ -116,7 +119,6 @@ export function OverridePrototypeValue<T extends object>(instance: T): void {
       }
     }
   }
-
 }
 
 /**
@@ -225,11 +227,13 @@ export function getPropertyNames(target: any, isSelfProperties = false): string[
  * @param {Container} container
  * @param {ObjectDefinitionOptions} _options
  */
-export function injectAOP(target: Function, prototypeChain: unknown, container: IContainer, _options?: ObjectDefinitionOptions) {
+export function injectAOP(target: Function, prototypeChain: unknown,
+  container: IContainer, _options?: ObjectDefinitionOptions) {
   const allMethods = getMethodNames(target);
   // only binding self method
   const selfMethods = getMethodNames(target, true);
-  const methodsFilter = (ms: string[]) => ms.filter((m: string) => !['constructor', 'init', '__before', '__after'].includes(m));
+  const methodsFilter = (ms: string[]) => ms.filter((m: string) => !['constructor', 'init',
+    '__before', '__after'].includes(m));
   let hasDefaultBefore = false, hasDefaultAfter = false;
   if (allMethods.includes('__before')) {
     // inject default AOP method
@@ -263,7 +267,7 @@ export function injectAOP(target: Function, prototypeChain: unknown, container: 
         }
         if (element === method) {
           logger.Debug(`Register inject AOP ${target.name} method: ${element} => ${type}`);
-          defineAOPProperty(target, element, name, type);
+          defineAOPProperty(target, prototypeChain, element, name, type);
         }
       });
     }
@@ -289,40 +293,19 @@ function hasDefaultAOP(target: any): boolean {
 }
 
 /**
- * inject default AOP
- *
- * @export
- * @param {Function} target
- * @param {object} prototypeChain
- * @param {string[]} methods
- * @returns {*}
- */
-function injectDefaultAOP(target: Function, prototypeChain: any, methods: string[]) {
-  methods.forEach((element) => {
-    if (helper.isFunction(prototypeChain.__before)) {
-      logger.Debug(`The ${target.name} class has AOP method '__before', @BeforeEach is not take effect`);
-      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
-      defineAOPProperty(target, element, "__before", AOPType.BeforeEach);
-    }
-    if (helper.isFunction(prototypeChain.__after)) {
-      logger.Debug(`The ${target.name} class has AOP method '__after', @AfterEach is not take effect`);
-      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
-      defineAOPProperty(target, element, "__after", AOPType.AfterEach);
-    }
-  });
-}
-
-/**
  * Dynamically add methods for target class types
  *
  * @param {Function} classes
+ * @param {any} prototypeChain
  * @param {string} protoName
  * @param {(string | Function)} aopName
  */
-function defineAOPProperty(classes: Function, protoName: string, aopName: string, type: AOPType) {
-  const oldMethod = Reflect.get(classes.prototype, protoName);
+function defineAOPProperty(classes: Function, prototypeChain: any, protoName: string, aopName: string, type: AOPType) {
+  const oldMethod = Reflect.get(prototypeChain, protoName);
   if (!oldMethod) throw Error(`${protoName} method does not exist.`);
-  Reflect.defineProperty(classes.prototype, protoName, {
+  Reflect.defineProperty(prototypeChain, protoName, {
+    enumerable: true,
+    configurable: false,
     writable: true,
     async value(...props: any[]) {
       if ([AOPType.Before, AOPType.BeforeEach].includes(type)) {
@@ -383,7 +366,7 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
         isLazy = true;
       }
 
-      if (isLazy) {
+      if (isLazy || options.isAsync) {
         // Delay loading solves the problem of cyclic dependency
         logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`);
         // lazy loading used event emit
@@ -410,11 +393,12 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
 /**
  * Inject class instance property
  * @param target 
- * @param instance 
+ * @param prototypeChain 
  * @param _container 
  * @param _options 
  */
-export function injectValues(target: Function, instance: object, _container?: IContainer, _options?: ObjectDefinitionOptions) {
+export function injectValues(target: Function, prototypeChain: object,
+  _container?: IContainer, _options?: ObjectDefinitionOptions) {
   const metaData = RecursiveGetMetadata(TAGGED_ARGS, target);
   for (const { name, method } of Object.values(metaData)) {
     logger.Debug(`Register inject ${name} properties => value: ${JSON.stringify(metaData[name])}`);
@@ -422,7 +406,7 @@ export function injectValues(target: Function, instance: object, _container?: IC
     if (helper.isFunction(method)) {
       targetValue = method();
     }
-    Reflect.defineProperty(instance, name, {
+    Reflect.defineProperty(prototypeChain, name, {
       enumerable: true,
       configurable: false,
       writable: true,
@@ -430,3 +414,46 @@ export function injectValues(target: Function, instance: object, _container?: IC
     });
   }
 }
+
+/**
+ * inject default AOP
+ *
+ * @export
+ * @param {Function} target
+ * @param {object} prototypeChain
+ * @param {string[]} methods
+ * @returns {*}
+ */
+function injectDefaultAOP(target: Function, prototypeChain: any, methods: string[]) {
+  methods.forEach((element) => {
+    if (helper.isFunction(prototypeChain.__before)) {
+      logger.Debug(`The ${target.name} class has AOP method '__before', @BeforeEach is not take effect`);
+      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __before`);
+      defineAOPProperty(target, prototypeChain, element, "__before", AOPType.BeforeEach);
+    }
+    if (helper.isFunction(prototypeChain.__after)) {
+      logger.Debug(`The ${target.name} class has AOP method '__after', @AfterEach is not take effect`);
+      logger.Debug(`Register inject default AOP ${target.name} method: ${element} => __after`);
+      defineAOPProperty(target, prototypeChain, element, "__after", AOPType.AfterEach);
+    }
+  });
+}
+
+/**
+ * @description: 
+ * @param {string} identifier
+ * @return {*}
+ */
+export function getComponentTypeByClassName(identifier: string) {
+  if (identifier.includes("Controller")) {
+    return "CONTROLLER";
+  } else if (identifier.includes("Middleware")) {
+    return "MIDDLEWARE";
+  } else if (identifier.includes("Service")) {
+    return "SERVICE";
+  } else {
+    return "COMPONENT";
+  }
+}
+
+

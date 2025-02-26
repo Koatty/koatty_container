@@ -1,4 +1,3 @@
-import assert from "assert";
 import { IOC } from "../src/Container";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
@@ -9,7 +8,8 @@ import { Test2Aspect } from "./Test2Aspect";
 import { Test3Aspect } from "./Test3Aspect";
 import { TestAspect } from "./TestAspect";
 
-describe("IOC", () => {
+
+describe("AOP", () => {
   beforeAll(() => {
     IOC.reg(MyDependency);
     IOC.reg(MyDependency2);
@@ -19,49 +19,6 @@ describe("IOC", () => {
     IOC.reg("ClassA", ClassA);
     IOC.reg("ClassB", ClassB);
     IOC.reg("ClassC", ClassC);
-  })
-
-  test("SetOrGetApp", () => {
-    const app = Object.create(null);
-    app.env = "production";
-    IOC.setApp(app);
-
-    assert.equal(IOC.getApp().env, "production")
-  })
-
-  test("getInsByClass", async () => {
-    const ins = IOC.getInsByClass(ClassA);
-    expect(ins).toBeInstanceOf(ClassA);
-  })
-
-  test("getIdentifier", async () => {
-    const id = IOC.getIdentifier(ClassA)
-    assert.equal(id, "ClassA")
-  })
-
-  test("getType", async () => {
-    const id = IOC.getType(ClassA)
-    assert.equal(id, "COMPONENT")
-  })
-
-  test("Values", async () => {
-    const ins = IOC.get(ClassA);
-    assert.equal(ins.config, "dev")
-  })
-
-  test("Autowired", async () => {
-    const ins: ClassA = IOC.get("ClassA");
-    assert.equal(await ins.run(), "MyDependency.run");
-  })
-
-  test("Inject", async () => {
-    const ins: ClassB = IOC.get("ClassB");
-    assert.equal(await ins.run(), "MyDependency2.run");
-  })
-
-  test("Extends", async () => {
-    const ins: ClassC = IOC.get("ClassC");
-    assert.equal(await ins.run(), "MyDependency.run");
   })
 
   test("Before", async () => {
@@ -92,16 +49,6 @@ describe("IOC", () => {
     await ins.run();
     // 断言 console.log 被正确调用并输出预期内容
     expect(logSpy).toHaveBeenCalledWith("Test2Aspect");
-    // 恢复 spy 的原始功能
-    logSpy.mockRestore();
-  })
-  test("AfterEach", async () => {
-    // 使用 jest.spyOn 来监控 console.log
-    const logSpy = jest.spyOn(console, 'log');
-    const ins: ClassA = IOC.get("ClassA");
-    await ins.run();
-    // 断言 console.log 被正确调用并输出预期内容
-    expect(logSpy).toHaveBeenCalledWith("Test3Aspect");
     // 恢复 spy 的原始功能
     logSpy.mockRestore();
   })

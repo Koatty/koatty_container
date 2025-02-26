@@ -8,58 +8,37 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { IOC } from "./Container";
-import { ComponentType, TAGGED_PROP } from "./IContainer";
+import { ClassOrString, ComponentType, TAGGED_PROP } from "./IContainer";
+import { getComponentTypeByClassName } from "./Util";
 
 /**
- * Property decorator for dependency injection.
- * Automatically injects components into class properties based on their type and identifier.
- * 
- * @param identifier Optional custom identifier for the component. If not provided, uses the design type name or camelCased property key
- * @param cType Optional component type. Auto-detected from identifier if not specified
- * @param constructArgs Optional array of constructor arguments for the component
- * @param isDelay Optional flag to indicate delayed injection, defaults to false
- * @returns PropertyDecorator function
- * @throws Error if identifier is empty with circular dependency
- * @throws Error if attempting to inject a Controller component
- * @example
- * ```typescript
- * // Injects a component into a class property
- * @Autowired()
- * public data: AnyClass;
- * 
- * // Injects a component into a class property with custom identifier
- * @Autowired("myData")
- * public data: AnyClass;
- * 
- * // Injects a component into a class property with custom identifier and component type
- * @Autowired("myData", "SERVICE")
- * public data: AnyClass;
- * 
- * // Injects a component into a class property with custom identifier and component type and constructor arguments
- * @Autowired("myData", "SERVICE", [1, 2, 3])
- * public data: AnyClass;
- * ```
+ * Marks a class property as to be autowired by Koatty"s dependency injection facilities.
+ *
+ * @export
+ * @param {ClassOrString} [paramName]
+ * @param {ComponentType} [cType]
+ * @param {any[]} [constructArgs]
+ * @param {boolean} [isDelay=false]
+ * @returns {PropertyDecorator}
  */
-export function Autowired(identifier?: string, cType?: ComponentType, constructArgs?: any[],
+export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType, constructArgs?: any[],
   isDelay = false): PropertyDecorator {
   return (target: object, propertyKey: string) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
-    identifier = identifier || (designType && designType.name !== "Object" ?
-      designType.name : helper.camelCase(propertyKey, true));
+    let identifier = designType?.name;
+    if (!identifier || identifier === "Object") {
+      if (helper.isString(paramName)) {
+        identifier = helper.camelCase(paramName, true);
+      } else {
+        identifier = paramName?.name;
+      }
+    }
 
     if (!identifier) {
-      throw Error("identifier cannot be empty when circular dependency exists");
+      throw Error("Autowired should refuse to inject incorrect types.");
     }
     if (cType === undefined) {
-      if (identifier.includes("Controller")) {
-        cType = "CONTROLLER";
-      } else if (identifier.includes("Middleware")) {
-        cType = "MIDDLEWARE";
-      } else if (identifier.includes("Service")) {
-        cType = "SERVICE";
-      } else {
-        cType = "COMPONENT";
-      }
+      cType = getComponentTypeByClassName(identifier);
     }
     //Cannot rely on injection controller
     if (cType === "CONTROLLER") {
@@ -73,6 +52,54 @@ export function Autowired(identifier?: string, cType?: ComponentType, constructA
       identifier,
       delay: isDelay,
       args: constructArgs ?? []
+    }, target, propertyKey);
+  };
+}
+
+
+/**
+ * Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.
+ * 
+ * @export
+ * @param {ClassOrString} [identifier]
+ * @param {ComponentType} [cType]
+ * @param {any[]} [constructArgs]
+ * @param {boolean} [isDelay=false]
+ * @returns {PropertyDecorator}
+ */
+export function Inject<T>(paramName?: ClassOrString<T>, cType?: ComponentType): ParameterDecorator {
+  return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
+    if (propertyKey) {
+      throw new Error("the Inject decorator only used by constructor method");
+    }
+    // 获取成员参数类型
+    const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
+    let identifier = paramTypes[parameterIndex]?.name;
+    if (!identifier || identifier === "Object") {
+      if (helper.isString(paramName)) {
+        propertyKey = paramName;
+        identifier = helper.camelCase(paramName, true);
+      } else {
+        identifier = paramName?.name;
+        propertyKey = helper.camelCase(paramName?.name);
+      }
+    } else {
+      propertyKey = helper.camelCase(identifier);
+    }
+
+    if (cType === undefined) {
+      cType = getComponentTypeByClassName(identifier);
+    }
+    //Cannot rely on injection controller
+    if (cType === "CONTROLLER") {
+      throw new Error(`Controller bean cannot be injection!`);
+    }
+
+    IOC.savePropertyData(TAGGED_PROP, {
+      type: cType,
+      identifier,
+      delay: false,
+      args: []
     }, target, propertyKey);
   };
 }
