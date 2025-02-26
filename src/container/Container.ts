@@ -120,7 +120,7 @@ export class Container implements IContainer {
       Reflect.defineProperty((<Function>target).prototype, "app", {
         get: () => this.app,
         configurable: false,
-        enumerable: false
+        enumerable: true
       });
 
       // inject
