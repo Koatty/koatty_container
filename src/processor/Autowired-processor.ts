@@ -15,14 +15,22 @@ import {
 import { recursiveGetMetadata } from "../utils/Util";
 
 /**
- * inject autowired class
- *
- * @export
- * @param {Function} target
- * @param {object} instance
- * @param {Container} container
- * @param {ObjectDefinitionOptions} options
- * @param {boolean} [isLazy=false]
+ * Inject autowired dependencies into the target class.
+ * 
+ * @param target The target class constructor function
+ * @param prototypeChain The prototype chain object of the target class
+ * @param container The IoC container instance
+ * @param options Object definition options for dependency injection
+ * @param isLazy Whether to use lazy loading for dependencies
+ * 
+ * @throws {Error} When a required dependency is not found and lazy loading is disabled
+ * 
+ * @description
+ * This function handles the injection of autowired dependencies by:
+ * - Retrieving metadata for tagged properties
+ * - Processing each dependency based on its type and identifier
+ * - Supporting lazy loading to resolve circular dependencies
+ * - Defining properties on the prototype chain for immediate injection
  */
 export function injectAutowired(target: Function, prototypeChain: object, container: IContainer,
   options?: ObjectDefinitionOptions, isLazy = false) {

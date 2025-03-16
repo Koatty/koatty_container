@@ -12,14 +12,22 @@ import { ClassOrString, ComponentType, TAGGED_PROP } from "../container/IContain
 import { getComponentTypeByClassName } from "../utils/Util";
 
 /**
- * Marks a class property as to be autowired by Koatty"s dependency injection facilities.
- *
- * @export
- * @param {ClassOrString} [paramName]
- * @param {ComponentType} [cType]
- * @param {any[]} [constructArgs]
- * @param {boolean} [isDelay=false]
- * @returns {PropertyDecorator}
+ * Decorator that marks a property for dependency injection.
+ * 
+ * @param paramName - The class or string identifier for the dependency
+ * @param cType - The component type of the dependency
+ * @param constructArgs - Constructor arguments for the dependency instance
+ * @param isDelay - Whether to delay the injection (default: false)
+ * @returns A property decorator function
+ * @throws Error if injection type is incorrect or if trying to inject a controller
+ * @example
+ * ```typescript
+ * @Autowired()
+ * private userService: UserService;
+ * 
+ * @Autowired('UserService')
+ * private userService: UserService;
+ * * ```
  */
 export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType, constructArgs?: any[],
   isDelay = false): PropertyDecorator {
@@ -56,16 +64,21 @@ export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType
   };
 }
 
-
 /**
- * Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.
+ * Parameter decorator for dependency injection.
+ * Used to inject dependencies into constructor parameters.
  * 
- * @export
- * @param {ClassOrString} [identifier]
- * @param {ComponentType} [cType]
- * @param {any[]} [constructArgs]
- * @param {boolean} [isDelay=false]
- * @returns {PropertyDecorator}
+ * @param paramName Optional class or string identifier for the dependency
+ * @param cType Optional component type for the dependency
+ * @throws {Error} When used on non-constructor parameters
+ * @throws {Error} When attempting to inject a controller component
+ * 
+ * @example
+ * ```typescript
+ * class Service {
+ *   constructor(@Inject() dependency: Dependency) {}
+ * }
+ * ```
  */
 export function Inject<T>(paramName?: ClassOrString<T>, cType?: ComponentType): ParameterDecorator {
   return (target: object, propertyKey: string | symbol, parameterIndex: number) => {

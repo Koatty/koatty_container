@@ -48,9 +48,9 @@ export interface Constructor<T> {
 }
 
 /**
- * Base Application interface
- *
- * @export
+ * Application interface for the container.
+ * Defines the basic structure and capabilities of an application.
+ * 
  * @interface Application
  */
 export interface Application {
@@ -77,11 +77,17 @@ export interface Application {
 }
 
 /**
- * Base Context interface
- *
- * @export
+ * Interface representing a context object with metadata management capabilities.
+ * 
  * @interface Context
- * @extends {Koa.Context}
+ * @description Provides methods to get and set metadata within a context.
+ * @example
+ * ```typescript
+ * const ctx: Context = {
+ *   getMetaData: (key) => someValue,
+ *   setMetaData: (key, value) => void
+ * };
+ * ```
  */
 export interface Context {
   /**
@@ -94,184 +100,229 @@ export interface Context {
 }
 
 /**
- * Container interface
- *
- * @export
+ * Interface for IOC container implementation.
+ * Provides methods for dependency injection, metadata management,
+ * and component registration/retrieval.
+ * 
  * @interface IContainer
  */
 export interface IContainer {
   /**
-     * set app
-     *
-     * @param {Koatty} app
-     * @returns
-     * @memberof Container
-     */
+   * Set application instance
+   * @param app Application instance
+   */
   setApp(app: Application): void;
   /**
-   * get app
-   *
-   * @returns
-   * @memberof Container
+   * Get the application instance.
+   * 
+   * @returns {any} The application instance
    */
   getApp(): Application;
   /**
-   * registering an instance of a class to an IOC container.
-   *
-   * @template T
-   * @param {T} target
-   * @param {ObjectDefinitionOptions} [options]
-   * @returns {void}
-   * @memberof Container
+   * Register a class or instance to the container.
+   * 
+   * @param identifier - The identifier string or class/instance to register
+   * @param target - Optional target class/instance or options
+   * @param options - Optional configuration for the registration
+   * @throws {Error} When target is not a class
+   * 
+   * @example
+   * ```ts
+   * container.reg('UserService', UserService);
+   * container.reg(UserService);
+   * container.reg(UserService, { scope: 'Singleton' });
+   * ```
    */
-  reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions, options?: ObjectDefinitionOptions): void;
+  reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
+    options?: ObjectDefinitionOptions): void;
 
   /**
-   * get an instance from the IOC container.
-   *
-   * @template T
-   * @param {string | Constructor<T>} identifier
-   * @param {ComponentType} [type="COMPONENT"]
-   * @param {...any[]} args
-   * @returns {T}
+   * Get component instance by identifier.
+   * 
+   * @param identifier - Class constructor or class name string
+   * @param type - Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE)
+   * @param args - Constructor arguments
+   * @returns Component instance or null if not found
+   * 
+   * @description
+   * Returns singleton instance from cache by default.
+   * Creates new instance when:
+   * 1. Constructor arguments are provided
+   * 2. Component scope is Prototype
+   * @example
+   * ```ts
+   * const userService = container.get('UserService');
+   * const userService = container.get(UserService);
+   * const userService = container.get(UserService, 'Singleton');
+   * const userService = container.get(UserService, 'Prototype', [1, 2, 3]);
+   * ```
    */
   get<T>(identifier: string | Constructor<T>, type?: ComponentType, ...args: any[]): T;
   /**
-   * get class from IOC container by identifier.
-   *
-   * @param {string} identifier
-   * @param {ComponentType} [type="COMPONENT"]
-   * @returns {Function}
-   * @memberof Container
+   * Get class by identifier and type from container.
+   * 
+   * @param {string} identifier The unique identifier of the class
+   * @param {ComponentType} [type="COMPONENT"] The component type
+   * @returns {Function} The class constructor
+   * @example
+   * ```ts
+   * const userServiceClass = container.getClass('UserService');
+   * const userServiceClass = container.getClass(UserService, 'Service');
+   * ```
    */
   getClass(identifier: string, type?: ComponentType): Function;
   /**
-   * get instance from IOC container by class.
-   *
-   * @template T
-   * @param {T} target
-   * @param {any[]} [args=[]]
-   * @returns {T}
-   * @memberof Container
+   * Get instance by class constructor
+   * @param target The class constructor
+   * @param args Constructor parameters
+   * @returns Instance of the class or null if target is not a class
+   * @template T Type of the class instance or function
+   * @description Get instance of the class
+   * @example
+   * ```ts
+   * const userService = container.getInsByClass(UserService);
+   * const userService = container.getInsByClass(UserService, [1, 2, 3]);
+   * ```
    */
   getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
   /**
-   * get metadata from class
-   *
-   * @static
-   * @param {(string | symbol)} metadataKey
-   * @param {(Function | object)} target
-   * @param {(string | symbol)} [propertyKey]
-   * @returns
-   * @memberof Injectable
+   * Get metadata map for the specified target and key.
+   * 
+   * @param metadataKey The key of metadata
+   * @param target The target class or object
+   * @param propertyKey Optional property key
+   * @returns Map instance containing metadata
+   * @example
+   * ```ts
+   * const metadataMap = container.getMetadataMap('key', UserService);
+   * const metadataMap = container.getMetadataMap('key', UserService, 'method');
+   * ```
    */
   getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
   /**
-   * get identifier from class
-   *
-   * @param {Function | Object} target
-   * @returns
-   * @memberof Container
+   * Get the identifier for a target class or object.
+   * 
+   * @param target The target class constructor function or object instance
+   * @returns The identifier string. For functions, returns the tagged metadata id or function name.
+   *          For objects, returns the constructor name.
    */
   getIdentifier(target: Function | object): string;
   /**
-   * get component type from class
-   *
-   * @param {Function} target
-   * @returns
-   * @memberof Container
+   * Get the component type of target class or object.
+   * 
+   * @param target The target class constructor or object instance
+   * @returns The component type string
    */
   getType(target: Function | object): any;
   /**
-   * save class to Container
-   *
-   * @param {ComponentType} type
-   * @param {Function} module
-   * @param {string} identifier
-   * @memberof Container
+   * Save class metadata and store class module in container.
+   * 
+   * @param type The component type
+   * @param module The class module to be saved
+   * @param identifier The unique identifier for the class
    */
   saveClass(type: ComponentType, module: Function, identifier: string): void;
   /**
-   * get all class from Container
-   *
-   * @param {ComponentType} type
-   * @returns
-   * @memberof Container
+   * List all registered classes of specified component type.
+   * @param type The component type to filter
+   * @returns Array of objects containing class id and target class
    */
   listClass(type: ComponentType): {
     id: string;
     target: Function;
   }[];
   /**
-   * save meta data to class or property
-   *
-   * @param {string} type
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {*} data
-   * @param {(Function | object)} target
-   * @param {string} [propertyName]
-   * @memberof Container
+   * Save class metadata to the container.
+   * @param type The type of metadata
+   * @param decoratorNameKey The decorator name or symbol key
+   * @param data The metadata to be saved
+   * @param target The class constructor function or object instance
+   * @param propertyName Optional property name if the metadata is for a class member
+   * @example
+   * ```ts
+   * container.saveClassMetadata('key', 'name', 'value', UserService);
+   * container.saveClassMetadata('key', 'name', 'value', UserService, 'method');
+   * ```
    */
   saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
   /**
-   * attach data to class or property
-   *
-   * @param {string} type
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {*} data
-   * @param {(Function | object)} target
-   * @param {string} [propertyName]
-   * @memberof Container
+   * Attach class metadata to the target.
+   * @param type The type of metadata
+   * @param decoratorNameKey The key of the decorator
+   * @param data The metadata to attach
+   * @param target The target class or object
+   * @param propertyName Optional property name if attaching to a class property
+   * @example
+   * ```ts
+   * container.attachClassMetadata('key', 'name', 'value', UserService);
+   * container.attachClassMetadata('key', 'name', 'value', UserService, 'method');
+   * ```
    */
   attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName?: string): void;
   /**
-   * get single data from class or property
-   *
-   * @param {string} type
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {(Function | object)} target
-   * @param {string} [propertyName]
-   * @returns
-   * @memberof Container
+   * Get metadata value by type and decorator key.
+   * 
+   * @param type The metadata type
+   * @param decoratorNameKey The decorator name or symbol key
+   * @param target The target class or object
+   * @param propertyName Optional property name
+   * @returns The metadata value associated with the decorator key
+   * @example
+   * ```ts
+   * const value = container.getClassMetadata('key', 'name', UserService);
+   * const value = container.getClassMetadata('key', 'name', UserService, 'method');
+   * ```
    */
   getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
   /**
-   * save property data to class
-   *
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {*} data
-   * @param {(Function | object)} target
-   * @param {(string | symbol)} propertyName
-   * @memberof Container
+   * Save property metadata to the container.
+   * 
+   * @param decoratorNameKey The key of the decorator metadata
+   * @param data The metadata to be saved
+   * @param target The target class or object
+   * @param propertyName The name of the property
+   * @example
+   * ```ts
+   * container.savePropertyData('key', 'value', UserService, 'property');
+   * ```
    */
   savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
   /**
-   * attach property data to class
-   *
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {*} data
-   * @param {(Function | object)} target
-   * @param {(string | symbol)} propertyName
-   * @memberof Container
+   * Attach property metadata to the target object/class.
+   * 
+   * @param decoratorNameKey The key to identify the decorator metadata
+   * @param data The metadata to be attached
+   * @param target The target object or class constructor
+   * @param propertyName The name of the property to attach metadata to
+   * @example
+   * ```ts
+   * container.attachPropertyData('key', 'value', UserService, 'property');
+   * ```
    */
   attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object, propertyName: string | symbol): void;
   /**
-   * get property data from class
-   *
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {(Function | object)} target
-   * @param {(string | symbol)} propertyName
-   * @returns
-   * @memberof Container
+   * Get property metadata by decorator name key.
+   * 
+   * @param decoratorNameKey The decorator name key
+   * @param target The target class or object
+   * @param propertyName The property name
+   * @returns The metadata value for the property
+   * @example
+   * ```ts
+   * const value = container.getPropertyData('key', UserService, 'property');
+   * ```
    */
   getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
   /**
-   * list property data from class
-   *
-   * @param {(string | symbol)} decoratorNameKey
-   * @param {(Function | object)} target
-   * @returns
-   * @memberof Container
+   * Get property data by decorator name key.
+   * 
+   * @param decoratorNameKey The decorator name key
+   * @param target The target class or object
+   * @returns {object} The property data object
+   * @example
+   * ```ts
+   * const data = container.listPropertyData('key', UserService);
+   * ```
    */
   listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
 }

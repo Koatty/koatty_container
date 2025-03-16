@@ -11,11 +11,23 @@ import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/ICo
 
 
 /**
- * Indicates that an decorated class is a "aspect".
- *
- * @export
- * @param {string} [identifier]
- * @returns {ClassDecorator}
+ * Aspect decorator for AOP implementation.
+ * Used to mark a class as an Aspect PointCut in the AOP system.
+ * 
+ * @param identifier Optional custom identifier for the Aspect class
+ * @throws {Error} When class name doesn't end with 'Aspect' suffix
+ * @throws {Error} When class doesn't implement 'run' method
+ * @returns {ClassDecorator} Class decorator function
+ * 
+ * @example
+ * ```typescript
+ * @Aspect()
+ * class LoggingAspect {
+ *   run() {
+ *     // aspect implementation
+ *   }
+ * }
+ * ```
  */
 export function Aspect(identifier?: string): ClassDecorator {
   return (target: Function) => {
@@ -31,11 +43,18 @@ export function Aspect(identifier?: string): ClassDecorator {
 }
 
 /**
- * Executed before specifying the PointCut method.
- *
+ * Before decorator, used to define a method-level AOP interceptor that executes before the target method.
+ * 
  * @export
- * @param {string} aopName
- * @returns {MethodDecorator}
+ * @param {ClassOrString<T>} paramName - The name or class of the AOP interceptor
+ * @returns {MethodDecorator} A method decorator that attaches AOP metadata
+ * @throws {Error} When AOP name is not provided
+ * 
+ * @example
+ * ```typescript
+ * @Before('LogInterceptor')
+ * someMethod() {}
+ * ```
  */
 export function Before<T>(paramName: ClassOrString<T>): MethodDecorator {
   let aopName = paramName;
@@ -53,11 +72,17 @@ export function Before<T>(paramName: ClassOrString<T>): MethodDecorator {
 }
 
 /**
- * Executed after execution of each method of the specified PointCut class.
- *
- * @export
- * @param {string} [aopName]
- * @returns {Function}
+ * Decorator that marks a class to execute before each method.
+ * 
+ * @param paramName - The name of the AOP class or string identifier
+ * @returns ClassDecorator function that attaches AOP metadata to the target class
+ * @throws Error if AOP name is not provided
+ * 
+ * @example
+ * ```typescript
+ * @BeforeEach(LoggerAspect)
+ * class UserService {}
+ * ```
  */
 export function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   let aopName = paramName;
@@ -74,11 +99,19 @@ export function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator {
 }
 
 /**
- * Executed after specifying the PointCut method.
- *
+ * After decorator, used to define an after aspect for a method.
+ * The aspect will be executed after the decorated method.
+ * 
  * @export
- * @param {string} aopName
- * @returns {MethodDecorator}
+ * @param {ClassOrString<T>} paramName - The name or class of the AOP handler
+ * @returns {MethodDecorator} Method decorator
+ * @throws {Error} When AopName is not provided
+ * 
+ * @example
+ * ```typescript
+ * @After('LogAspect')
+ * someMethod() {}
+ * ```
  */
 export function After<T>(paramName: ClassOrString<T>): MethodDecorator {
   let aopName = paramName;
@@ -96,11 +129,18 @@ export function After<T>(paramName: ClassOrString<T>): MethodDecorator {
 }
 
 /**
- * Executed after execution of each method of the specified PointCut class.
- *
+ * Decorator that marks a class to execute after each method.
+ * 
  * @export
- * @param {string} aopName
- * @returns {Function}
+ * @param {ClassOrString<T>} paramName The AOP class name or string identifier
+ * @returns {ClassDecorator} Class decorator function
+ * @throws {Error} When AopName is not provided
+ * 
+ * @example
+ * ```typescript
+ * @AfterEach(LoggerAspect)
+ * class UserService {}
+ * ```
  */
 export function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   let aopName = paramName;

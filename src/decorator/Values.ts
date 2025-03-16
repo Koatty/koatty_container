@@ -9,12 +9,26 @@ import { IOC } from "../container/Container";
 import { TAGGED_ARGS } from "../container/IContainer";
 
 /**
- * Indicates that an decorated class instance property values.
- *
- * @export
- * @param {unknown | Function} key !!!not support async function
- * @param {unknown} [defaultValue]
- * @returns {*}  {PropertyDecorator}
+ * Property decorator that assigns a value to a class property.
+ * 
+ * @param value - The value to assign or a function that returns the value
+ * @param defaultValue - Optional default value if the main value is empty
+ * @throws {Error} When the assigned value type doesn't match the property type
+ * @returns PropertyDecorator
+ * 
+ * @example
+ * ```ts
+ * class Example {
+ *   @Values('test')
+ *   name: string;
+ * 
+ *   @Values(null, 'default')
+ *   title: string;
+ * 
+ *   @Values(() => 'value')
+ *   title: string;
+ * }
+ * ```
  */
 export function Values(value: unknown | Function, defaultValue?: unknown): PropertyDecorator {
   return (target: object, propertyKey: string) => {

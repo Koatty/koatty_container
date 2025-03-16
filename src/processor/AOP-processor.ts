@@ -15,14 +15,19 @@ import {
 } from "../container/IContainer";
 import { getMethodNames } from "../utils/Util";
 
+
 /**
- * inject AOP
- *
- * @export
- * @param {Function} target
- * @param {*} instance
- * @param {Container} container
- * @param {ObjectDefinitionOptions} _options
+ * Inject AOP (Aspect-Oriented Programming) functionality into a target class.
+ * 
+ * @param target The target class constructor function
+ * @param prototypeChain The prototype chain of the target class
+ * @param container The IoC container instance
+ * @param _options Optional object definition options
+ * 
+ * This function handles:
+ * - Default AOP methods (__before, __after)
+ * - Custom AOP decorators (Before, BeforeEach, After, AfterEach)
+ * - Method filtering and injection of AOP functionality
  */
 export function injectAOP(target: Function, prototypeChain: unknown,
   container: IContainer, _options?: ObjectDefinitionOptions) {
@@ -72,10 +77,10 @@ export function injectAOP(target: Function, prototypeChain: unknown,
 }
 
 /**
- * Determine whether the class contains the default AOP method
- *
- * @param {*} target
- * @returns {*}  {boolean}
+ * Check whether the target class contains default AOP methods.
+ * 
+ * @param target The target class to check
+ * @returns {boolean} True if the target class contains __before or __after method, otherwise false
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function hasDefaultAOP(target: any): boolean {
@@ -90,13 +95,15 @@ function hasDefaultAOP(target: any): boolean {
 }
 
 /**
- * Dynamically add methods for target class types
- * @param container 
- * @param classes 
- * @param prototypeChain 
- * @param protoName 
- * @param aopName 
- * @param type 
+ * Defines an AOP (Aspect-Oriented Programming) property on a class method.
+ * 
+ * @param container - The IoC container instance
+ * @param classes - The target class constructor
+ * @param prototypeChain - The prototype chain object containing the method
+ * @param protoName - The name of the method to apply AOP
+ * @param aopName - The name of the aspect method to execute
+ * @param type - The type of AOP (Before, After, BeforeEach, AfterEach)
+ * @throws Error if the target method does not exist
  */
 function defineAOPProperty(container: IContainer, classes: Function, prototypeChain: any,
   protoName: string, aopName: string, type: AOPType) {
@@ -126,11 +133,13 @@ function defineAOPProperty(container: IContainer, classes: Function, prototypeCh
 }
 
 /**
- * Execute aspect
- * @param container 
- * @param aopName 
- * @param props 
- * @returns 
+ * Execute an aspect with the given aspect name and parameters.
+ * 
+ * @param container The dependency injection container instance
+ * @param aopName The name of the aspect to execute
+ * @param props Array of parameters to pass to the aspect's run method
+ * @returns Promise<any> The result of executing the aspect
+ * @throws Error if aspect instance cannot be obtained or doesn't have a run method
  */
 async function executeAspect(container: IContainer, aopName: string, props: any[]) {
   const aspect: IAspect = container.get(aopName, "COMPONENT");
@@ -139,16 +148,14 @@ async function executeAspect(container: IContainer, aopName: string, props: any[
   return aspect.run(...props);
 }
 
-
 /**
- * inject default AOP
- *
- * @export
- * @param {IContainer} container
- * @param {Function} target
- * @param {object} prototypeChain
- * @param {string[]} methods
- * @returns {*}
+ * Injects default AOP (Aspect-Oriented Programming) methods for a given target class.
+ * Checks for '__before' and '__after' methods in the prototype chain and registers them as AOP hooks.
+ * 
+ * @param container - The dependency injection container instance
+ * @param target - The target class constructor
+ * @param prototypeChain - The prototype chain object containing AOP methods
+ * @param methods - Array of method names to apply AOP
  */
 function injectDefaultAOP(container: IContainer, target: Function, prototypeChain: any, methods: string[]) {
   methods.forEach((element) => {
