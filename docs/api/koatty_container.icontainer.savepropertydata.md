@@ -4,7 +4,7 @@
 
 ## IContainer.savePropertyData() method
 
-save property data to class
+Save property metadata to the container.
 
 **Signature:**
 
@@ -16,12 +16,19 @@ savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function 
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  decoratorNameKey | string \| symbol |  |
-|  data | any |  |
-|  target | Function \| object |  |
-|  propertyName | string \| symbol |  Container |
+|  decoratorNameKey | string \| symbol | The key of the decorator metadata |
+|  data | any | The metadata to be saved |
+|  target | Function \| object | The target class or object |
+|  propertyName | string \| symbol | The name of the property |
 
 **Returns:**
 
 void
+
+## Example
+
+
+```ts
+container.savePropertyData('key', 'value', UserService, 'property');
+```
 

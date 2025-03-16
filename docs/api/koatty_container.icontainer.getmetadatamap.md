@@ -4,8 +4,7 @@
 
 ## IContainer.getMetadataMap() method
 
-get metadata from class
-
+Get metadata map for the specified target and key.
 
 **Signature:**
 
@@ -17,13 +16,21 @@ getMetadataMap(metadataKey: string | symbol, target: Function | object, property
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  metadataKey | string \| symbol |  |
-|  target | Function \| object |  |
-|  propertyKey | string \| symbol | _(Optional)_ |
+|  metadataKey | string \| symbol | The key of metadata |
+|  target | Function \| object | The target class or object |
+|  propertyKey | string \| symbol | _(Optional)_ Optional property key |
 
 **Returns:**
 
 any
 
- Injectable
+Map instance containing metadata
+
+## Example
+
+
+```ts
+const metadataMap = container.getMetadataMap('key', UserService);
+const metadataMap = container.getMetadataMap('key', UserService, 'method');
+```
 

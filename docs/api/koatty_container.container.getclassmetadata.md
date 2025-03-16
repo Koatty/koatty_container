@@ -4,7 +4,7 @@
 
 ## Container.getClassMetadata() method
 
-get single data from class or property
+Get metadata value by type and decorator key.
 
 **Signature:**
 
@@ -16,14 +16,22 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | string |  |
-|  decoratorNameKey | string \| symbol |  |
-|  target | Function \| object |  |
-|  propertyName | string | _(Optional)_ |
+|  type | string | The metadata type |
+|  decoratorNameKey | string \| symbol | The decorator name or symbol key |
+|  target | Function \| object | The target class or object |
+|  propertyName | string | _(Optional)_ Optional property name |
 
 **Returns:**
 
 any
 
- Container
+The metadata value associated with the decorator key
+
+## Example
+
+
+```ts
+const value = container.getClassMetadata('key', 'name', UserService);
+const value = container.getClassMetadata('key', 'name', UserService, 'method');
+```
 

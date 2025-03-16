@@ -4,7 +4,7 @@
 
 ## IContainer.listPropertyData() method
 
-list property data from class
+Get property data by decorator name key.
 
 **Signature:**
 
@@ -16,12 +16,19 @@ listPropertyData(decoratorNameKey: string | symbol, target: Function | object): 
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  decoratorNameKey | string \| symbol |  |
-|  target | Function \| object |  |
+|  decoratorNameKey | string \| symbol | The decorator name key |
+|  target | Function \| object | The target class or object |
 
 **Returns:**
 
 any
 
- Container
+{<!-- -->object<!-- -->} The property data object
+
+## Example
+
+
+```ts
+const data = container.listPropertyData('key', UserService);
+```
 

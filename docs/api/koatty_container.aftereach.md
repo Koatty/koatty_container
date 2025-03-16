@@ -4,7 +4,7 @@
 
 ## AfterEach() function
 
-Executed after execution of each method of the specified PointCut class.
+Decorator that marks a class to execute after each method.
 
 
 **Signature:**
@@ -17,11 +17,23 @@ export declare function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorato
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The AOP class name or string identifier |
 
 **Returns:**
 
 ClassDecorator
 
-{<!-- -->Function<!-- -->}
+{<!-- -->ClassDecorator<!-- -->} Class decorator function
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When AopName is not provided
+
+## Example
+
+
+```typescript
+@AfterEach(LoggerAspect)
+class UserService {}
+```
 

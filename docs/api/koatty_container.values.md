@@ -4,8 +4,7 @@
 
 ## Values() function
 
-Indicates that an decorated class instance property values.
-
+Property decorator that assigns a value to a class property.
 
 **Signature:**
 
@@ -17,12 +16,32 @@ export declare function Values(value: unknown | Function, defaultValue?: unknown
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  value | unknown \| Function |  |
-|  defaultValue | unknown | _(Optional)_ |
+|  value | unknown \| Function | The value to assign or a function that returns the value |
+|  defaultValue | unknown | _(Optional)_ Optional default value if the main value is empty |
 
 **Returns:**
 
 PropertyDecorator
 
-{<!-- -->\*<!-- -->} {<!-- -->PropertyDecorator<!-- -->}
+PropertyDecorator
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When the assigned value type doesn't match the property type
+
+## Example
+
+
+```ts
+class Example {
+  @Values('test')
+  name: string;
+
+  @Values(null, 'default')
+  title: string;
+
+  @Values(() => 'value')
+  title: string;
+}
+```
 

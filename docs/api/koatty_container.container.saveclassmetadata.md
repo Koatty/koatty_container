@@ -4,7 +4,7 @@
 
 ## Container.saveClassMetadata() method
 
-save meta data to class or property
+Save class metadata to the container.
 
 **Signature:**
 
@@ -16,13 +16,21 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | string |  |
-|  decoratorNameKey | string \| symbol |  |
-|  data | any |  |
-|  target | Function \| object |  |
-|  propertyName | string | _(Optional)_  Container |
+|  type | string | The type of metadata |
+|  decoratorNameKey | string \| symbol | The decorator name or symbol key |
+|  data | any | The metadata to be saved |
+|  target | Function \| object | The class constructor function or object instance |
+|  propertyName | string | _(Optional)_ Optional property name if the metadata is for a class member |
 
 **Returns:**
 
 void
+
+## Example
+
+
+```ts
+container.saveClassMetadata('key', 'name', 'value', UserService);
+container.saveClassMetadata('key', 'name', 'value', UserService, 'method');
+```
 

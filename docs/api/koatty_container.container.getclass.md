@@ -4,7 +4,7 @@
 
 ## Container.getClass() method
 
-get class from IOC container by identifier.
+Get class by identifier and type from container.
 
 **Signature:**
 
@@ -16,12 +16,20 @@ getClass(identifier: string, type?: ComponentType): Function;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
+|  identifier | string | The unique identifier of the class |
+|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ The component type |
 
 **Returns:**
 
 Function
 
-{<!-- -->Function<!-- -->}  Container
+{<!-- -->Function<!-- -->} The class constructor
+
+## Example
+
+
+```ts
+const userServiceClass = container.getClass('UserService');
+const userServiceClass = container.getClass(UserService, 'Service');
+```
 

@@ -4,7 +4,7 @@
 
 ## Container.getPropertyData() method
 
-get property data from class
+Get property metadata by decorator name key.
 
 **Signature:**
 
@@ -16,13 +16,20 @@ getPropertyData(decoratorNameKey: string | symbol, target: Function | object, pr
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  decoratorNameKey | string \| symbol |  |
-|  target | Function \| object |  |
-|  propertyName | string \| symbol |  |
+|  decoratorNameKey | string \| symbol | The decorator name key |
+|  target | Function \| object | The target class or object |
+|  propertyName | string \| symbol | The property name |
 
 **Returns:**
 
 any
 
- Container
+The metadata value for the property
+
+## Example
+
+
+```ts
+const value = container.getPropertyData('key', UserService, 'property');
+```
 

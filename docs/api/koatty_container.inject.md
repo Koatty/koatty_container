@@ -4,8 +4,7 @@
 
 ## Inject() function
 
-Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.
-
+Parameter decorator for dependency injection. Used to inject dependencies into constructor parameters.
 
 **Signature:**
 
@@ -17,12 +16,25 @@ export declare function Inject<T>(paramName?: ClassOrString<T>, cType?: Componen
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ |
-|  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ Optional class or string identifier for the dependency |
+|  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ Optional component type for the dependency |
 
 **Returns:**
 
 ParameterDecorator
 
-{<!-- -->PropertyDecorator<!-- -->}
+## Exceptions
+
+{<!-- -->Error<!-- -->} When used on non-constructor parameters
+
+{<!-- -->Error<!-- -->} When attempting to inject a controller component
+
+## Example
+
+
+```typescript
+class Service {
+  constructor(@Inject() dependency: Dependency) {}
+}
+```
 

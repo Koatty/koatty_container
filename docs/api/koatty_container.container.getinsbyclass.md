@@ -4,9 +4,7 @@
 
 ## Container.getInsByClass() method
 
-get instance from IOC container by class.
-
- T
+Get instance by class constructor
 
 **Signature:**
 
@@ -18,12 +16,20 @@ getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | T |  |
-|  args | any\[\] | _(Optional)_ |
+|  target | T | The class constructor |
+|  args | any\[\] | _(Optional)_ Constructor parameters |
 
 **Returns:**
 
 T
 
-{<!-- -->T<!-- -->}  Container
+Instance of the class or null if target is not a class  T Type of the class instance or function  Get instance of the class
+
+## Example
+
+
+```ts
+const userService = container.getInsByClass(UserService);
+const userService = container.getInsByClass(UserService, [1, 2, 3]);
+```
 

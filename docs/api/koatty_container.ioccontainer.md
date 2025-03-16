@@ -4,7 +4,7 @@
 
 ## IOCContainer variable
 
-alias IOC
+IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->}
 
 **Signature:**
 

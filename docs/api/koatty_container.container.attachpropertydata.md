@@ -4,7 +4,7 @@
 
 ## Container.attachPropertyData() method
 
-attach property data to class
+Attach property metadata to the target object/class.
 
 **Signature:**
 
@@ -16,12 +16,19 @@ attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Functio
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  decoratorNameKey | string \| symbol |  |
-|  data | any |  |
-|  target | Function \| object |  |
-|  propertyName | string \| symbol |  Container |
+|  decoratorNameKey | string \| symbol | The key to identify the decorator metadata |
+|  data | any | The metadata to be attached |
+|  target | Function \| object | The target object or class constructor |
+|  propertyName | string \| symbol | The name of the property to attach metadata to |
 
 **Returns:**
 
 void
+
+## Example
+
+
+```ts
+container.attachPropertyData('key', 'value', UserService, 'property');
+```
 

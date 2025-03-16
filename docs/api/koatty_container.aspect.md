@@ -4,8 +4,7 @@
 
 ## Aspect() function
 
-Indicates that an decorated class is a "aspect".
-
+Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system.
 
 **Signature:**
 
@@ -17,11 +16,29 @@ export declare function Aspect(identifier?: string): ClassDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string | _(Optional)_ |
+|  identifier | string | _(Optional)_ Optional custom identifier for the Aspect class |
 
 **Returns:**
 
 ClassDecorator
 
-{<!-- -->ClassDecorator<!-- -->}
+{<!-- -->ClassDecorator<!-- -->} Class decorator function
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When class name doesn't end with 'Aspect' suffix
+
+{<!-- -->Error<!-- -->} When class doesn't implement 'run' method
+
+## Example
+
+
+```typescript
+@Aspect()
+class LoggingAspect {
+  run() {
+    // aspect implementation
+  }
+}
+```
 

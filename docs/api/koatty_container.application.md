@@ -4,9 +4,9 @@
 
 ## Application interface
 
-Base Application interface
+Application interface for the container. Defines the basic structure and capabilities of an application.
 
-  Application
+ Application
 
 **Signature:**
 

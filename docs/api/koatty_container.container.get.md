@@ -4,7 +4,7 @@
 
 ## Container.get() method
 
-get instance from IOC container.
+Get component instance by identifier.
 
 **Signature:**
 
@@ -16,13 +16,25 @@ get<T>(identifier: string | Constructor<T>, type?: ComponentType, ...args: any[]
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string \| [Constructor](./koatty_container.constructor.md)<!-- -->&lt;T&gt; |  |
-|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
-|  args | any\[\] |  |
+|  identifier | string \| [Constructor](./koatty_container.constructor.md)<!-- -->&lt;T&gt; | Class constructor or class name string |
+|  type | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE) |
+|  args | any\[\] | Constructor arguments |
 
 **Returns:**
 
 T
 
-{<!-- -->\*<!-- -->}  Container
+Component instance or null if not found
+
+ Returns singleton instance from cache by default. Creates new instance when: 1. Constructor arguments are provided 2. Component scope is Prototype
+
+## Example
+
+
+```ts
+const userService = container.get('UserService');
+const userService = container.get(UserService);
+const userService = container.get(UserService, 'Singleton');
+const userService = container.get(UserService, 'Prototype', [1, 2, 3]);
+```
 

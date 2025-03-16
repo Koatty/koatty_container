@@ -8,7 +8,7 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [Container](./koatty_container.container.md) | <p>IOC Container</p><p>  Container  {<!-- -->IContainer<!-- -->}</p> |
+|  [Container](./koatty_container.container.md) | <p>Container class implements IContainer interface for dependency injection. Manages class instances, metadata, and dependency injection in an IOC container. Uses singleton pattern to ensure only one container instance exists.</p><p>Features: - Singleton instance management - Class and instance registration - Metadata management - Dependency injection - Component lifecycle management - Property injection - AOP support</p><p> Container  {<!-- -->IContainer<!-- -->}</p> |
 
 ## Enumerations
 
@@ -20,38 +20,38 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [After(paramName)](./koatty_container.after.md) | <p>Executed after specifying the PointCut method.</p> |
-|  [AfterEach(paramName)](./koatty_container.aftereach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
-|  [Aspect(identifier)](./koatty_container.aspect.md) | <p>Indicates that an decorated class is a "aspect".</p> |
-|  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | <p>Marks a class property as to be autowired by Koatty"s dependency injection facilities.</p> |
-|  [Before(paramName)](./koatty_container.before.md) | <p>Executed before specifying the PointCut method.</p> |
-|  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | <p>Executed after execution of each method of the specified PointCut class.</p> |
+|  [After(paramName)](./koatty_container.after.md) | <p>After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.</p> |
+|  [AfterEach(paramName)](./koatty_container.aftereach.md) | <p>Decorator that marks a class to execute after each method.</p> |
+|  [Aspect(identifier)](./koatty_container.aspect.md) | Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system. |
+|  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | Decorator that marks a property for dependency injection. |
+|  [Before(paramName)](./koatty_container.before.md) | <p>Before decorator, used to define a method-level AOP interceptor that executes before the target method.</p> |
+|  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | Decorator that marks a class to execute before each method. |
 |  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | @<!-- -->description: |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
 |  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
-|  [Inject(paramName, cType)](./koatty_container.inject.md) | <p>Marks a constructor method's parameter as to be Inject by Koatty"s dependency injection facilities.</p> |
+|  [Inject(paramName, cType)](./koatty_container.inject.md) | Parameter decorator for dependency injection. Used to inject dependencies into constructor parameters. |
 |  [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
 |  [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
-|  [Values(value, defaultValue)](./koatty_container.values.md) | <p>Indicates that an decorated class instance property values.</p> |
+|  [Values(value, defaultValue)](./koatty_container.values.md) | Property decorator that assigns a value to a class property. |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [Application](./koatty_container.application.md) | <p>Base Application interface</p><p>  Application</p> |
+|  [Application](./koatty_container.application.md) | <p>Application interface for the container. Defines the basic structure and capabilities of an application.</p><p> Application</p> |
 |  [Constructor](./koatty_container.constructor.md) | Defined constructor interface |
-|  [Context](./koatty_container.context.md) | <p>Base Context interface</p><p>  Context  {<!-- -->Koa.Context<!-- -->}</p> |
+|  [Context](./koatty_container.context.md) | <p>Interface representing a context object with metadata management capabilities.</p><p> Context  Provides methods to get and set metadata within a context.</p> |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
-|  [IContainer](./koatty_container.icontainer.md) | <p>Container interface</p><p>  IContainer</p> |
+|  [IContainer](./koatty_container.icontainer.md) | <p>Interface for IOC container implementation. Provides methods for dependency injection, metadata management, and component registration/retrieval.</p><p> IContainer</p> |
 |  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [IOC](./koatty_container.ioc.md) | export Singleton. get the singleton instance of Container |
-|  [IOCContainer](./koatty_container.ioccontainer.md) | alias IOC |
+|  [IOC](./koatty_container.ioc.md) | <p>Global IOC container instance. Singleton pattern implementation to ensure only one container instance exists. Throws error if multiple versions of koatty\_container are detected.</p><p>  {<!-- -->Container<!-- -->}</p> |
+|  [IOCContainer](./koatty_container.ioccontainer.md) | IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->} |
 |  [TAGGED\_AOP](./koatty_container.tagged_aop.md) |  |
 |  [TAGGED\_ARGS](./koatty_container.tagged_args.md) |  |
 |  [TAGGED\_CLS](./koatty_container.tagged_cls.md) |  |

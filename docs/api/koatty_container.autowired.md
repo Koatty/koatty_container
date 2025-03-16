@@ -4,8 +4,7 @@
 
 ## Autowired() function
 
-Marks a class property as to be autowired by Koatty"s dependency injection facilities.
-
+Decorator that marks a property for dependency injection.
 
 **Signature:**
 
@@ -17,14 +16,24 @@ export declare function Autowired<T>(paramName?: ClassOrString<T>, cType?: Compo
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ |
-|  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ |
-|  constructArgs | any\[\] | _(Optional)_ |
-|  isDelay | boolean | _(Optional)_ |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ The class or string identifier for the dependency |
+|  cType | [ComponentType](./koatty_container.componenttype.md) | _(Optional)_ The component type of the dependency |
+|  constructArgs | any\[\] | _(Optional)_ Constructor arguments for the dependency instance |
+|  isDelay | boolean | _(Optional)_ Whether to delay the injection (default: false) |
 
 **Returns:**
 
 PropertyDecorator
 
-{<!-- -->PropertyDecorator<!-- -->}
+A property decorator function
+
+## Exceptions
+
+Error if injection type is incorrect or if trying to inject a controller
+
+## Example
+
+\`\`\`<!-- -->typescript @<!-- -->Autowired() private userService: UserService;
+
+@<!-- -->Autowired('UserService') private userService: UserService; \* \`\`\`
 

@@ -4,7 +4,7 @@
 
 ## Container.listClass() method
 
-get all class from Container
+List all registered classes of specified component type.
 
 **Signature:**
 
@@ -19,11 +19,11 @@ listClass(type: ComponentType): {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | [ComponentType](./koatty_container.componenttype.md) |  |
+|  type | [ComponentType](./koatty_container.componenttype.md) | The component type to filter |
 
 **Returns:**
 
 { id: string; target: Function; }\[\]
 
- Container
+Array of objects containing class id and target class
 

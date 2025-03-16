@@ -4,7 +4,7 @@
 
 ## Container.getApp() method
 
-get app
+Get the application instance.
 
 **Signature:**
 
@@ -15,5 +15,5 @@ getApp(): Application;
 
 [Application](./koatty_container.application.md)
 
- Container
+{<!-- -->any<!-- -->} The application instance
 

@@ -4,7 +4,7 @@
 
 ## Before() function
 
-Executed before specifying the PointCut method.
+Before decorator, used to define a method-level AOP interceptor that executes before the target method.
 
 
 **Signature:**
@@ -17,11 +17,23 @@ export declare function Before<T>(paramName: ClassOrString<T>): MethodDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The name or class of the AOP interceptor |
 
 **Returns:**
 
 MethodDecorator
 
-{<!-- -->MethodDecorator<!-- -->}
+{<!-- -->MethodDecorator<!-- -->} A method decorator that attaches AOP metadata
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When AOP name is not provided
+
+## Example
+
+
+```typescript
+@Before('LogInterceptor')
+someMethod() {}
+```
 

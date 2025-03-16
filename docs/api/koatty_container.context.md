@@ -4,14 +4,24 @@
 
 ## Context interface
 
-Base Context interface
+Interface representing a context object with metadata management capabilities.
 
-  Context  {<!-- -->Koa.Context<!-- -->}
+ Context  Provides methods to get and set metadata within a context.
 
 **Signature:**
 
 ```typescript
 export interface Context 
+```
+
+## Example
+
+
+```typescript
+const ctx: Context = {
+  getMetaData: (key) => someValue,
+  setMetaData: (key, value) => void
+};
 ```
 
 ## Properties

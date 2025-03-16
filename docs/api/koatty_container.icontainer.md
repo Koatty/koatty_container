@@ -4,9 +4,9 @@
 
 ## IContainer interface
 
-Container interface
+Interface for IOC container implementation. Provides methods for dependency injection, metadata management, and component registration/retrieval.
 
-  IContainer
+ IContainer
 
 **Signature:**
 
@@ -18,22 +18,22 @@ export interface IContainer
 
 |  Method | Description |
 |  --- | --- |
-|  [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachclassmetadata.md) | attach data to class or property |
-|  [attachPropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachpropertydata.md) | attach property data to class |
-|  [get(identifier, type, args)](./koatty_container.icontainer.get.md) | <p>get an instance from the IOC container.</p><p> T</p> |
-|  [getApp()](./koatty_container.icontainer.getapp.md) | get app |
-|  [getClass(identifier, type)](./koatty_container.icontainer.getclass.md) | get class from IOC container by identifier. |
-|  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.icontainer.getclassmetadata.md) | get single data from class or property |
-|  [getIdentifier(target)](./koatty_container.icontainer.getidentifier.md) | get identifier from class |
-|  [getInsByClass(target, args)](./koatty_container.icontainer.getinsbyclass.md) | <p>get instance from IOC container by class.</p><p> T</p> |
-|  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.icontainer.getmetadatamap.md) | <p>get metadata from class</p> |
-|  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.icontainer.getpropertydata.md) | get property data from class |
-|  [getType(target)](./koatty_container.icontainer.gettype.md) | get component type from class |
-|  [listClass(type)](./koatty_container.icontainer.listclass.md) | get all class from Container |
-|  [listPropertyData(decoratorNameKey, target)](./koatty_container.icontainer.listpropertydata.md) | list property data from class |
-|  [reg(identifier, target, options)](./koatty_container.icontainer.reg.md) | <p>registering an instance of a class to an IOC container.</p><p> T</p> |
-|  [saveClass(type, module, identifier)](./koatty_container.icontainer.saveclass.md) | save class to Container |
-|  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.saveclassmetadata.md) | save meta data to class or property |
-|  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.savepropertydata.md) | save property data to class |
-|  [setApp(app)](./koatty_container.icontainer.setapp.md) | set app |
+|  [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachclassmetadata.md) | Attach class metadata to the target. |
+|  [attachPropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachpropertydata.md) | Attach property metadata to the target object/class. |
+|  [get(identifier, type, args)](./koatty_container.icontainer.get.md) | Get component instance by identifier. |
+|  [getApp()](./koatty_container.icontainer.getapp.md) | Get the application instance. |
+|  [getClass(identifier, type)](./koatty_container.icontainer.getclass.md) | Get class by identifier and type from container. |
+|  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.icontainer.getclassmetadata.md) | Get metadata value by type and decorator key. |
+|  [getIdentifier(target)](./koatty_container.icontainer.getidentifier.md) | Get the identifier for a target class or object. |
+|  [getInsByClass(target, args)](./koatty_container.icontainer.getinsbyclass.md) | Get instance by class constructor |
+|  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.icontainer.getmetadatamap.md) | Get metadata map for the specified target and key. |
+|  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.icontainer.getpropertydata.md) | Get property metadata by decorator name key. |
+|  [getType(target)](./koatty_container.icontainer.gettype.md) | Get the component type of target class or object. |
+|  [listClass(type)](./koatty_container.icontainer.listclass.md) | List all registered classes of specified component type. |
+|  [listPropertyData(decoratorNameKey, target)](./koatty_container.icontainer.listpropertydata.md) | Get property data by decorator name key. |
+|  [reg(identifier, target, options)](./koatty_container.icontainer.reg.md) | Register a class or instance to the container. |
+|  [saveClass(type, module, identifier)](./koatty_container.icontainer.saveclass.md) | Save class metadata and store class module in container. |
+|  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.saveclassmetadata.md) | Save class metadata to the container. |
+|  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.savepropertydata.md) | Save property metadata to the container. |
+|  [setApp(app)](./koatty_container.icontainer.setapp.md) | Set application instance |
 

@@ -4,9 +4,7 @@
 
 ## IContainer.reg() method
 
-registering an instance of a class to an IOC container.
-
- T
+Register a class or instance to the container.
 
 **Signature:**
 
@@ -18,13 +16,24 @@ reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefi
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string \| T |  |
-|  target | T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
-|  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ |
+|  identifier | string \| T | The identifier string or class/instance to register |
+|  target | T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ Optional target class/instance or options |
+|  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ Optional configuration for the registration |
 
 **Returns:**
 
 void
 
-{<!-- -->void<!-- -->}  Container
+## Exceptions
+
+{<!-- -->Error<!-- -->} When target is not a class
+
+## Example
+
+
+```ts
+container.reg('UserService', UserService);
+container.reg(UserService);
+container.reg(UserService, { scope: 'Singleton' });
+```
 

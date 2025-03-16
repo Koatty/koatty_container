@@ -4,7 +4,7 @@
 
 ## Container.setApp() method
 
-set app
+Set application instance
 
 **Signature:**
 
@@ -16,11 +16,9 @@ setApp(app: Application): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  app | [Application](./koatty_container.application.md) |  |
+|  app | [Application](./koatty_container.application.md) | Application instance |
 
 **Returns:**
 
 void
-
- Container
 

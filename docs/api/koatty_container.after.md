@@ -4,7 +4,7 @@
 
 ## After() function
 
-Executed after specifying the PointCut method.
+After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.
 
 
 **Signature:**
@@ -17,11 +17,23 @@ export declare function After<T>(paramName: ClassOrString<T>): MethodDecorator;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The name or class of the AOP handler |
 
 **Returns:**
 
 MethodDecorator
 
-{<!-- -->MethodDecorator<!-- -->}
+{<!-- -->MethodDecorator<!-- -->} Method decorator
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When AopName is not provided
+
+## Example
+
+
+```typescript
+@After('LogAspect')
+someMethod() {}
+```
 

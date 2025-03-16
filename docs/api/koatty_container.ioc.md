@@ -4,7 +4,9 @@
 
 ## IOC variable
 
-export Singleton. get the singleton instance of Container
+Global IOC container instance. Singleton pattern implementation to ensure only one container instance exists. Throws error if multiple versions of koatty\_container are detected.
+
+  {<!-- -->Container<!-- -->}
 
 **Signature:**
 

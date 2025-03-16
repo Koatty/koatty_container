@@ -4,8 +4,7 @@
 
 ## BeforeEach() function
 
-Executed after execution of each method of the specified PointCut class.
-
+Decorator that marks a class to execute before each method.
 
 **Signature:**
 
@@ -17,11 +16,23 @@ export declare function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorat
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; |  |
+|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The name of the AOP class or string identifier |
 
 **Returns:**
 
 ClassDecorator
 
-{<!-- -->Function<!-- -->}
+ClassDecorator function that attaches AOP metadata to the target class
+
+## Exceptions
+
+Error if AOP name is not provided
+
+## Example
+
+
+```typescript
+@BeforeEach(LoggerAspect)
+class UserService {}
+```
 

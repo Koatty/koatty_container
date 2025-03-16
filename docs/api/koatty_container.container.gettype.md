@@ -4,7 +4,7 @@
 
 ## Container.getType() method
 
-get component type from class
+Get the component type of target class or object.
 
 **Signature:**
 
@@ -16,11 +16,11 @@ getType(target: Function | object): any;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | Function \| object |  |
+|  target | Function \| object | The target class constructor or object instance |
 
 **Returns:**
 
 any
 
- Container
+The component type string
 

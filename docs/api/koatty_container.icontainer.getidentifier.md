@@ -4,7 +4,7 @@
 
 ## IContainer.getIdentifier() method
 
-get identifier from class
+Get the identifier for a target class or object.
 
 **Signature:**
 
@@ -16,11 +16,11 @@ getIdentifier(target: Function | object): string;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | Function \| object |  |
+|  target | Function \| object | The target class constructor function or object instance |
 
 **Returns:**
 
 string
 
- Container
+The identifier string. For functions, returns the tagged metadata id or function name. For objects, returns the constructor name.
 

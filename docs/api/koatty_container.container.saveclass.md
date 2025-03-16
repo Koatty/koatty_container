@@ -4,7 +4,7 @@
 
 ## Container.saveClass() method
 
-save class to Container
+Save class metadata and store class module in container.
 
 **Signature:**
 
@@ -16,9 +16,9 @@ saveClass(type: ComponentType, module: Function, identifier: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | [ComponentType](./koatty_container.componenttype.md) |  |
-|  module | Function |  |
-|  identifier | string |  Container |
+|  type | [ComponentType](./koatty_container.componenttype.md) | The component type |
+|  module | Function | The class module to be saved |
+|  identifier | string | The unique identifier for the class |
 
 **Returns:**
 
