@@ -16,11 +16,17 @@ import {
 import { recursiveGetMetadata } from "../utils/Util";
 
 /**
- * Inject class instance property
- * @param target 
- * @param prototypeChain 
- * @param _container 
- * @param _options 
+ * Inject values into the target class prototype chain.
+ * 
+ * @param target The target class constructor
+ * @param prototypeChain The prototype chain object to inject properties into
+ * @param container Optional IoC container instance
+ * @param _options Optional object definition options
+ * 
+ * @description
+ * This function injects values into class properties by recursively getting metadata
+ * from the container. It supports both direct values and function-returned values.
+ * The injected properties are defined as enumerable and writable but not configurable.
  */
 export function injectValues(target: Function, prototypeChain: object,
   container?: IContainer, _options?: ObjectDefinitionOptions) {
