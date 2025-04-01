@@ -522,12 +522,15 @@ export class Container implements IContainer {
  * @type {Container}
  * @throws {Error} When multiple container versions conflict
  */
-export const IOC: Container = (function () {
-  if (!helper.isTrueEmpty(process.env.KOATTY_CONTAINER)) {
-    throw Error("There are two different versions of the koatty_container module that are conflicting.");
-  }
-  process.env.KOATTY_CONTAINER = "true";
-  return Container.getInstance();
+export const IOC: IContainer = (function () {
+    // Check global object first
+    if ((<any>global).__KOATTY_IOC__) {
+      return (<any>global).__KOATTY_IOC__;
+    }
+    // First initialization
+    const instance = Container.getInstance();
+  (<any>global).__KOATTY_IOC__ = instance;
+    return instance;
 })();
 
 /**
