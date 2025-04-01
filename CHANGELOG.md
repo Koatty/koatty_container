@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.3](https://github.com/koatty/koatty_container/compare/v1.10.2...v1.10.3) (2025-04-01)
+
+
+### Bug Fixes
+
+* improve IOC singleton implementation by using global object cache ([6e9a29f](https://github.com/koatty/koatty_container/commit/6e9a29f9b3808ff1cb20af3a28ba3b4731ac2dc1))
+
 ### [1.10.2](https://github.com/koatty/koatty_container/compare/v1.10.1...v1.10.2) (2025-03-16)
 
 ### [1.10.1](https://github.com/koatty/koatty_container/compare/v1.10.0...v1.10.1) (2025-02-26)
