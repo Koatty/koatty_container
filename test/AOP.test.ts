@@ -85,4 +85,33 @@ describe("AOP", () => {
     logSpy.mockRestore();
   })
 
+  test("ClearContainer", async () => {
+    // 保存app引用
+    const app = IOC.getApp();
+    
+    // 验证容器中有数据
+    const beforeClear = IOC.get("ClassA");
+    expect(beforeClear).toBeDefined();
+    
+    // 执行clear
+    IOC.clear();
+    
+    // 验证容器已清空
+    const afterClear = IOC.get("ClassA");
+    expect(afterClear).toBeNull();
+    
+    // 验证app引用仍然存在
+    expect(IOC.getApp()).toBe(app);
+    
+    // 重新注册测试数据
+    IOC.reg(MyDependency);
+    IOC.reg(MyDependency2);
+    IOC.reg(TestAspect);
+    IOC.reg(Test2Aspect);
+    IOC.reg(Test3Aspect);
+    IOC.reg("ClassA", ClassA);
+    IOC.reg("ClassB", ClassB);
+    IOC.reg("ClassC", ClassC);
+  })
+
 })

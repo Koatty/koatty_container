@@ -325,6 +325,12 @@ export interface IContainer {
    * ```
    */
   listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
+
+  /**
+   * clear all resources in container
+   * @memberof Container
+   */
+  clear(): void;
 }
 
 

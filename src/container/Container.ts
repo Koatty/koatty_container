@@ -511,6 +511,16 @@ export class Container implements IContainer {
     }
     return data;
   }
+
+  /**
+   * clear all resources in container
+   * @memberof Container
+   */
+  public clear(): void {
+    this.classMap.clear();
+    this.instanceMap = new WeakMap();
+    this.metadataMap = new WeakMap();
+  }
 }
 
 /**
