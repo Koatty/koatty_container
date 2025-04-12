@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/koatty/koatty_container/compare/v1.10.3...v1.11.0) (2025-04-12)
+
+
+### Features
+
+* add clear method to Container class for resource cleanup ([75a1117](https://github.com/koatty/koatty_container/commit/75a1117b05166025c6c3fe9fd51558c0a298dd9b))
+
 ### [1.10.3](https://github.com/koatty/koatty_container/compare/v1.10.2...v1.10.3) (2025-04-01)
 
 

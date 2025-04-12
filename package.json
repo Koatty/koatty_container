@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "1.10.3",
+  "version": "1.11.0",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -56,6 +56,7 @@
     "@rollup/plugin-commonjs": "^28.x.x",
     "@rollup/plugin-json": "^6.x.x",
     "@rollup/plugin-node-resolve": "^15.x.x",
+    "@rollup/plugin-terser": "^0.4.4",
     "@types/jest": "^29.x.x",
     "@types/koa": "^2.x.x",
     "@types/lodash": "^4.x.x",
@@ -70,9 +71,7 @@
     "jest-html-reporters": "^3.x.x",
     "reflect-metadata": "^0.x.x",
     "rollup": "^4.x.x",
-    "rollup-plugin-cleanup": "^3.x.x",
     "rollup-plugin-delete": "^2.x.x",
-    "rollup-plugin-terser": "^7.x.x",
     "rollup-plugin-typescript2": "^0.x.x",
     "standard-version": "^9.x.x",
     "ts-jest": "^29.x.x",
