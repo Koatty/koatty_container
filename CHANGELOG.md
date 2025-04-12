@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.1](https://github.com/koatty/koatty_container/compare/v1.11.0...v1.11.1) (2025-04-12)
+
+
+### Bug Fixes
+
+* redefine 'app' property in Container class with correct descriptor ([efaf582](https://github.com/koatty/koatty_container/commit/efaf58281bcde269078d609db215fbb229e99f71))
+
 ## [1.11.0](https://github.com/koatty/koatty_container/compare/v1.10.3...v1.11.0) (2025-04-12)
 
 
