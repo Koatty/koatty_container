@@ -1,15 +1,49 @@
-# koatty_container
+# koatty_container [![Version npm](https://img.shields.io/npm/v/koatty_container.svg?style=flat-square)](https://www.npmjs.com/package/koatty_container) [![npm Downloads](https://img.shields.io/npm/dm/koatty_container.svg?style=flat-square)](https://npmcharts.com/compare/koatty_container?minimal)
 
 Typescript中IOC容器的实现，支持DI（依赖注入）以及 AOP （切面编程）。参考Spring IOC的实现机制，用Typescript实现了一个IOC容器，在应用启动的时候，自动分类装载组件，并且根据依赖关系，注入相应的依赖。它解决了一个最主要的问题：将组件的创建+配置与组件的使用相分离，并且，由IoC容器负责管理组件的生命周期。
 
-[![Version npm](https://img.shields.io/npm/v/koatty_container.svg?style=flat-square)](https://www.npmjs.com/package/koatty_container)
-[![npm Downloads](https://img.shields.io/npm/dm/koatty_container.svg?style=flat-square)](https://npmcharts.com/compare/koatty_container?minimal)
+## 安装
+
+```bash
+npm install koatty_container --save
+# 或
+yarn add koatty_container
+```
+
+## 快速开始
+
+```typescript
+import { Container } from 'koatty_container';
+import { Autowired } from 'koatty_container/decorator';
+
+class UserService {
+  getUsers() {
+    return ['user1', 'user2'];
+  }
+}
+
+class UserController {
+  @Autowired()
+  private userService: UserService;
+  
+  getUsers() {
+    return this.userService.getUsers();
+  }
+}
+
+const container = new Container();
+container.reg(UserService);
+container.reg(UserController);
+
+const controller = container.get(UserController);
+console.log(controller.getUsers()); // ['user1', 'user2']
+```
 
 ## IOC容器
 
 IoC全称Inversion of Control，直译为控制反转。不是什么技术，而是一种设计思想。在OO开发中，Ioc意味着将你设计好的对象交给容器控制，而不是传统的在你的对象内部直接控制。
 
-如何理解好Ioc呢？理解好Ioc的关键是要明确“谁控制谁，控制什么，为何是反转（有反转就应该有正转了），哪些方面反转了”，那我们来深入分析一下：
+如何理解好Ioc呢？理解好Ioc的关键是要明确"谁控制谁，控制什么，为何是反转（有反转就应该有正转了），哪些方面反转了"，那我们来深入分析一下：
 
 * 谁控制谁，控制什么：
 > 传统OO程序设计，我们直接在对象内部通过new进行创建对象，是程序主动去创建依赖对象；而IoC是有专门一个容器来创建这些对象，即由Ioc容器来控制对象的创建；谁控制谁？当然是IoC 容器控制了对象；控制什么？那就是主要控制了外部资源获取（不只是对象包括比如文件等）。
@@ -24,7 +58,7 @@ export class BookService {
 
   private config: DataConfig = new DataConfig();
   private dataSource: DataSource = new MysqlDataSource(config);
-	
+  
   protected constructor() {
 
   }
@@ -294,3 +328,30 @@ export class TestAspect {
 | `@Inject(paramName:T \| string)` | `paramName` 构造方法入参名(形参); 可以传入bean  <br> `cType` 注入bean的类型 | 该装饰器使用类构造方法入参来注入依赖, 如果和 `@Autowired()` 同时使用, 可能会覆盖autowired注入的相同属性 | 仅用于构造方法(constructor)的入参 |
 
 
+## 测试
+
+```bash
+npm test
+# 或
+yarn test
+```
+
+## 构建
+
+```bash
+npm run build
+# 或
+yarn build
+```
+
+## 贡献
+
+欢迎提交Pull Request或报告问题。在提交代码前，请确保：
+
+1. 代码符合项目风格指南
+2. 所有测试用例通过
+3. 添加必要的文档更新
+
+## 许可证
+
+BSD-3-Clause © [richenlin](https://github.com/richenlin)
