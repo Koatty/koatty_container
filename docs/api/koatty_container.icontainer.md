@@ -20,6 +20,7 @@ export interface IContainer
 |  --- | --- |
 |  [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachclassmetadata.md) | Attach class metadata to the target. |
 |  [attachPropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachpropertydata.md) | Attach property metadata to the target object/class. |
+|  [clear()](./koatty_container.icontainer.clear.md) | clear all resources in container  Container |
 |  [get(identifier, type, args)](./koatty_container.icontainer.get.md) | Get component instance by identifier. |
 |  [getApp()](./koatty_container.icontainer.getapp.md) | Get the application instance. |
 |  [getClass(identifier, type)](./koatty_container.icontainer.getclass.md) | Get class by identifier and type from container. |

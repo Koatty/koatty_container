@@ -11,5 +11,5 @@ Global IOC container instance. Singleton pattern implementation to ensure only o
 **Signature:**
 
 ```typescript
-IOC: Container
+IOC: IContainer
 ```

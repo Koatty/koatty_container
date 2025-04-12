@@ -23,6 +23,7 @@ export declare class Container implements IContainer
 |  --- | --- | --- |
 |  [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.attachclassmetadata.md) |  | Attach class metadata to the target. |
 |  [attachPropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.container.attachpropertydata.md) |  | Attach property metadata to the target object/class. |
+|  [clear()](./koatty_container.container.clear.md) |  | clear all resources in container  Container |
 |  [get(identifier, type, args)](./koatty_container.container.get.md) |  | Get component instance by identifier. |
 |  [getApp()](./koatty_container.container.getapp.md) |  | Get the application instance. |
 |  [getClass(identifier, type)](./koatty_container.container.getclass.md) |  | Get class by identifier and type from container. |

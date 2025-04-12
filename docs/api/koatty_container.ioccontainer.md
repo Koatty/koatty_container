@@ -9,5 +9,5 @@ IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->}
 **Signature:**
 
 ```typescript
-IOCContainer: Container
+IOCContainer: IContainer
 ```
