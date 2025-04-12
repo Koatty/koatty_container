@@ -127,11 +127,12 @@ export class Container implements IContainer {
         ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
       };
 
-      // define app as getter
+      // define app
       Reflect.defineProperty((<Function>target).prototype, "app", {
-        get: () => this.app,
         configurable: false,
-        enumerable: true
+        enumerable: true,
+        writable: true,
+        value: this.app
       });
 
       // inject
