@@ -26,13 +26,13 @@
 |  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | Decorator that marks a property for dependency injection. |
 |  [Before(paramName)](./koatty_container.before.md) | <p>Before decorator, used to define a method-level AOP interceptor that executes before the target method.</p> |
 |  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | Decorator that marks a class to execute before each method. |
-|  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | @<!-- -->description: |
-|  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Find all methods on a given ES6 class |
-|  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) |  |
-|  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | <p>Find all property on a given ES6 class</p> |
+|  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | Get component type based on class name identifier |
+|  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Gets all method names from a class target and optionally its prototype chain |
+|  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) | Get metadata from target object or class by metadata key. If metadata doesn't exist, create a new Map and define it. |
+|  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | Gets all property names from a target object and optionally its prototype chain. |
 |  [Inject(paramName, cType)](./koatty_container.inject.md) | Parameter decorator for dependency injection. Used to inject dependencies into constructor parameters. |
-|  [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override object's property to PrototypeValue |
-|  [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | get metadata value of a metadata key on the prototype chain of an object and property |
+|  [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override undefined instance properties with values from its prototype. |
+|  [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | Recursively retrieves metadata from a container by traversing the prototype chain. |
 |  [Values(value, defaultValue)](./koatty_container.values.md) | Property decorator that assigns a value to a class property. |
 
 ## Interfaces

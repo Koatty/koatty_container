@@ -4,7 +4,7 @@
 
 ## recursiveGetMetadata() function
 
-get metadata value of a metadata key on the prototype chain of an object and property
+Recursively retrieves metadata from a container by traversing the prototype chain.
 
 **Signature:**
 
@@ -16,13 +16,14 @@ export declare function recursiveGetMetadata(container: IContainer, metadataKey:
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  container | [IContainer](./koatty_container.icontainer.md) |  |
-|  metadataKey | any |  |
-|  target | any |  |
-|  \_propertyKey | string \| symbol | _(Optional)_ |
+|  container | [IContainer](./koatty_container.icontainer.md) | The dependency injection container instance |
+|  metadataKey | any | The key to retrieve metadata for |
+|  target | any | The target object to get metadata from |
+|  \_propertyKey | string \| symbol | _(Optional)_ Optional property key |
 
 **Returns:**
 
 any\[\]
 
+An array containing all collected metadata
 

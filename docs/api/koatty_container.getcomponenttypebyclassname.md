@@ -4,7 +4,7 @@
 
 ## getComponentTypeByClassName() function
 
-@<!-- -->description:
+Get component type based on class name identifier
 
 **Signature:**
 
@@ -16,9 +16,11 @@ export declare function getComponentTypeByClassName(identifier: string): "COMPON
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  identifier | string |  {<!-- -->\*<!-- -->} |
+|  identifier | string | The class name string to check |
 
 **Returns:**
 
 "COMPONENT" \| "CONTROLLER" \| "MIDDLEWARE" \| "SERVICE"
+
+Component type string: 'CONTROLLER', 'MIDDLEWARE', 'SERVICE' or 'COMPONENT'
 

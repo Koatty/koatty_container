@@ -4,8 +4,7 @@
 
 ## getPropertyNames() function
 
-Find all property on a given ES6 class
-
+Gets all property names from a target object and optionally its prototype chain.
 
 **Signature:**
 
@@ -17,12 +16,12 @@ export declare function getPropertyNames(target: any, isSelfProperties?: boolean
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | any |  |
-|  isSelfProperties | boolean | _(Optional)_ |
+|  target | any | The target object to get properties from |
+|  isSelfProperties | boolean | _(Optional)_ If true, only returns own properties. If false, includes prototype chain properties |
 
 **Returns:**
 
 string\[\]
 
-{<!-- -->string\[\]<!-- -->}
+An array of property names as strings
 

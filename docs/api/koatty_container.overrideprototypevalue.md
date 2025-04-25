@@ -4,7 +4,7 @@
 
 ## overridePrototypeValue() function
 
-Override object's property to PrototypeValue
+Override undefined instance properties with values from its prototype.
 
 **Signature:**
 
@@ -16,9 +16,13 @@ export declare function overridePrototypeValue<T extends object>(instance: T): v
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  instance | T |  |
+|  instance | T | The object instance to process |
 
 **Returns:**
 
 void
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When instance is null/undefined or not an object
 

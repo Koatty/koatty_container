@@ -4,7 +4,7 @@
 
 ## getMethodNames() function
 
-Find all methods on a given ES6 class
+Gets all method names from a class target and optionally its prototype chain
 
 **Signature:**
 
@@ -16,12 +16,12 @@ export declare function getMethodNames(target: any, isSelfProperties?: boolean):
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  target | any |  |
-|  isSelfProperties | boolean | _(Optional)_ |
+|  target | any | The class target to get method names from |
+|  isSelfProperties | boolean | _(Optional)_ If true, only returns methods defined on the target class itself |
 
 **Returns:**
 
 string\[\]
 
-{<!-- -->string\[\]<!-- -->}
+Array of method names as strings
 

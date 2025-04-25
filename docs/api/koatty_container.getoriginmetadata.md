@@ -4,6 +4,8 @@
 
 ## getOriginMetadata() function
 
+Get metadata from target object or class by metadata key. If metadata doesn't exist, create a new Map and define it.
+
 **Signature:**
 
 ```typescript
@@ -14,12 +16,13 @@ export declare function getOriginMetadata(metadataKey: string | symbol, target: 
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  metadataKey | string \| symbol |  |
-|  target | any |  |
-|  propertyKey | string \| symbol | _(Optional)_ |
+|  metadataKey | string \| symbol | The key to get metadata |
+|  target | any | The target object or class |
+|  propertyKey | string \| symbol | _(Optional)_ Optional property key for property or method metadata |
 
 **Returns:**
 
 any
 
+The metadata value associated with the key
 
