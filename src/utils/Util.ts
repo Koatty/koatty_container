@@ -52,32 +52,6 @@ function ordinaryGetPrototypeOf(obj: any): any {
 }
 
 /**
- * get metadata value of a metadata key on the prototype chain of an object and property
- * @param container 
- * @param metadataKey 
- * @param target 
- * @param _propertyKey 
- * @returns 
- */
-export function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any,
-  _propertyKey?: string | symbol): any[] {
-  // get metadata value of a metadata key on the prototype
-  // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
-  const metadata = container.listPropertyData(metadataKey, target) ?? {};
-  // get metadata value of a metadata key on the prototype chain
-  let parent = ordinaryGetPrototypeOf(target);
-  while (parent !== null) {
-    // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
-    const parentMetadata = container.listPropertyData(metadataKey, parent);
-    if (parentMetadata) {
-      mergeMetadata(parentMetadata, metadata);
-    }
-    parent = ordinaryGetPrototypeOf(parent);
-  }
-  return metadata;
-}
-
-/**
  * Merge object properties and override the source object when
  *  the property values in the new object are not undefined.
  * @param parentMetadata source object metadata
@@ -102,8 +76,37 @@ function mergeMetadata(parentMetadata: Record<string, any>, metadata: Record<str
 }
 
 /**
- * Override object's property to PrototypeValue
- * @param instance 
+ * Recursively retrieves metadata from a container by traversing the prototype chain.
+ * 
+ * @param container - The dependency injection container instance
+ * @param metadataKey - The key to retrieve metadata for
+ * @param target - The target object to get metadata from
+ * @param _propertyKey - Optional property key
+ * @returns An array containing all collected metadata
+ */
+export function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any,
+  _propertyKey?: string | symbol): any[] {
+  // get metadata value of a metadata key on the prototype
+  // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
+  const metadata = container.listPropertyData(metadataKey, target) ?? {};
+  // get metadata value of a metadata key on the prototype chain
+  let parent = ordinaryGetPrototypeOf(target);
+  while (parent !== null) {
+    // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
+    const parentMetadata = container.listPropertyData(metadataKey, parent);
+    if (parentMetadata) {
+      mergeMetadata(parentMetadata, metadata);
+    }
+    parent = ordinaryGetPrototypeOf(parent);
+  }
+  return metadata;
+}
+
+/**
+ * Override undefined instance properties with values from its prototype.
+ * 
+ * @param instance - The object instance to process
+ * @throws {Error} When instance is null/undefined or not an object
  */
 export function overridePrototypeValue<T extends object>(instance: T): void {
   if (!instance || typeof instance !== 'object') {
@@ -122,15 +125,16 @@ export function overridePrototypeValue<T extends object>(instance: T): void {
 }
 
 /**
-*
-*
-* @param {(string | symbol)} metadataKey
-* @param {*} target
-* @param {(string | symbol)} [propertyKey]
-* @returns
-*/
+ * Get metadata from target object or class by metadata key.
+ * If metadata doesn't exist, create a new Map and define it.
+ * 
+ * @param metadataKey - The key to get metadata
+ * @param target - The target object or class
+ * @param propertyKey - Optional property key for property or method metadata
+ * @returns The metadata value associated with the key
+ */
 export function getOriginMetadata(metadataKey: string | symbol, target: any, propertyKey?: string | symbol) {
-  // filter Object.create(null)
+// filter Object.create(null)
   if (typeof target === "object" && target.constructor) {
     target = target.constructor;
   }
@@ -150,11 +154,10 @@ export function getOriginMetadata(metadataKey: string | symbol, target: any, pro
 }
 
 /**
- * Find all methods on a given ES6 class
- *
- * @param {*} target 
- * @param {boolean} isSelfProperties 
- * @returns {string[]}
+ * Gets all method names from a class target and optionally its prototype chain
+ * @param target The class target to get method names from
+ * @param isSelfProperties If true, only returns methods defined on the target class itself
+ * @returns Array of method names as strings
  */
 export function getMethodNames(target: any, isSelfProperties = false): string[] {
   const result: Set<string> = new Set();
@@ -184,12 +187,11 @@ export function getMethodNames(target: any, isSelfProperties = false): string[] 
 }
 
 /**
- * Find all property on a given ES6 class 
- *
- * @export
- * @param {*} target
- * @param {boolean} isSelfProperties 
- * @returns {string[]}
+ * Gets all property names from a target object and optionally its prototype chain.
+ * 
+ * @param target - The target object to get properties from
+ * @param isSelfProperties - If true, only returns own properties. If false, includes prototype chain properties
+ * @returns An array of property names as strings
  */
 export function getPropertyNames(target: any, isSelfProperties = false): string[] {
   const result: Set<string> = new Set();
@@ -219,9 +221,9 @@ export function getPropertyNames(target: any, isSelfProperties = false): string[
 }
 
 /**
- * @description: 
- * @param {string} identifier
- * @return {*}
+ * Get component type based on class name identifier
+ * @param identifier The class name string to check
+ * @returns Component type string: 'CONTROLLER', 'MIDDLEWARE', 'SERVICE' or 'COMPONENT'
  */
 export function getComponentTypeByClassName(identifier: string) {
   if (identifier.includes("Controller")) {
