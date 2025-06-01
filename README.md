@@ -684,7 +684,7 @@ class OrderService {
 class OrderService {
   createOrder() {
     const userService = new UserService(); // 硬编码依赖
-  }
+    }
 }
 ```
 
