@@ -20,6 +20,10 @@ import {
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./IContainer";
 
+// import circular dependency detector
+import { CircularDependencyDetector, CircularDependencyError } from "../utils/CircularDependencyDetector";
+import { DefaultLogger as logger } from "koatty_logger";
+
 /**
  * Container class implements IContainer interface for dependency injection.
  * Manages class instances, metadata, and dependency injection in an IOC container.
@@ -33,6 +37,7 @@ import {
  * - Component lifecycle management
  * - Property injection
  * - AOP support
+ * - Circular dependency detection
  * 
  * @class Container
  * @implements {IContainer}
@@ -43,6 +48,9 @@ export class Container implements IContainer {
   private instanceMap: WeakMap<object | Function, any>;
   private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
   private static instance: Container;
+  
+  // circular dependency detector
+  private circularDependencyDetector: CircularDependencyDetector;
 
   /**
    * Get singleton instance of Container
@@ -63,6 +71,7 @@ export class Container implements IContainer {
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
+    this.circularDependencyDetector = new CircularDependencyDetector();
   }
 
   /**
@@ -83,12 +92,21 @@ export class Container implements IContainer {
   }
 
   /**
+   * Get circular dependency detector
+   * @returns {CircularDependencyDetector} The circular dependency detector instance
+   */
+  public getCircularDependencyDetector(): CircularDependencyDetector {
+    return this.circularDependencyDetector;
+  }
+
+  /**
    * Register a class or instance to the container.
    * 
    * @param identifier - The identifier string or class/instance to register
    * @param target - Optional target class/instance or options
    * @param options - Optional configuration for the registration
    * @throws {Error} When target is not a class
+   * @throws {CircularDependencyError} When circular dependency is detected
    * 
    * @example
    * ```ts
@@ -127,35 +145,96 @@ export class Container implements IContainer {
         ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
       };
 
-      // define app
-      Reflect.defineProperty((<Function>target).prototype, "app", {
-        configurable: false,
-        enumerable: true,
-        writable: true,
-        value: this.app
-      });
+      try {
+        // register component to circular dependency detector
+        this.circularDependencyDetector.registerComponent(
+          identifier,
+          (target as Function).name,
+          this.extractDependencies(target)
+        );
 
-      // inject
-      this._injection(target, options);
-      // inject options once
-      Reflect.defineProperty((<Function>target).prototype, "_options", {
-        enumerable: false,
-        configurable: false,
-        writable: true,
-        value: options
-      });
+        // define app
+        Reflect.defineProperty((<Function>target).prototype, "app", {
+          configurable: false,
+          enumerable: true,
+          writable: true,
+          value: this.app
+        });
 
-      // save class to metadata
-      if (!this.getClass(<string>identifier, options.type)) {
-        this.saveClass(options.type, <Function>target, <string>identifier);
+        // inject
+        this._injection(target, options, identifier);
+        // inject options once
+        Reflect.defineProperty((<Function>target).prototype, "_options", {
+          enumerable: false,
+          configurable: false,
+          writable: true,
+          value: options
+        });
+
+        // save class to metadata
+        if (!this.getClass(<string>identifier, options.type)) {
+          this.saveClass(options.type, <Function>target, <string>identifier);
+        }
+        // async instance
+        if (options.isAsync) {
+          this.app.on("appReady", () => this._setInstance(target, options));
+        }
+
+        this._setInstance(target, options);
+        
+        // mark component resolution completed
+        this.circularDependencyDetector.finishResolving(identifier);
+        
+      } catch (error) {
+        if (error instanceof CircularDependencyError) {
+          // log circular dependency error details
+          logger.Error("Circular dependency detection failed:", error.toJSON());
+          logger.Error("Detailed information:", error.getDetailedMessage());
+          
+          // provide resolution suggestions
+          const suggestions = this.circularDependencyDetector.getResolutionSuggestions(error.circularPath);
+          logger.Info("Resolution suggestions:");
+          suggestions.forEach(suggestion => logger.Info(suggestion));
+          
+          throw error;
+        }
+        throw error;
       }
-      // async instance
-      if (options.isAsync) {
-        this.app.on("appReady", () => this._setInstance(target, options));
-      }
-
-      this._setInstance(target, options);
     }
+  }
+
+  /**
+   * Extract the dependencies of a class
+   * @param target The target class
+   * @returns {string[]} An array of dependencies
+   */
+  private extractDependencies(target: any): string[] {
+    const dependencies: string[] = [];
+    
+    try {
+      // get constructor parameter types
+      const paramTypes = Reflect.getMetadata('design:paramtypes', target) || [];
+      paramTypes.forEach((type: any) => {
+        if (type && type.name) {
+          dependencies.push(type.name);
+        }
+      });
+
+      // get @Autowired decorated properties
+      const props = Object.getOwnPropertyNames(target.prototype);
+      props.forEach(prop => {
+        const metaKey = `${prop}:autowired`;
+        const propMetadata = Reflect.getMetadata(metaKey, target);
+        if (propMetadata && propMetadata.identifier) {
+          dependencies.push(propMetadata.identifier);
+        }
+      });
+
+    } catch (error) {
+      logger.Debug(`Failed to extract dependencies of ${target.name}:`, error);
+    }
+
+    return dependencies;
   }
 
   /**
@@ -182,15 +261,31 @@ export class Container implements IContainer {
    * 
    * @param target The target class to inject dependencies into
    * @param options Configuration options for dependency injection
+   * @param identifier Component identifier for circular dependency detection
    * @private
    */
-  private _injection<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
-    // inject autowired
-    injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
-    // inject properties values
-    injectValues(<Function>target, (<Function>target).prototype, IOC, options);
-    // inject AOP
-    injectAOP(<Function>target, (<Function>target).prototype, IOC, options);
+  private _injection<T extends object | Function>(target: T, options: ObjectDefinitionOptions, identifier: string): void {
+    try {
+      // start resolving dependencies
+      this.circularDependencyDetector.startResolving(identifier);
+      
+      // inject autowired
+      injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
+      // inject properties values
+      injectValues(<Function>target, (<Function>target).prototype, IOC, options);
+      // inject AOP
+      injectAOP(<Function>target, (<Function>target).prototype, IOC, options);
+      
+    } catch (error) {
+      // if it is a circular dependency error, throw it again
+      if (error instanceof CircularDependencyError) {
+        throw error;
+      }
+      
+      // other injection errors
+      logger.Error(`Injection failed for ${identifier}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -200,6 +295,7 @@ export class Container implements IContainer {
    * @param type - Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE)
    * @param args - Constructor arguments
    * @returns Component instance or null if not found
+   * @throws {CircularDependencyError} When circular dependency is detected during resolution
    * 
    * @description
    * Returns singleton instance from cache by default.
@@ -216,18 +312,20 @@ export class Container implements IContainer {
    */
   public get<T>(identifier: string | Constructor<T>, type?: ComponentType,
     ...args: any[]): T {
-    let className;
+    let className: string;
     if (helper.isClass(<any>identifier)) {
       className = (<Constructor<T>>identifier)?.name;
     } else {
       className = <string>identifier;
     }
+    
     if (!type) {
       type = getComponentTypeByClassName(className);
     }
+    
     const target = <T>this.getClass(className, type);
     if (!target) {
-      return null;
+      throw new Error(`Bean ${className} not found`);
     }
 
     const options = Reflect.get((<Function>target).prototype, "_options");
@@ -237,13 +335,38 @@ export class Container implements IContainer {
     // 1. Explicit args provided
     // 2. OR scope is Prototype (ignore instanceMap)
     if (args.length > 0 || isPrototype) {
-      const instance = Reflect.construct(<Function>target, args, <Function>target);
-      overridePrototypeValue(<Function>instance);
-      return instance as T;
+      try {
+        // for Prototype scope, detect circular dependency each time
+        if (isPrototype) {
+          const cycle = this.circularDependencyDetector.detectCircularDependency(className);
+          if (cycle) {
+            const circularError = new CircularDependencyError(
+              `Prototype scope component has circular dependency: ${className}`,
+              [className],
+              cycle
+            );
+            logger.Error("Circular dependency detection failed:", circularError.toJSON());
+            throw circularError;
+          }
+        }
+        
+        const instance = Reflect.construct(<Function>target, args, <Function>target);
+        overridePrototypeValue(<Function>instance);
+        return instance as T;
+      } catch (error) {
+        if (error instanceof CircularDependencyError) {
+          throw error;
+        }
+        throw new Error(`Failed to create instance of ${className}: ${error.message}`);
+      }
     }
 
     // Return cached instance for Singleton
-    return this.instanceMap.get(<Function>target) as T;
+    const instance = this.instanceMap.get(<Function>target) as T;
+    if (!instance) {
+      throw new Error(`Bean ${className} not found`);
+    }
+    return instance;
   }
 
   /**
@@ -514,6 +637,55 @@ export class Container implements IContainer {
   }
 
   /**
+   * Generate and log dependency analysis report
+   */
+  public generateDependencyReport(): void {
+    const report = this.circularDependencyDetector.generateDependencyReport();
+    
+    logger.Info("=== Dependency analysis report ===");
+    logger.Info(`Total components: ${report.totalComponents}`);
+    logger.Info(`Resolved components: ${report.resolvedComponents}`);
+    logger.Info(`Unresolved components: ${report.unresolvedComponents.length}`);
+    
+    if (report.circularDependencies.length > 0) {
+      logger.Warn(`Found ${report.circularDependencies.length} circular dependencies:`);
+      report.circularDependencies.forEach((cycle, index) => {
+        logger.Warn(`  ${index + 1}. ${cycle.join(' -> ')}`);
+        
+        // provide resolution suggestions
+        const suggestions = this.circularDependencyDetector.getResolutionSuggestions(cycle);
+        suggestions.forEach(suggestion => logger.Info(`     ${suggestion}`));
+      });
+    } else {
+      logger.Info("✓ No circular dependencies found");
+    }
+    
+    if (report.unresolvedComponents.length > 0) {
+      logger.Warn("Unresolved components:");
+      report.unresolvedComponents.forEach(comp => logger.Warn(`  - ${comp}`));
+    }
+    
+    // output dependency graph visualization
+    logger.Debug(this.circularDependencyDetector.getDependencyGraphVisualization());
+  }
+
+  /**
+   * Check for circular dependencies in the container
+   * @returns {boolean} True if circular dependencies exist
+   */
+  public hasCircularDependencies(): boolean {
+    return this.circularDependencyDetector.hasCircularDependencies();
+  }
+
+  /**
+   * Get all circular dependencies
+   * @returns {string[][]} Array of circular dependency paths
+   */
+  public getCircularDependencies(): string[][] {
+    return this.circularDependencyDetector.getAllCircularDependencies();
+  }
+
+  /**
    * clear all resources in container
    * @memberof Container
    */
@@ -521,6 +693,7 @@ export class Container implements IContainer {
     this.classMap.clear();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
+    this.circularDependencyDetector.clear();
   }
 }
 

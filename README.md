@@ -2,6 +2,16 @@
 
 Typescript中IOC容器的实现，支持DI（依赖注入）以及 AOP （切面编程）。参考Spring IOC的实现机制，用Typescript实现了一个IOC容器，在应用启动的时候，自动分类装载组件，并且根据依赖关系，注入相应的依赖。它解决了一个最主要的问题：将组件的创建+配置与组件的使用相分离，并且，由IoC容器负责管理组件的生命周期。
 
+## ✨ 主要特性
+
+- 🏗️ **IOC容器**: 完整的依赖注入和控制反转实现
+- 💉 **依赖注入**: 支持构造函数、属性和方法注入
+- 🎯 **AOP切面编程**: 支持前置、后置、环绕通知
+- 🔍 **循环依赖检测**: 智能的循环依赖检测和解决方案
+- 📊 **依赖分析**: 完整的依赖关系图和分析报告
+- 🛡️ **错误恢复**: 多种错误恢复策略
+- 🎨 **装饰器支持**: 丰富的装饰器API简化开发
+
 ## 安装
 
 ```bash
@@ -191,6 +201,145 @@ app.emit("appReady");
 1、尽量避免循环依赖，新增第三方公共类来解耦互相依赖的类
 
 2、使用IOC容器获取类的原型(getClass)，自行实例化
+
+## 循环依赖检测机制
+
+koatty_container 内置了强大的循环依赖检测机制，能够在编译时和运行时检测并处理循环依赖问题。
+
+### 🔍 检测功能
+
+- **实时检测**: 在组件注册时自动检测循环依赖
+- **详细报告**: 提供完整的依赖链和循环路径信息
+- **可视化图形**: 生成依赖关系图便于分析
+- **解决建议**: 提供具体的解决方案建议
+
+### 基本使用
+
+```typescript
+import { IOC, CircularDependencyError } from 'koatty_container';
+
+// 检查是否存在循环依赖
+const hasCircular = IOC.hasCircularDependencies();
+
+// 获取所有循环依赖路径
+const cycles = IOC.getCircularDependencies();
+
+// 生成依赖分析报告
+IOC.generateDependencyReport();
+```
+
+### 循环依赖处理
+
+当检测到循环依赖时，koatty_container 会抛出 `CircularDependencyError` 并提供详细信息：
+
+```typescript
+try {
+  IOC.reg(ServiceA);
+  IOC.reg(ServiceB);
+} catch (error) {
+  if (error instanceof CircularDependencyError) {
+    console.log('循环依赖路径:', error.circularPath);
+    console.log('详细信息:', error.getDetailedMessage());
+    
+    // 获取解决建议
+    const detector = IOC.getCircularDependencyDetector();
+    const suggestions = detector.getResolutionSuggestions(error.circularPath);
+    suggestions.forEach(suggestion => console.log(suggestion));
+  }
+}
+```
+
+### 解决方案
+
+#### 1. 延迟加载
+
+```typescript
+class UserService {
+  // 使用延迟加载避免循环依赖
+  @Autowired("OrderService", "COMPONENT", [], true)
+  orderService: OrderService;
+}
+
+class OrderService {
+  @Autowired()
+  userService: UserService;
+}
+```
+
+#### 2. 重构设计
+
+```typescript
+// 提取公共接口
+interface INotificationService {
+  sendNotification(message: string): void;
+}
+
+class PaymentService {
+  @Autowired()
+  notificationService: INotificationService;
+}
+
+class NotificationService implements INotificationService {
+  // 不再直接依赖 PaymentService
+  sendNotification(message: string) {
+    // 通过事件或回调处理
+  }
+}
+```
+
+### 依赖分析报告
+
+```typescript
+// 生成完整的依赖分析报告
+IOC.generateDependencyReport();
+
+// 输出示例:
+// === 依赖关系分析报告 ===
+// 总组件数: 15
+// 已解析组件数: 13
+// 未解析组件数: 2
+// ✓ 未发现循环依赖
+
+// 获取依赖图可视化
+const detector = IOC.getCircularDependencyDetector();
+console.log(detector.getDependencyGraphVisualization());
+
+// 输出示例:
+// 依赖关系图:
+//   ✓ UserService -> [OrderService]
+//   ✓ OrderService -> [PaymentService]
+//   ✓ PaymentService (无依赖)
+```
+
+### 高级功能
+
+#### 传递依赖分析
+
+```typescript
+const detector = IOC.getCircularDependencyDetector();
+
+// 获取组件的所有传递依赖
+const allDeps = detector.getTransitiveDependencies('UserService');
+console.log('UserService 的所有依赖:', allDeps);
+```
+
+#### 自定义检测配置
+
+```typescript
+// 注册组件时指定依赖关系
+detector.registerComponent('MyService', 'MyService', ['Dependency1', 'Dependency2']);
+
+// 添加运行时依赖关系
+detector.addDependency('ServiceA', 'ServiceB');
+```
+
+### 最佳实践
+
+1. **及早检测**: 在开发阶段就运行依赖分析，及早发现问题
+2. **设计原则**: 遵循单一职责原则，减少不必要的依赖
+3. **分层架构**: 采用分层架构，避免跨层直接依赖
+4. **接口抽象**: 使用接口和抽象类减少具体类之间的耦合
+5. **事件驱动**: 对于复杂的交互，考虑使用事件驱动模式
 
 ## API
 

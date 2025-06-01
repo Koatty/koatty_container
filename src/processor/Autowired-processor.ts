@@ -13,6 +13,7 @@ import {
   TAGGED_PROP
 } from "../container/IContainer";
 import { recursiveGetMetadata } from "../utils/Util";
+import { CircularDependencyError } from "../utils/CircularDependencyDetector";
 
 /**
  * Inject autowired dependencies into the target class.
@@ -24,6 +25,7 @@ import { recursiveGetMetadata } from "../utils/Util";
  * @param isLazy Whether to use lazy loading for dependencies
  * 
  * @throws {Error} When a required dependency is not found and lazy loading is disabled
+ * @throws {CircularDependencyError} When circular dependency is detected
  * 
  * @description
  * This function handles the injection of autowired dependencies by:
@@ -31,44 +33,149 @@ import { recursiveGetMetadata } from "../utils/Util";
  * - Processing each dependency based on its type and identifier
  * - Supporting lazy loading to resolve circular dependencies
  * - Defining properties on the prototype chain for immediate injection
+ * - Enhanced circular dependency detection and handling
  */
 export function injectAutowired(target: Function, prototypeChain: object, container: IContainer,
   options?: ObjectDefinitionOptions, isLazy = false) {
+  
   const metaData = recursiveGetMetadata(container, TAGGED_PROP, target);
+  const className = target.name;
+  const circularDetector = container.getCircularDependencyDetector();
+  
+  // collect all dependencies of the current class
+  const currentDependencies: string[] = [];
+  
+  for (const metaKey in metaData) {
+    const { type, identifier } =
+      metaData[metaKey] || { type: "", identifier: "" };
+    
+    if (type && identifier) {
+      currentDependencies.push(identifier);
+      
+      // add dependency relationship to the detector
+      circularDetector.addDependency(className, identifier);
+    }
+  }
+  
+  // register current class and its dependencies to the detector
+  circularDetector.registerComponent(className, className, currentDependencies);
+  
   for (const metaKey in metaData) {
     const { type, identifier, delay, args } =
       metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
+    
     isLazy = isLazy || delay;
+    
     if (type && identifier) {
-      const dep = container.get(identifier, type, args);
-      if (!dep) {
-        if (!isLazy) {
-          throw new Error(
-            `Component ${metaData[metaKey].identifier ?? ""} not found. It's inject in class ${target.name}`);
+      try {
+        // detect circular dependency before injecting dependencies
+        const circularPath = circularDetector.detectCircularDependency(identifier);
+        if (circularPath && !isLazy && !options?.isAsync) {
+          logger.Warn(`Circular dependency detected: ${circularPath.join(' -> ')}, enable lazy loading`);
+          isLazy = true;
         }
-        isLazy = true;
-      }
+        
+        const dep = container.get(identifier, type, ...args);
+        
+        if (!dep) {
+          if (!isLazy) {
+            throw new Error(
+              `Component ${metaData[metaKey].identifier ?? ""} not found. It's inject in class ${target.name}`);
+          }
+          isLazy = true;
+        }
 
-      if (isLazy || options.isAsync) {
-        // Delay loading solves the problem of cyclic dependency
-        logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`);
-        // lazy loading used event emit
-        options.isAsync = true;
-        const app = container.getApp();
-        // lazy inject autowired
-        if (app?.once) {
-          app.once("appReady", () => injectAutowired(target, prototypeChain, container, options, true));
+        if (isLazy || options?.isAsync) {
+          // Delay loading solves the problem of cyclic dependency
+          logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`);
+          
+          // lazy loading used event emit
+          if (options) {
+            options.isAsync = true;
+          }
+          
+          const app = container.getApp();
+          // lazy inject autowired
+          if (app?.once) {
+            app.once("appReady", () => {
+              try {
+                injectAutowired(target, prototypeChain, container, options, true);
+              } catch (lazyError) {
+                if (lazyError instanceof CircularDependencyError) {
+                  logger.Error(`Circular dependency still exists when injecting lazily: ${className}.${metaKey}:`, lazyError.getDetailedMessage());
+                  
+                  // provide resolution suggestions
+                  const suggestions = circularDetector.getResolutionSuggestions(lazyError.circularPath);
+                  logger.Info("Suggested solutions:");
+                  suggestions.forEach((suggestion: string) => logger.Info(suggestion));
+                  
+                  // try using null as a fallback
+                  logger.Warn(`Use null as a fallback for ${className}.${metaKey}`);
+                  Reflect.defineProperty(prototypeChain, metaKey, {
+                    enumerable: true,
+                    configurable: false,
+                    writable: true,
+                    value: null
+                  });
+                } else {
+                  logger.Error(`Lazy injection failed: ${className}.${metaKey}:`, lazyError);
+                }
+              }
+            });
+          }
+        } else {
+          logger.Debug(
+            `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
+          
+          // validate if the dependency is valid
+          if (dep === null || dep === undefined) {
+            throw new Error(`Dependency ${identifier} is null or undefined for ${className}.${metaKey}`);
+          }
+          
+          Reflect.defineProperty(prototypeChain, metaKey, {
+            enumerable: true,
+            configurable: false,
+            writable: true,
+            value: dep
+          });
         }
-      } else {
-        logger.Debug(
-          `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
-        Reflect.defineProperty(prototypeChain, metaKey, {
-          enumerable: true,
-          configurable: false,
-          writable: true,
-          value: dep
-        });
+      } catch (error) {
+        if (error instanceof CircularDependencyError) {
+          logger.Error(`Circular dependency error in ${className}.${metaKey}:`, error.getDetailedMessage());
+          
+          // if not lazy loading, try to enable lazy loading
+          if (!isLazy && !options?.isAsync) {
+            logger.Info(`Enable lazy loading for ${className}.${metaKey} to solve circular dependency`);
+            isLazy = true;
+            
+            if (options) {
+              options.isAsync = true;
+            }
+            
+            const app = container.getApp();
+            if (app?.once) {
+              app.once("appReady", () => {
+                try {
+                  injectAutowired(target, prototypeChain, container, options, true);
+                } catch (retryError) {
+                  logger.Error(`Lazy loading retry failed: ${className}.${metaKey}:`, retryError);
+                }
+              });
+            }
+            continue;
+          }
+          
+          throw error;
+        }
+        
+        // other errors
+        logger.Error(`Injection failed: ${className}.${metaKey}:`, error);
+        throw new Error(`Failed to inject dependency ${identifier} in ${className}.${metaKey}: ${error.message}`);
       }
+    } else {
+      logger.Warn(`Invalid dependency metadata: ${className}.${metaKey}:`, metaData[metaKey]);
     }
   }
+  
+  logger.Debug(`Dependency injection completed: ${className}, total dependencies: ${currentDependencies.length}`);
 }

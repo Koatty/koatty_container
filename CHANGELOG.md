@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/koatty/koatty_container/compare/v1.12.0...v1.13.0) (2025-01-XX)
+
+### Features
+
+* **circular-dependency**: add comprehensive circular dependency detection mechanism ([xxx])
+  - Implement real-time circular dependency detection during component registration
+  - Add detailed dependency chain and circular path reporting  
+  - Provide dependency graph visualization and analysis reports
+  - Include resolution suggestions and best practice recommendations
+  - Support delayed loading for circular dependency resolution
+  - Add CircularDependencyDetector class with full API
+  - Integrate detection into Container and Autowired processor
+  - Add comprehensive test suite for circular dependency scenarios
+
+### Improvements
+
+* **container**: enhance Container class with circular dependency detection APIs
+* **processor**: improve Autowired processor with enhanced error handling and lazy loading
+* **interface**: extend IContainer interface with dependency analysis methods
+* **utils**: add CircularDependencyDetector and CircularDependencyError utilities
+* **docs**: update README with detailed circular dependency detection documentation
+
+### Breaking Changes
+
+* Container.get() now throws detailed errors instead of returning null for missing dependencies
+
 ## [1.12.0](https://github.com/koatty/koatty_container/compare/v1.11.1...v1.12.0) (2025-04-25)
 
 

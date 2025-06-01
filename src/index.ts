@@ -11,3 +11,9 @@ export * from "./decorator/Autowired";
 export * from "./decorator/Values";
 export * from "./utils/Util";
 
+// Export circular dependency detection classes
+export { 
+  CircularDependencyDetector as CircularDependencyDetectorImpl, 
+  CircularDependencyError 
+} from "./utils/CircularDependencyDetector";
+

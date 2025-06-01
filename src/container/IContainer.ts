@@ -27,6 +27,27 @@ export const TAGGED_METHOD = 'TAGGED_METHOD';
 
 export type ClassOrString<T> = string | (new () => T);
 
+// Forward declaration for CircularDependencyDetector
+export interface CircularDependencyDetector {
+  registerComponent(identifier: string, className: string, dependencies?: string[]): void;
+  addDependency(from: string, to: string): void;
+  startResolving(identifier: string): void;
+  finishResolving(identifier: string): void;
+  detectCircularDependency(identifier: string): string[] | null;
+  getAllCircularDependencies(): string[][];
+  hasCircularDependencies(): boolean;
+  getResolutionSuggestions(circularPath: string[]): string[];
+  generateDependencyReport(): {
+    totalComponents: number;
+    resolvedComponents: number;
+    circularDependencies: string[][];
+    unresolvedComponents: string[];
+  };
+  getDependencyGraphVisualization(): string;
+  getTransitiveDependencies(identifier: string): string[];
+  clear(): void;
+}
+
 /**
  * defined AOP type
  *
@@ -331,6 +352,29 @@ export interface IContainer {
    * @memberof Container
    */
   clear(): void;
+
+  /**
+   * Get circular dependency detector
+   * @returns {CircularDependencyDetector} The circular dependency detector instance
+   */
+  getCircularDependencyDetector(): CircularDependencyDetector;
+
+  /**
+   * Generate and log dependency analysis report
+   */
+  generateDependencyReport(): void;
+
+  /**
+   * Check for circular dependencies in the container
+   * @returns {boolean} True if circular dependencies exist
+   */
+  hasCircularDependencies(): boolean;
+
+  /**
+   * Get all circular dependencies
+   * @returns {string[][]} Array of circular dependency paths
+   */
+  getCircularDependencies(): string[][];
 }
 
 
