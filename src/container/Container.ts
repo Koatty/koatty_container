@@ -245,102 +245,212 @@ export class Container implements IContainer {
   }
 
   /**
-   * Preload metadata for components of a specific type
-   * Useful before batch registration of a particular component type
-   * @param type Component type to preload metadata for (optional, if not provided preloads all)
-   * @example
-   * // Before registering all controllers:
-   * IOC.preloadMetadata('CONTROLLER');
-   * const controllers = IOC.listClass('CONTROLLER');
-   * controllers.forEach(({target, id}) => IOC.reg(target));
+   * Preloads metadata for specified component types with performance optimization options.
+   * 
+   * @param types - Array of component types to preload (e.g. ["CONTROLLER", "SERVICE"]). 
+   *                Defaults to ["CONTROLLER", "SERVICE", "COMPONENT"] if empty.
+   * @param options - Configuration options for the preload process:
+   *   - optimizePerformance: Whether to enable performance optimizations (default: true)
+   *   - warmupCaches: Whether to warm up AOP caches (default: true)
+   *   - batchPreProcessDependencies: Whether to batch process dependencies (default: true)
+   *   - clearStaleCache: Whether to clear stale cache before preload (default: false)
+   * 
+   * The method executes in 6 phases:
+   * 1. Cache optimization and cleanup (if enabled)
+   * 2. Type processing sorted by component count
+   * 3. Metadata preloading for each component
+   * 4. Batch dependency preprocessing (if enabled)
+   * 5. AOP cache warmup (if enabled)
+   * 6. Post-optimization processing (if enabled)
+   * 
+   * Logs detailed performance statistics including processing time, cache hit rates,
+   * and total components processed.
    */
-  public preloadMetadata(type: string = "COMPONENT"): void {
+  public preloadMetadata(types: string[] = [], options: {
+    optimizePerformance?: boolean;
+    warmupCaches?: boolean;
+    batchPreProcessDependencies?: boolean;
+    clearStaleCache?: boolean;
+  } = {}): void {
+    const {
+      optimizePerformance = true, // default enable optimization
+      warmupCaches = true, // default enable cache warmup
+      batchPreProcessDependencies = true, // default enable batch pre-process
+      clearStaleCache = false // avoid unexpected cleanup
+    } = options;
+
     const startTime = Date.now();
     
-    logger.Info(`Starting metadata preload for ${type || 'all'} components...`);
+    // determine the types to process
+    const targetTypes = types.length > 0 ? types : ["CONTROLLER", "SERVICE", "COMPONENT"];
     
-    // Get components to preload for
-    const componentsToPreload = type 
-      ? this.listClass(type)
-      : Array.from(this.classMap.entries()).map(([key, target]) => ({
-          id: key,
-          target
-        }));
+    logger.Info(`Starting ${optimizePerformance ? 'optimized' : 'standard'} metadata preload for types: [${targetTypes.join(', ')}]...`);
     
-    if (componentsToPreload.length === 0) {
-      logger.Warn(`No components found for type: ${type || 'all'}`);
-      return;
+    // phase 1: optional cache cleanup and optimization
+    if (optimizePerformance) {
+      if (clearStaleCache) {
+        this.clearPerformanceCache();
+        logger.Debug("Performance caches cleared before preload");
+      }
+      
+      // optimize metadata lru cache
+      this.metadataCache.optimize();
     }
     
-    // Register frequently accessed metadata keys for preloading
-    const preloadKeys: string[] = [];
+    // phase 2: sort types by access frequency and process
+    const sortedTypes = targetTypes.sort((a, b) => {
+      const aCount = this.listClass(a).length;
+      const bCount = this.listClass(b).length;
+      return bCount - aCount; // descending, process types with more components first
+    });
     
-    componentsToPreload.forEach(({ target, id }) => {
-      const [, identifier] = id.split(':');
+    let totalProcessed = 0;
+    const allTargets: Function[] = [];
+    
+    for (const type of sortedTypes) {
+      const typeStartTime = Date.now();
       
-      // Common metadata keys that are frequently accessed during injection
-      preloadKeys.push(
-        // Reflect metadata for constructor parameters
-        `reflect:design:paramtypes:${identifier}`,
-        // Property injection metadata
-        `property:${TAGGED_PROP}:${identifier}`,
-        // Class decoration metadata
-        `class:${TAGGED_CLS}:${TAGGED_AOP}:${identifier}`,
-        // Autowired properties
-        `reflect:autowired:${identifier}`,
-        // Values properties
-        `reflect:values:${identifier}`
-      );
+      // get all components of this type
+      const componentsToPreload = this.listClass(type);
       
-      // Preload property-specific metadata
-      const propertyNames = Object.getOwnPropertyNames(target.prototype);
-      propertyNames.forEach(propName => {
-        if (propName !== 'constructor') {
-          preloadKeys.push(
-            `reflect:${propName}:autowired:${identifier}`,
-            `reflect:${propName}:values:${identifier}`
-          );
+      if (componentsToPreload.length === 0) {
+        logger.Debug(`No components found for type: ${type}`);
+        continue;
+      }
+      
+      // collect all target classes
+      const typeTargets = componentsToPreload.map(c => c.target);
+      allTargets.push(...typeTargets);
+      
+      // phase 3: metadata pre-load
+      const preloadKeys: string[] = [];
+      
+      componentsToPreload.forEach(({ target, id }) => {
+        const [, identifier] = id.split(':');
+        
+        // common metadata keys
+        preloadKeys.push(
+          `reflect:design:paramtypes:${identifier}`,
+          `property:${TAGGED_PROP}:${identifier}`,
+          `class:${TAGGED_CLS}:${TAGGED_AOP}:${identifier}`,
+          `reflect:autowired:${identifier}`,
+          `reflect:values:${identifier}`
+        );
+        
+        // property specific metadata
+        const propertyNames = Object.getOwnPropertyNames(target.prototype);
+        propertyNames.forEach(propName => {
+          if (propName !== 'constructor') {
+            preloadKeys.push(
+              `reflect:${propName}:autowired:${identifier}`,
+              `reflect:${propName}:values:${identifier}`
+            );
+          }
+        });
+      });
+      
+      this.metadataCache.registerForPreload(preloadKeys);
+      
+      // pre-load metadata
+      let preloadedCount = 0;
+      this.metadataCache.preload((key: string) => {
+        try {
+          const parts = key.split(':');
+          const [cacheType, metadataKey, targetName, propertyKey] = parts;
+          
+          const target = this.findTargetByName(targetName);
+          if (!target) return undefined;
+          
+          if (cacheType === 'reflect') {
+            const value = propertyKey && propertyKey !== targetName
+              ? Reflect.getMetadata(metadataKey, target, propertyKey)
+              : Reflect.getMetadata(metadataKey, target);
+            
+            if (value !== undefined) {
+              preloadedCount++;
+            }
+            return value;
+          }
+          
+          return undefined;
+        } catch (error) {
+          logger.Debug(`Failed to preload metadata for key ${key}:`, error);
+          return undefined;
         }
       });
-    });
-    
-    this.metadataCache.registerForPreload(preloadKeys);
-    
-    // Preload metadata using Reflect API
-    let preloadedCount = 0;
-    this.metadataCache.preload((key: string) => {
+      
+      const typeTime = Date.now() - typeStartTime;
+      totalProcessed += componentsToPreload.length;
+      
+      logger.Debug(`Processed ${type}: ${componentsToPreload.length} components, ${preloadedCount} metadata entries in ${typeTime}ms`);
+    }
+
+    // phase 4: batch dependency pre-process (if enabled)
+    if (batchPreProcessDependencies && optimizePerformance && allTargets.length > 0) {
       try {
-        const parts = key.split(':');
-        const [cacheType, metadataKey, targetName, propertyKey] = parts;
-        
-        const target = this.findTargetByName(targetName);
-        if (!target) return undefined;
-        
-        if (cacheType === 'reflect') {
-          const value = propertyKey && propertyKey !== targetName
-            ? Reflect.getMetadata(metadataKey, target, propertyKey)
-            : Reflect.getMetadata(metadataKey, target);
-          
-          if (value !== undefined) {
-            preloadedCount++;
-          }
-          return value;
-        }
-        
-        return undefined;
+        const { batchPreProcessDependencies: batchPreProcess } = require("../processor/Autowired-processor");
+        batchPreProcess(allTargets, this);
+        logger.Debug(`Batch dependency preprocessing completed for ${allTargets.length} targets`);
       } catch (error) {
-        logger.Debug(`Failed to preload metadata for key ${key}:`, error);
-        return undefined;
+        logger.Debug("Batch dependency preprocessing failed:", error);
       }
-    });
+    }
+
+    // phase 5: aop cache warmup (if enabled)
+    if (warmupCaches && optimizePerformance && allTargets.length > 0) {
+      try {
+        const { warmupAOPCache } = require("../processor/AOP-processor");
+        warmupAOPCache(allTargets, this);
+        logger.Debug(`AOP cache warmup completed for ${allTargets.length} targets`);
+      } catch (error) {
+        logger.Debug("AOP cache warmup failed:", error);
+      }
+    }
+
+    // phase 6: post-optimization processing (if enabled)
+    if (optimizePerformance) {
+      try {
+        const { optimizeDependencyCache } = require("../processor/Autowired-processor");
+        optimizeDependencyCache();
+      } catch (error) {
+        logger.Debug("Dependency cache optimization failed:", error);
+      }
+
+      try {
+        const { optimizeAOPCache } = require("../processor/AOP-processor");
+        optimizeAOPCache();
+      } catch (error) {
+        logger.Debug("AOP cache optimization failed:", error);
+      }
+    }
     
-    const preloadTime = Date.now() - startTime;
+    const totalTime = Date.now() - startTime;
     const cacheStats = this.metadataCache.getStats();
     
-    logger.Info(`Metadata preload completed in ${preloadTime}ms:`);
-    logger.Info(`  - Components processed: ${componentsToPreload.length}`);
-    logger.Info(`  - Metadata entries preloaded: ${preloadedCount}`);
-    logger.Info(`  - Cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
+    // output statistics information
+    if (optimizePerformance) {
+      const detailedStats = this.getDetailedPerformanceStats();
+      
+      logger.Info(`Optimized metadata preload completed in ${totalTime}ms:`);
+      logger.Info(`  - Types processed: [${sortedTypes.join(', ')}]`);
+      logger.Info(`  - Total components: ${totalProcessed}`);
+      logger.Info(`  - Metadata cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
+      
+      if (detailedStats.lruCaches.dependencies) {
+        logger.Info(`  - Dependencies cache hit rate: ${(detailedStats.lruCaches.dependencies.hitRate * 100).toFixed(2)}%`);
+      }
+      
+      if (detailedStats.lruCaches.aop) {
+        logger.Info(`  - AOP cache hit rate: ${(detailedStats.lruCaches.aop.hitRates.overall * 100).toFixed(2)}%`);
+      }
+      
+      logger.Info(`  - Total cache size: ${this.calculateTotalCacheSize(detailedStats.lruCaches)}`);
+    } else {
+      logger.Info(`Standard metadata preload completed in ${totalTime}ms:`);
+      logger.Info(`  - Types processed: [${sortedTypes.join(', ')}]`);
+      logger.Info(`  - Total components: ${totalProcessed}`);
+      logger.Info(`  - Cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
+    }
   }
 
   /**
@@ -394,28 +504,6 @@ export class Container implements IContainer {
   private getMetadataMapSize(): number {
     // WeakMap size cannot be directly determined, estimate based on class map
     return this.classMap.size * 3; // Rough estimate
-  }
-
-  /**
-   * Optimize container performance
-   */
-  public optimizePerformance(): void {
-    logger.Info("Starting container performance optimization...");
-    
-    const startTime = Date.now();
-    
-    // Optimize metadata cache
-    this.metadataCache.optimize();
-    
-    // Preload frequently accessed metadata
-    this.preloadMetadata();
-    
-    const optimizationTime = Date.now() - startTime;
-    logger.Info(`Container performance optimization completed in ${optimizationTime}ms`);
-    
-    // Log performance statistics
-    const stats = this.getPerformanceStats();
-    logger.Info("Performance statistics:", stats);
   }
 
   /**
@@ -1144,6 +1232,251 @@ export class Container implements IContainer {
       conflictError: conflict || undefined,
       report
     };
+  }
+
+  /**
+   * Batch register components
+   * @param components - The components to register
+   * @param batchOptions - The batch options
+   * @example
+   * ```ts
+   * container.batchRegister([UserService, UserRepository], { preProcessDependencies: true, warmupAOP: true });
+   * ```
+   */
+  public batchRegister(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[], 
+                      batchOptions: { preProcessDependencies?: boolean, warmupAOP?: boolean } = {}): void {
+    const startTime = Date.now();
+    logger.Info(`Starting batch registration for ${components.length} components...`);
+    
+    try {
+      // phase 1: if enabled pre-process, use unified preloadMetadata for optimization
+      if (batchOptions.preProcessDependencies || batchOptions.warmupAOP) {
+        // extract all component types
+        const componentTypes = [...new Set(components.map(c => {
+          const identifier = c.identifier || this.getIdentifier(c.target);
+          return this.getType(c.target) || getComponentTypeByClassName(identifier);
+        }))];
+        
+        this.preloadMetadata(componentTypes, {
+          optimizePerformance: true,
+          batchPreProcessDependencies: batchOptions.preProcessDependencies,
+          warmupCaches: batchOptions.warmupAOP,
+          clearStaleCache: false
+        });
+        
+        logger.Debug(`Integrated optimization completed for types: [${componentTypes.join(', ')}]`);
+      }
+      
+      // phase 2: sort components by dependency order
+      const sortedComponents = this.topologicalSortComponents(components);
+      
+      // phase 3: batch registration
+      let successCount = 0;
+      for (const component of sortedComponents) {
+        try {
+          const { target, identifier, options } = component;
+          const id = identifier || this.getIdentifier(target);
+          this.reg(id, target, options);
+          successCount++;
+        } catch (error) {
+          logger.Error(`Failed to register component ${component.identifier || component.target.name}:`, error);
+        }
+      }
+      
+      const totalTime = Date.now() - startTime;
+      logger.Info(`Batch registration completed: ${successCount}/${components.length} components registered in ${totalTime}ms`);
+      
+    } catch (error) {
+      logger.Error("Batch registration failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * topological sort components (by dependency order)
+   */
+  private topologicalSortComponents(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[]): typeof components {
+    const dependencyGraph = new Map<string, string[]>();
+    const componentMap = new Map<string, typeof components[0]>();
+    
+    // build dependency graph
+    for (const component of components) {
+      const identifier = component.identifier || this.getIdentifier(component.target);
+      componentMap.set(identifier, component);
+      
+      const dependencies = this.extractDependencies(component.target);
+      dependencyGraph.set(identifier, dependencies.filter(dep => 
+        components.some(c => (c.identifier || this.getIdentifier(c.target)) === dep)
+      ));
+    }
+    
+    // topological sort
+    const sorted: typeof components = [];
+    const visited = new Set<string>();
+    const visiting = new Set<string>();
+    
+    const visit = (identifier: string) => {
+      if (visiting.has(identifier)) {
+        logger.Warn(`Circular dependency detected involving ${identifier}, using registration order`);
+        return;
+      }
+      if (visited.has(identifier)) return;
+      
+      visiting.add(identifier);
+      const dependencies = dependencyGraph.get(identifier) || [];
+      
+      for (const dep of dependencies) {
+        if (componentMap.has(dep)) {
+          visit(dep);
+        }
+      }
+      
+      visiting.delete(identifier);
+      visited.add(identifier);
+      
+      const component = componentMap.get(identifier);
+      if (component) {
+        sorted.push(component);
+      }
+    };
+    
+    for (const component of components) {
+      const identifier = component.identifier || this.getIdentifier(component.target);
+      visit(identifier);
+    }
+    
+    return sorted;
+  }
+
+  /**
+   * clear performance cache
+   */
+  public clearPerformanceCache(): void {
+    this.metadataCache.clear();
+    
+    // clear processor lru cache
+    try {
+      const { clearDependencyCache } = require("../processor/Autowired-processor");
+      clearDependencyCache();
+    } catch (error) {
+      logger.Debug("Autowired cache cleanup failed:", error);
+    }
+    
+    try {
+      const { clearAOPCache } = require("../processor/AOP-processor");
+      clearAOPCache();
+    } catch (error) {
+      logger.Debug("AOP cache cleanup failed:", error);
+    }
+    
+    logger.Info("All LRU caches cleared");
+  }
+
+  /**
+   * get detailed performance stats (enhanced version)
+   */
+  public getDetailedPerformanceStats(): {
+    cache: any;
+    containers: {
+      totalRegistered: number;
+      byType: Record<string, number>;
+      memoryUsage: {
+        classMap: number;
+        instanceMap: number;
+        metadataMap: number;
+      };
+    };
+    hotspots: {
+      mostAccessedTypes: string[];
+      circularDependencies: number;
+      lazyLoadingCount: number;
+    };
+    lruCaches: {
+      metadata: any;
+      dependencies?: any;
+      aop?: any;
+    };
+  } {
+    const cacheStats = this.metadataCache.getStats();
+    
+    // count the number of components of each type
+    const typeStats: Record<string, number> = {};
+    const typeOrder = ["CONTROLLER", "SERVICE", "COMPONENT", "REPOSITORY"];
+    
+    for (const type of typeOrder) {
+      typeStats[type] = this.listClass(type).length;
+    }
+    
+    // count the number of circular dependencies
+    const circularCount = this.circularDependencyDetector.getAllCircularDependencies().length;
+    const mostAccessedTypes = Object.entries(typeStats)
+      .sort(([,a], [,b]) => b - a)
+      .map(([type]) => type);
+
+    // get lru cache stats
+    const lruCaches: any = {
+      metadata: cacheStats
+    };
+
+    // get dependency processor lru cache stats
+    try {
+      const { getDependencyCacheStats } = require("../processor/Autowired-processor");
+      lruCaches.dependencies = getDependencyCacheStats();
+    } catch (error) {
+      logger.Debug("Failed to get dependency cache stats:", error);
+    }
+
+    // get aop processor lru cache stats
+    try {
+      const { getAOPCacheStats } = require("../processor/AOP-processor");
+      lruCaches.aop = getAOPCacheStats();
+    } catch (error) {
+      logger.Debug("Failed to get AOP cache stats:", error);
+    }
+    
+    return {
+      cache: cacheStats,
+      containers: {
+        totalRegistered: this.classMap.size,
+        byType: typeStats,
+        memoryUsage: {
+          classMap: this.classMap.size,
+          instanceMap: this.getInstanceMapSize(),
+          metadataMap: this.getMetadataMapSize()
+        }
+      },
+      hotspots: {
+        mostAccessedTypes,
+        circularDependencies: circularCount,
+        lazyLoadingCount: 0 // TODO: implement lazy loading count
+      },
+      lruCaches
+    };
+  }
+
+  /**
+   * calculate total lru cache size
+   */
+  private calculateTotalCacheSize(lruCaches: any): string {
+    let totalSize = 0;
+    
+    // metadata cache memory usage
+    if (lruCaches.metadata && lruCaches.metadata.memoryUsage) {
+      totalSize += lruCaches.metadata.memoryUsage;
+    }
+    
+    // dependency cache size (estimated)
+    if (lruCaches.dependencies && lruCaches.dependencies.cacheSize) {
+      totalSize += lruCaches.dependencies.cacheSize * 1024; // estimated 1KB per dependency
+    }
+    
+    // aop cache size (estimated)
+    if (lruCaches.aop && lruCaches.aop.cacheSize) {
+      const aopSize = lruCaches.aop.cacheSize;
+      totalSize += (aopSize.aspects + aopSize.methodNames + aopSize.interceptors) * 2048; // estimated 2KB per aop item
+    }
+    
+    return `${(totalSize / 1024).toFixed(1)}KB`;
   }
 }
 

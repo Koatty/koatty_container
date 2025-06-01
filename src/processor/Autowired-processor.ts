@@ -8,12 +8,121 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 import { DefaultLogger as logger } from "koatty_logger";
+import { LRUCache } from "lru-cache";
 import {
   IContainer, ObjectDefinitionOptions,
   TAGGED_PROP
 } from "../container/IContainer";
 import { recursiveGetMetadata } from "../utils/MetadataOpertor";
-import { CircularDepError } from "../utils/CircularDepDetector";
+
+// use lru cache to unify cache strategy
+interface DependencyPreProcessData {
+  dependencies: string[];
+  metadata: any;
+  circularPaths: string[] | null;
+  timestamp: number;
+}
+
+// dependency pre-parse lru cache
+const dependencyPreProcessCache = new LRUCache<string, DependencyPreProcessData>({
+  max: 1000, // max cache 1000 components
+  ttl: 5 * 60 * 1000, // 5 minutes ttl
+  allowStale: false,
+  updateAgeOnGet: true,
+  updateAgeOnHas: false,
+});
+
+// cache stats
+let cacheStats = {
+  hits: 0,
+  misses: 0,
+  totalRequests: 0
+};
+
+/**
+ * get cache stats
+ */
+export function getDependencyCacheStats(): {
+  cacheSize: number;
+  cacheStats: typeof cacheStats;
+  hitRate: number;
+} {
+  const hitRate = cacheStats.totalRequests > 0 ? cacheStats.hits / cacheStats.totalRequests : 0;
+  return {
+    cacheSize: dependencyPreProcessCache.size,
+    cacheStats,
+    hitRate
+  };
+}
+
+/**
+ * batch pre-process dependency info
+ * @param targets target class array
+ * @param container IoC container instance
+ */
+export function batchPreProcessDependencies(targets: Function[], container: IContainer): Map<string, any> {
+  const results = new Map<string, any>();
+  const startTime = Date.now();
+  
+  logger.Debug(`Starting batch preprocessing for ${targets.length} targets`);
+  
+  targets.forEach(target => {
+    const className = target.name;
+    const cacheKey = `${className}_${target.toString().length}`;
+    
+    cacheStats.totalRequests++;
+    
+    // check lru cache
+    const cached = dependencyPreProcessCache.get(cacheKey);
+    if (cached) {
+      cacheStats.hits++;
+      results.set(className, cached);
+      logger.Debug(`Cache hit for ${className}`);
+      return;
+    }
+    
+    cacheStats.misses++;
+    logger.Debug(`Cache miss for ${className}, processing...`);
+    
+    // pre-process dependencies
+    const metaData = recursiveGetMetadata(container, TAGGED_PROP, target);
+    const circularDetector = container.getCircularDependencyDetector();
+    const dependencies: string[] = [];
+    
+    // collect all dependencies
+    for (const metaKey in metaData) {
+      const { type, identifier } = metaData[metaKey] || {};
+      if (type && identifier) {
+        dependencies.push(identifier);
+        circularDetector.addDependency(className, identifier);
+      }
+    }
+    
+    // pre-detect circular dependencies
+    const circularPaths = dependencies.length > 0 
+      ? circularDetector.detectCircularDependency(className)
+      : null;
+    
+    const processedData: DependencyPreProcessData = {
+      dependencies,
+      metadata: metaData,
+      circularPaths,
+      timestamp: Date.now()
+    };
+    
+    // store to lru cache
+    dependencyPreProcessCache.set(cacheKey, processedData);
+    results.set(className, processedData);
+  });
+  
+  const processingTime = Date.now() - startTime;
+  const stats = getDependencyCacheStats();
+  
+  logger.Info(`Batch preprocessing completed for ${targets.length} targets in ${processingTime}ms`);
+  logger.Info(`Cache stats - Size: ${stats.cacheSize}, Hit rate: ${(stats.hitRate * 100).toFixed(2)}%`);
+  
+  return results;
+}
 
 /**
  * Inject autowired dependencies into the target class.
@@ -28,140 +137,111 @@ import { CircularDepError } from "../utils/CircularDepDetector";
  * @throws {CircularDepError} When circular dependency is detected
  * 
  * @description
- * This function handles the injection of autowired dependencies by:
- * - Retrieving metadata for tagged properties
- * - Processing each dependency based on its type and identifier
- * - Supporting lazy loading to resolve circular dependencies
- * - Defining properties on the prototype chain for immediate injection
- * - Enhanced circular dependency detection and handling
+ * 🚀 Performance optimized version with:
+ * - Batch dependency preprocessing
+ * - LRU cache optimization  
+ * - Circular dependency pre-detection
+ * - Lazy loading optimization
  */
 export function injectAutowired(target: Function, prototypeChain: object, container: IContainer,
   options?: ObjectDefinitionOptions, isLazy = false) {
   
-  const metaData = recursiveGetMetadata(container, TAGGED_PROP, target);
   const className = target.name;
+  const cacheKey = `${className}_${target.toString().length}`;
+  
+  cacheStats.totalRequests++;
+  
+  // try to get data from lru cache
+  let preprocessedData = dependencyPreProcessCache.get(cacheKey);
+  
+  if (!preprocessedData) {
+    cacheStats.misses++;
+    logger.Debug(`Cache miss for ${className}, processing dependencies...`);
+    
+    // no cache, re-process
+    const metaData = recursiveGetMetadata(container, TAGGED_PROP, target);
+    const circularDetector = container.getCircularDependencyDetector();
+    const dependencies: string[] = [];
+    
+    // collect dependency info
+    for (const metaKey in metaData) {
+      const { type, identifier } = metaData[metaKey] || {};
+      if (type && identifier) {
+        dependencies.push(identifier);
+        circularDetector.addDependency(className, identifier);
+      }
+    }
+    
+    // pre-detect circular dependencies
+    const circularPaths = dependencies.length > 0 
+      ? circularDetector.detectCircularDependency(className)
+      : null;
+    
+    preprocessedData = {
+      dependencies,
+      metadata: metaData,
+      circularPaths,
+      timestamp: Date.now()
+    };
+    
+    // store to lru cache
+    dependencyPreProcessCache.set(cacheKey, preprocessedData);
+  } else {
+    cacheStats.hits++;
+    logger.Debug(`Cache hit for ${className}`);
+  }
+  
+  const { metadata: metaData, dependencies: currentDependencies, circularPaths } = preprocessedData;
   const circularDetector = container.getCircularDependencyDetector();
   
-  // collect all dependencies of the current class
-  const currentDependencies: string[] = [];
+  // register component and its dependencies
+  circularDetector.registerComponent(className, className, currentDependencies);
   
+  // batch dependency resolution
+  const dependencyInstances = new Map<string, any>();
+  const lazyDependencies = new Set<string>();
+  
+  // pre-resolve all dependencies
   for (const metaKey in metaData) {
-    const { type, identifier } =
-      metaData[metaKey] || { type: "", identifier: "" };
+    const { type, identifier, delay } = metaData[metaKey] || {};
     
     if (type && identifier) {
-      currentDependencies.push(identifier);
+      // check if need to delay loading
+      const shouldDelay = isLazy || delay || (circularPaths && circularPaths.includes(identifier));
       
-      // add dependency relationship to the detector
-      circularDetector.addDependency(className, identifier);
+      if (shouldDelay) {
+        lazyDependencies.add(identifier);
+      } else {
+        try {
+          // batch get dependency instance
+          const dep = container.get(identifier, type);
+          if (dep) {
+            dependencyInstances.set(identifier, dep);
+          }
+        } catch (error) {
+          logger.Debug(`Failed to pre-resolve dependency ${identifier}: ${error.message}`);
+          lazyDependencies.add(identifier);
+        }
+      }
     }
   }
   
-  // register current class and its dependencies to the detector
-  circularDetector.registerComponent(className, className, currentDependencies);
-  
+  // batch inject non-delay dependencies
   for (const metaKey in metaData) {
-    const { type, identifier, delay, args } =
-      metaData[metaKey] || { type: "", identifier: "", delay: false, args: [] };
-    
-    isLazy = isLazy || delay;
+    const { type, identifier, args = [] } = metaData[metaKey] || {};
     
     if (type && identifier) {
-      try {
-        // detect circular dependency before injecting dependencies
-        const circularPath = circularDetector.detectCircularDependency(identifier);
-        if (circularPath && !isLazy && !options?.isAsync) {
-          logger.Warn(`Circular dependency detected: ${circularPath.join(' -> ')}, enable lazy loading`);
-          isLazy = true;
-        }
-        
-        // Check if lazy loading is needed before attempting to get the dependency
-        if (isLazy || options?.isAsync) {
-          // Delay loading solves the problem of cyclic dependency
-          logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`);
-          
-          // lazy loading used event emit
-          if (options) {
-            options.isAsync = true;
-          }
-          
-          const app = container.getApp();
-          // lazy inject autowired
-          if (app?.once) {
-            app.once("appReady", () => {
-              try {
-                logger.Debug(`Lazy loading triggered for ${className}.${metaKey} -> ${identifier}`);
-                
-                // Get the dependency now
-                const dep = container.get(identifier, type, ...args);
-                
-                if (!dep) {
-                  logger.Error(`Lazy loading failed: Component ${identifier} not found for ${className}.${metaKey}`);
-                  return;
-                }
-                
-                // Get the actual instance of the target class
-                const instance = container.getInsByClass(target);
-                if (!instance) {
-                  logger.Error(`Lazy loading failed: Instance of ${className} not found`);
-                  return;
-                }
-                
-                // Inject the dependency into the instance
-                logger.Debug(`Injecting ${identifier} into ${className}.${metaKey}`);
-                Object.defineProperty(instance, metaKey, {
-                  enumerable: true,
-                  configurable: false,
-                  writable: true,
-                  value: dep
-                });
-                
-                logger.Debug(`Lazy injection successful: ${className}.${metaKey} = ${dep.constructor.name}`);
-                
-              } catch (lazyError) {
-                if (lazyError instanceof CircularDepError) {
-                  logger.Error(`Circular dependency still exists when injecting lazily: ${className}.${metaKey}:`, lazyError.getDetailedMessage());
-                  
-                  // provide resolution suggestions
-                  const suggestions = circularDetector.getResolutionSuggestions(lazyError.circularPath);
-                  logger.Info("Suggested solutions:");
-                  suggestions.forEach((suggestion: string) => logger.Info(suggestion));
-                  
-                  // try using null as a fallback
-                  logger.Warn(`Use null as a fallback for ${className}.${metaKey}`);
-                  const instance = container.getInsByClass(target);
-                  if (instance) {
-                    Object.defineProperty(instance, metaKey, {
-                      enumerable: true,
-                      configurable: false,
-                      writable: true,
-                      value: null
-                    });
-                  }
-                } else {
-                  logger.Error(`Lazy injection failed: ${className}.${metaKey}:`, lazyError);
-                }
-              }
-            });
-          }
-          continue; // Skip immediate injection for lazy dependencies
-        }
-        
-        // Only get the dependency if not lazy loading
-        const dep = container.get(identifier, type, ...args);
-        
-        if (!dep) {
-          throw new Error(
-            `Component ${metaData[metaKey].identifier ?? ""} not found. It's inject in class ${target.name}`);
-        }
-
-        logger.Debug(
-          `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
-        
-        // validate if the dependency is valid
-        if (dep === null || dep === undefined) {
-          throw new Error(`Dependency ${identifier} is null or undefined for ${className}.${metaKey}`);
-        }
+      // check if need to delay loading
+      if (lazyDependencies.has(identifier)) {
+        // process delay loading
+        setupLazyInjection(target, prototypeChain, metaKey, identifier, type, args, container, className, options);
+        continue;
+      }
+      
+      // get dependency from pre-resolved instance
+      const dep = dependencyInstances.get(identifier);
+      if (dep) {
+        logger.Debug(`Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
         
         Reflect.defineProperty(prototypeChain, metaKey, {
           enumerable: true,
@@ -169,56 +249,98 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
           writable: true,
           value: dep
         });
-      } catch (error) {
-        if (error instanceof CircularDepError) {
-          logger.Error(`Circular dependency error in ${className}.${metaKey}:`, error.getDetailedMessage());
-          
-          // if not lazy loading, try to enable lazy loading
-          if (!isLazy && !options?.isAsync) {
-            logger.Info(`Enable lazy loading for ${className}.${metaKey} to solve circular dependency`);
-            isLazy = true;
-            
-            if (options) {
-              options.isAsync = true;
-            }
-            
-            const app = container.getApp();
-            if (app?.once) {
-              app.once("appReady", () => {
-                try {
-                  logger.Debug(`Retry lazy loading for ${className}.${metaKey} -> ${identifier}`);
-                  
-                  const dep = container.get(identifier, type, ...args);
-                  const instance = container.getInsByClass(target);
-                  
-                  if (dep && instance) {
-                    Object.defineProperty(instance, metaKey, {
-                      enumerable: true,
-                      configurable: false,
-                      writable: true,
-                      value: dep
-                    });
-                    logger.Debug(`Retry lazy injection successful: ${className}.${metaKey}`);
-                  }
-                } catch (retryError) {
-                  logger.Error(`Lazy loading retry failed: ${className}.${metaKey}:`, retryError);
-                }
-              });
-            }
-            continue;
-          }
-          
-          throw error;
-        }
-        
-        // other errors
-        logger.Error(`Injection failed: ${className}.${metaKey}:`, error);
-        throw new Error(`Failed to inject dependency ${identifier} in ${className}.${metaKey}: ${error.message}`);
+      } else {
+        logger.Warn(`Dependency ${identifier} not found for ${className}.${metaKey}, switching to lazy loading`);
+        setupLazyInjection(target, prototypeChain, metaKey, identifier, type, args, container, className, options);
       }
-    } else {
-      logger.Warn(`Invalid dependency metadata: ${className}.${metaKey}:`, metaData[metaKey]);
     }
   }
   
-  logger.Debug(`Dependency injection completed: ${className}, total dependencies: ${currentDependencies.length}`);
+  logger.Debug(`Dependency injection completed: ${className}, total dependencies: ${currentDependencies.length}, lazy: ${lazyDependencies.size}`);
+}
+
+/**
+ * delay injection setup
+ */
+function setupLazyInjection(
+  target: Function, 
+  prototypeChain: object, 
+  metaKey: string,
+  identifier: string,
+  type: string,
+  args: any[],
+  container: IContainer,
+  className: string,
+  options?: ObjectDefinitionOptions
+) {
+  logger.Debug(`Setting up lazy injection for ${className}.${metaKey} -> ${identifier}`);
+  
+  if (options) {
+    options.isAsync = true;
+  }
+  
+  const app = container.getApp();
+  if (app?.once) {
+    app.once("appReady", () => {
+      try {
+        logger.Debug(`Lazy loading triggered for ${className}.${metaKey} -> ${identifier}`);
+        
+        const dep = container.get(identifier, type, ...args);
+        if (!dep) {
+          logger.Error(`Lazy loading failed: Component ${identifier} not found for ${className}.${metaKey}`);
+          return;
+        }
+        
+        const instance = container.getInsByClass(target);
+        if (!instance) {
+          logger.Error(`Lazy loading failed: Instance of ${className} not found`);
+          return;
+        }
+        
+        Object.defineProperty(instance, metaKey, {
+          enumerable: true,
+          configurable: false,
+          writable: true,
+          value: dep
+        });
+        
+        logger.Debug(`Lazy injection successful: ${className}.${metaKey} = ${dep.constructor.name}`);
+      } catch (error) {
+        logger.Error(`Lazy injection failed: ${className}.${metaKey}:`, error);
+      }
+    });
+  }
+}
+
+/**
+ * clear dependency cache
+ */
+export function clearDependencyCache(): void {
+  dependencyPreProcessCache.clear();
+  cacheStats = {
+    hits: 0,
+    misses: 0,
+    totalRequests: 0
+  };
+  logger.Debug("Dependency preprocessing LRU cache cleared");
+}
+
+/**
+ * optimize dependency cache
+ */
+export function optimizeDependencyCache(): void {
+  const initialSize = dependencyPreProcessCache.size;
+  
+  // lru cache will be optimized automatically, but we can manually clear stale items
+  dependencyPreProcessCache.purgeStale();
+  
+  const finalSize = dependencyPreProcessCache.size;
+  const cleaned = initialSize - finalSize;
+  
+  if (cleaned > 0) {
+    logger.Info(`Dependency cache optimized: removed ${cleaned} stale entries`);
+  }
+  
+  const stats = getDependencyCacheStats();
+  logger.Info(`Dependency cache stats - Size: ${stats.cacheSize}, Hit rate: ${(stats.hitRate * 100).toFixed(2)}%`);
 }

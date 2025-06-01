@@ -383,11 +383,17 @@ export interface IContainer {
   getCircularDependencies(): string[][];
 
   /**
-   * Preload metadata for components of a specific type
-   * Useful before batch registration of a particular component type
-   * @param type Component type to preload metadata for (optional, if not provided preloads all)
+   * 🚀 性能优化：统一的元数据预加载和性能优化方法
+   * 集成了所有性能优化功能，默认开启优化
+   * @param types 组件类型数组，如果为空则处理所有类型
+   * @param options 预加载选项，默认开启所有优化
    */
-  preloadMetadata(type?: string): void;
+  preloadMetadata(types?: string[], options?: {
+    optimizePerformance?: boolean;
+    warmupCaches?: boolean;
+    batchPreProcessDependencies?: boolean;
+    clearStaleCache?: boolean;
+  }): void;
 
   /**
    * Get performance statistics including cache hit rates and memory usage
@@ -404,9 +410,20 @@ export interface IContainer {
   };
 
   /**
-   * Optimize container performance
+   * Batch register components
    */
-  optimizePerformance(): void;
+  batchRegister(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[], 
+                batchOptions?: { preProcessDependencies?: boolean, warmupAOP?: boolean }): void;
+
+  /**
+   * Get detailed performance statistics
+   */
+  getDetailedPerformanceStats(): any;
+
+  /**
+   * Clear performance cache
+   */
+  clearPerformanceCache(): void;
 
   /**
    * Get version conflict detector
