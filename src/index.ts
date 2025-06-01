@@ -13,6 +13,6 @@ export * from "./utils/MetadataOpertor";
 
 // Export performance optimization and utility classes
 export { MetadataCache } from "./utils/MetadataCache";
-export { CircularDependencyDetector, CircularDependencyError } from "./utils/CircularDependencyDetector";
+export { CircularDepDetector, CircularDepError } from "./utils/CircularDepDetector";
 export { VersionConflictDetector, VersionConflictError } from "./utils/VersionConflictDetector";
 

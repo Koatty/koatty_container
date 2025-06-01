@@ -16,19 +16,19 @@ import { DefaultLogger as logger } from "koatty_logger";
  * @method getDetailedMessage - Returns a formatted string with error details including dependency chain and circular path
  * @method toJSON - Converts error to JSON format for logging purposes
  */
-export class CircularDependencyError extends Error {
+export class CircularDepError extends Error {
   public readonly dependencyChain: string[];
   public readonly circularPath: string[];
 
   constructor(message: string, dependencyChain: string[], circularPath: string[]) {
     super(message);
-    this.name = 'CircularDependencyError';
+    this.name = 'CircularDepError';
     this.dependencyChain = dependencyChain;
     this.circularPath = circularPath;
 
     // capture stack trace
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CircularDependencyError);
+      Error.captureStackTrace(this, CircularDepError);
     }
   }
 
@@ -91,7 +91,7 @@ interface DependencyNode {
  * 
  * The detector uses a depth-first search approach to identify cycles in the dependency graph.
  */
-export class CircularDependencyDetector {
+export class CircularDepDetector {
   private dependencyGraph: Map<string, DependencyNode> = new Map();
   private resolutionStack: string[] = [];
   private visitedInCurrentPath: Set<string> = new Set();
@@ -151,7 +151,7 @@ export class CircularDependencyDetector {
     // check if the component is already in the current resolution path
     if (this.visitedInCurrentPath.has(identifier)) {
       const circularPath = this.buildCircularPath(identifier);
-      throw new CircularDependencyError(
+      throw new CircularDepError(
         `Circular dependency detected: ${identifier}`,
         [...this.resolutionStack],
         circularPath

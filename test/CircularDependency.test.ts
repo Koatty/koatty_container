@@ -1,5 +1,5 @@
 import { IOC } from "../src/container/Container";
-import { CircularDependencyError } from "../src/utils/CircularDependencyDetector";
+import { CircularDepError } from "../src/utils/CircularDepDetector";
 import { Autowired } from "../src/decorator/Autowired";
 
 // normal non-circular dependency
@@ -94,7 +94,7 @@ describe("Circular Dependency Detection", () => {
       expect(() => {
         IOC.reg(UserService);
         IOC.reg(OrderService);
-      }).toThrow(CircularDependencyError);
+      }).toThrow(CircularDepError);
     });
 
     test("Should detect complex circular dependency chain", () => {
@@ -102,7 +102,7 @@ describe("Circular Dependency Detection", () => {
         IOC.reg(ServiceA);
         IOC.reg(ServiceB);
         IOC.reg(ServiceC);
-      }).toThrow(CircularDependencyError);
+      }).toThrow(CircularDepError);
     });
 
     test("Should handle delayed loading for circular dependencies", () => {
@@ -220,14 +220,14 @@ describe("Circular Dependency Detection", () => {
         IOC.reg(UserService);
         IOC.reg(OrderService);
       } catch (error) {
-        if (error instanceof CircularDependencyError) {
+        if (error instanceof CircularDepError) {
           expect(error.dependencyChain).toBeDefined();
           expect(error.circularPath).toBeDefined();
           expect(error.getDetailedMessage()).toContain("依赖链");
           expect(error.getDetailedMessage()).toContain("循环路径");
           
           const json = error.toJSON();
-          expect(json.name).toBe("CircularDependencyError");
+          expect(json.name).toBe("CircularDepError");
           expect(json.dependencyChain).toBeDefined();
           expect(json.circularPath).toBeDefined();
         }

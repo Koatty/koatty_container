@@ -27,8 +27,8 @@ export const TAGGED_METHOD = 'TAGGED_METHOD';
 
 export type ClassOrString<T> = string | (new () => T);
 
-// Forward declaration for CircularDependencyDetector
-export interface CircularDependencyDetector {
+// Forward declaration for CircularDepDetector
+export interface CircularDepDetector {
   registerComponent(identifier: string, className: string, dependencies?: string[]): void;
   addDependency(from: string, to: string): void;
   startResolving(identifier: string): void;
@@ -355,9 +355,9 @@ export interface IContainer {
 
   /**
    * Get circular dependency detector
-   * @returns {CircularDependencyDetector} The circular dependency detector instance
+   * @returns {CircularDepDetector} The circular dependency detector instance
    */
-  getCircularDependencyDetector(): CircularDependencyDetector;
+  getCircularDependencyDetector(): CircularDepDetector;
 
   /**
    * Generate and log dependency analysis report

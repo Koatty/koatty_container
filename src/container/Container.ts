@@ -21,7 +21,7 @@ import {
 } from "./IContainer";
 
 // import circular dependency detector
-import { CircularDependencyDetector, CircularDependencyError } from "../utils/CircularDependencyDetector";
+import { CircularDepDetector, CircularDepError } from "../utils/CircularDepDetector";
 import { MetadataCache } from "../utils/MetadataCache";
 import { VersionConflictDetector, VersionConflictError } from "../utils/VersionConflictDetector";
 import { DefaultLogger as logger } from "koatty_logger";
@@ -61,7 +61,7 @@ export class Container implements IContainer {
   private static initializationPromise: Promise<Container> | null = null;
   
   // circular dependency detector
-  private circularDependencyDetector: CircularDependencyDetector;
+  private circularDependencyDetector: CircularDepDetector;
   
   // performance optimization components
   private metadataCache: MetadataCache;
@@ -156,7 +156,7 @@ export class Container implements IContainer {
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
-    this.circularDependencyDetector = new CircularDependencyDetector();
+    this.circularDependencyDetector = new CircularDepDetector();
     
     // Initialize metadata cache for real-world performance optimization
     this.metadataCache = new MetadataCache({
@@ -222,9 +222,9 @@ export class Container implements IContainer {
 
   /**
    * Get circular dependency detector
-   * @returns {CircularDependencyDetector} The circular dependency detector instance
+   * @returns {CircularDepDetector} The circular dependency detector instance
    */
-  public getCircularDependencyDetector(): CircularDependencyDetector {
+  public getCircularDependencyDetector(): CircularDepDetector {
     return this.circularDependencyDetector;
   }
 
@@ -425,7 +425,7 @@ export class Container implements IContainer {
    * @param target - Optional target class/instance or options
    * @param options - Optional configuration for the registration
    * @throws {Error} When target is not a class
-   * @throws {CircularDependencyError} When circular dependency is detected
+   * @throws {CircularDepError} When circular dependency is detected
    * 
    * @example
    * ```ts
@@ -507,7 +507,7 @@ export class Container implements IContainer {
         this.circularDependencyDetector.finishResolving(identifier);
         
       } catch (error) {
-        if (error instanceof CircularDependencyError) {
+        if (error instanceof CircularDepError) {
           // log circular dependency error details
           logger.Error("Circular dependency detection failed:", error.toJSON());
           logger.Error("Detailed information:", error.getDetailedMessage());
@@ -621,7 +621,7 @@ export class Container implements IContainer {
       
     } catch (error) {
       // if it is a circular dependency error, throw it again
-      if (error instanceof CircularDependencyError) {
+      if (error instanceof CircularDepError) {
         throw error;
       }
       
@@ -638,7 +638,7 @@ export class Container implements IContainer {
    * @param type - Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE)
    * @param args - Constructor arguments
    * @returns Component instance or null if not found
-   * @throws {CircularDependencyError} When circular dependency is detected during resolution
+   * @throws {CircularDepError} When circular dependency is detected during resolution
    * 
    * @description
    * Returns singleton instance from cache by default.
@@ -683,7 +683,7 @@ export class Container implements IContainer {
         if (isPrototype) {
           const cycle = this.circularDependencyDetector.detectCircularDependency(className);
           if (cycle) {
-            const circularError = new CircularDependencyError(
+            const circularError = new CircularDepError(
               `Prototype scope component has circular dependency: ${className}`,
               [className],
               cycle
@@ -697,7 +697,7 @@ export class Container implements IContainer {
         overridePrototypeValue(<Function>instance);
         return instance as T;
       } catch (error) {
-        if (error instanceof CircularDependencyError) {
+        if (error instanceof CircularDepError) {
           throw error;
         }
         throw new Error(`Failed to create instance of ${className}: ${error.message}`);

@@ -13,7 +13,7 @@ import {
   TAGGED_PROP
 } from "../container/IContainer";
 import { recursiveGetMetadata } from "../utils/MetadataOpertor";
-import { CircularDependencyError } from "../utils/CircularDependencyDetector";
+import { CircularDepError } from "../utils/CircularDepDetector";
 
 /**
  * Inject autowired dependencies into the target class.
@@ -25,7 +25,7 @@ import { CircularDependencyError } from "../utils/CircularDependencyDetector";
  * @param isLazy Whether to use lazy loading for dependencies
  * 
  * @throws {Error} When a required dependency is not found and lazy loading is disabled
- * @throws {CircularDependencyError} When circular dependency is detected
+ * @throws {CircularDepError} When circular dependency is detected
  * 
  * @description
  * This function handles the injection of autowired dependencies by:
@@ -101,7 +101,7 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
               try {
                 injectAutowired(target, prototypeChain, container, options, true);
               } catch (lazyError) {
-                if (lazyError instanceof CircularDependencyError) {
+                if (lazyError instanceof CircularDepError) {
                   logger.Error(`Circular dependency still exists when injecting lazily: ${className}.${metaKey}:`, lazyError.getDetailedMessage());
                   
                   // provide resolution suggestions
@@ -140,7 +140,7 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
           });
         }
       } catch (error) {
-        if (error instanceof CircularDependencyError) {
+        if (error instanceof CircularDepError) {
           logger.Error(`Circular dependency error in ${className}.${metaKey}:`, error.getDetailedMessage());
           
           // if not lazy loading, try to enable lazy loading
