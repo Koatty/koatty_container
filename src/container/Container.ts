@@ -17,11 +17,12 @@ import {
 import {
   Application,
   ComponentType, Constructor, IContainer,
-  ObjectDefinitionOptions, TAGGED_CLS
+  ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
 } from "./IContainer";
 
 // import circular dependency detector
 import { CircularDependencyDetector, CircularDependencyError } from "../utils/CircularDependencyDetector";
+import { MetadataCache } from "../utils/MetadataCache";
 import { DefaultLogger as logger } from "koatty_logger";
 
 /**
@@ -32,12 +33,13 @@ import { DefaultLogger as logger } from "koatty_logger";
  * Features:
  * - Singleton instance management
  * - Class and instance registration
- * - Metadata management
+ * - Metadata management with intelligent caching
  * - Dependency injection
  * - Component lifecycle management
  * - Property injection
  * - AOP support
  * - Circular dependency detection
+ * - High-performance metadata caching for real-world scenarios
  * 
  * @class Container
  * @implements {IContainer}
@@ -51,6 +53,9 @@ export class Container implements IContainer {
   
   // circular dependency detector
   private circularDependencyDetector: CircularDependencyDetector;
+  
+  // performance optimization components
+  private metadataCache: MetadataCache;
 
   /**
    * Get singleton instance of Container
@@ -72,6 +77,15 @@ export class Container implements IContainer {
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
     this.circularDependencyDetector = new CircularDependencyDetector();
+    
+    // Initialize metadata cache for real-world performance optimization
+    this.metadataCache = new MetadataCache({
+      capacity: 2000,
+      defaultTTL: 10 * 60 * 1000, // 10 minutes
+      maxMemoryUsage: 100 * 1024 * 1024 // 100MB
+    });
+    
+    logger.Debug("Container initialized with metadata cache optimization");
   }
 
   /**
@@ -97,6 +111,188 @@ export class Container implements IContainer {
    */
   public getCircularDependencyDetector(): CircularDependencyDetector {
     return this.circularDependencyDetector;
+  }
+
+  /**
+   * Get metadata cache instance
+   * @returns {MetadataCache} The metadata cache instance
+   */
+  public getMetadataCache(): MetadataCache {
+    return this.metadataCache;
+  }
+
+  /**
+   * Preload metadata for components of a specific type
+   * Useful before batch registration of a particular component type
+   * @param type Component type to preload metadata for (optional, if not provided preloads all)
+   * @example
+   * // Before registering all controllers:
+   * IOC.preloadMetadata('CONTROLLER');
+   * const controllers = IOC.listClass('CONTROLLER');
+   * controllers.forEach(({target, id}) => IOC.reg(target));
+   */
+  public preloadMetadata(type?: ComponentType): void {
+    const startTime = Date.now();
+    
+    logger.Info(`Starting metadata preload for ${type || 'all'} components...`);
+    
+    // Get components to preload for
+    const componentsToPreload = type 
+      ? this.listClass(type)
+      : Array.from(this.classMap.entries()).map(([key, target]) => ({
+          id: key,
+          target
+        }));
+    
+    if (componentsToPreload.length === 0) {
+      logger.Warn(`No components found for type: ${type || 'all'}`);
+      return;
+    }
+    
+    // Register frequently accessed metadata keys for preloading
+    const preloadKeys: string[] = [];
+    
+    componentsToPreload.forEach(({ target, id }) => {
+      const [, identifier] = id.split(':');
+      
+      // Common metadata keys that are frequently accessed during injection
+      preloadKeys.push(
+        // Reflect metadata for constructor parameters
+        `reflect:design:paramtypes:${identifier}`,
+        // Property injection metadata
+        `property:${TAGGED_PROP}:${identifier}`,
+        // Class decoration metadata
+        `class:${TAGGED_CLS}:${TAGGED_AOP}:${identifier}`,
+        // Autowired properties
+        `reflect:autowired:${identifier}`,
+        // Values properties
+        `reflect:values:${identifier}`
+      );
+      
+      // Preload property-specific metadata
+      const propertyNames = Object.getOwnPropertyNames(target.prototype);
+      propertyNames.forEach(propName => {
+        if (propName !== 'constructor') {
+          preloadKeys.push(
+            `reflect:${propName}:autowired:${identifier}`,
+            `reflect:${propName}:values:${identifier}`
+          );
+        }
+      });
+    });
+    
+    this.metadataCache.registerForPreload(preloadKeys);
+    
+    // Preload metadata using Reflect API
+    let preloadedCount = 0;
+    this.metadataCache.preload((key: string) => {
+      try {
+        const parts = key.split(':');
+        const [cacheType, metadataKey, targetName, propertyKey] = parts;
+        
+        const target = this.findTargetByName(targetName);
+        if (!target) return undefined;
+        
+        if (cacheType === 'reflect') {
+          const value = propertyKey && propertyKey !== targetName
+            ? Reflect.getMetadata(metadataKey, target, propertyKey)
+            : Reflect.getMetadata(metadataKey, target);
+          
+          if (value !== undefined) {
+            preloadedCount++;
+          }
+          return value;
+        }
+        
+        return undefined;
+      } catch (error) {
+        logger.Debug(`Failed to preload metadata for key ${key}:`, error);
+        return undefined;
+      }
+    });
+    
+    const preloadTime = Date.now() - startTime;
+    const cacheStats = this.metadataCache.getStats();
+    
+    logger.Info(`Metadata preload completed in ${preloadTime}ms:`);
+    logger.Info(`  - Components processed: ${componentsToPreload.length}`);
+    logger.Info(`  - Metadata entries preloaded: ${preloadedCount}`);
+    logger.Info(`  - Cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
+  }
+
+  /**
+   * Find target class by name
+   */
+  private findTargetByName(name: string): Function | undefined {
+    for (const [, target] of this.classMap) {
+      if (target.name === name) {
+        return target;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Get performance statistics
+   */
+  public getPerformanceStats(): {
+    cache: any;
+    totalRegistered: number;
+    memoryUsage: {
+      classMap: number;
+      instanceMap: number;
+      metadataMap: number;
+    };
+  } {
+    const cacheStats = this.metadataCache.getStats();
+    
+    return {
+      cache: cacheStats,
+      totalRegistered: this.classMap.size,
+      memoryUsage: {
+        classMap: this.classMap.size,
+        instanceMap: this.getInstanceMapSize(),
+        metadataMap: this.getMetadataMapSize()
+      }
+    };
+  }
+
+  /**
+   * Estimate instance map size
+   */
+  private getInstanceMapSize(): number {
+    // WeakMap size cannot be directly determined, estimate based on class map
+    return this.classMap.size;
+  }
+
+  /**
+   * Estimate metadata map size
+   */
+  private getMetadataMapSize(): number {
+    // WeakMap size cannot be directly determined, estimate based on class map
+    return this.classMap.size * 3; // Rough estimate
+  }
+
+  /**
+   * Optimize container performance
+   */
+  public optimizePerformance(): void {
+    logger.Info("Starting container performance optimization...");
+    
+    const startTime = Date.now();
+    
+    // Optimize metadata cache
+    this.metadataCache.optimize();
+    
+    // Preload frequently accessed metadata
+    this.preloadMetadata();
+    
+    const optimizationTime = Date.now() - startTime;
+    logger.Info(`Container performance optimization completed in ${optimizationTime}ms`);
+    
+    // Log performance statistics
+    const stats = this.getPerformanceStats();
+    logger.Info("Performance statistics:", stats);
   }
 
   /**
@@ -145,12 +341,14 @@ export class Container implements IContainer {
         ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
       };
 
+      const dependencies = this.extractDependencies(target);
+
       try {
         // register component to circular dependency detector
         this.circularDependencyDetector.registerComponent(
           identifier,
           (target as Function).name,
-          this.extractDependencies(target)
+          dependencies
         );
 
         // define app
@@ -204,27 +402,46 @@ export class Container implements IContainer {
   }
 
   /**
-   * Extract the dependencies of a class
+   * Extract the dependencies of a class with caching
    * @param target The target class
    * @returns {string[]} An array of dependencies
    */
   private extractDependencies(target: any): string[] {
+    // Check cache first
+    const cachedDependencies = this.metadataCache.getCachedDependencies(target);
+    if (cachedDependencies) {
+      return cachedDependencies;
+    }
+
     const dependencies: string[] = [];
     
     try {
-      // get constructor parameter types
-      const paramTypes = Reflect.getMetadata('design:paramtypes', target) || [];
+      // get constructor parameter types with caching
+      let paramTypes = this.metadataCache.getReflectMetadata('design:paramtypes', target);
+      if (!paramTypes) {
+        paramTypes = Reflect.getMetadata('design:paramtypes', target) || [];
+        this.metadataCache.setReflectMetadata('design:paramtypes', target, paramTypes);
+      }
+      
       paramTypes.forEach((type: any) => {
         if (type && type.name) {
           dependencies.push(type.name);
         }
       });
 
-      // get @Autowired decorated properties
+      // get @Autowired decorated properties with caching
       const props = Object.getOwnPropertyNames(target.prototype);
       props.forEach(prop => {
         const metaKey = `${prop}:autowired`;
-        const propMetadata = Reflect.getMetadata(metaKey, target);
+        let propMetadata = this.metadataCache.getReflectMetadata(metaKey, target);
+        
+        if (!propMetadata) {
+          propMetadata = Reflect.getMetadata(metaKey, target);
+          if (propMetadata) {
+            this.metadataCache.setReflectMetadata(metaKey, target, propMetadata);
+          }
+        }
+        
         if (propMetadata && propMetadata.identifier) {
           dependencies.push(propMetadata.identifier);
         }
@@ -234,6 +451,9 @@ export class Container implements IContainer {
       logger.Debug(`Failed to extract dependencies of ${target.name}:`, error);
     }
 
+    // Cache the extracted dependencies
+    this.metadataCache.setCachedDependencies(target, dependencies);
+    
     return dependencies;
   }
 
@@ -499,7 +719,7 @@ export class Container implements IContainer {
   }
 
   /**
-   * Save class metadata to the container.
+   * Save class metadata to the container with caching.
    * @param type The type of metadata
    * @param decoratorNameKey The decorator name or symbol key
    * @param data The metadata to be saved
@@ -515,6 +735,43 @@ export class Container implements IContainer {
     propertyName?: string) {
     const originMap = this.getMetadataMap(type, target, propertyName);
     originMap.set(decoratorNameKey, data);
+    
+    // Cache the metadata for faster access
+    this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, data, propertyName);
+  }
+
+  /**
+   * Get metadata value by type and decorator key with caching.
+   * 
+   * @param type The metadata type
+   * @param decoratorNameKey The decorator name or symbol key
+   * @param target The target class or object
+   * @param propertyName Optional property name
+   * @returns The metadata value associated with the decorator key
+   * @example
+   * ```ts
+   * const value = container.getClassMetadata('key', 'name', UserService);
+   * const value = container.getClassMetadata('key', 'name', UserService, 'method');
+   * ```
+   */
+  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object,
+    propertyName?: string) {
+    // Try cache first
+    const cachedValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName);
+    if (cachedValue !== undefined) {
+      return cachedValue;
+    }
+    
+    // Fallback to original method
+    const originMap = this.getMetadataMap(type, target, propertyName);
+    const value = originMap.get(decoratorNameKey);
+    
+    // Cache the result for next time
+    if (value !== undefined) {
+      this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, value, propertyName);
+    }
+    
+    return value;
   }
 
   /**
@@ -537,30 +794,15 @@ export class Container implements IContainer {
       originMap.set(decoratorNameKey, []);
     }
     originMap.get(decoratorNameKey).push(data);
+    
+    // Update cache
+    const currentValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName) || [];
+    currentValue.push(data);
+    this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, currentValue, propertyName);
   }
 
   /**
-   * Get metadata value by type and decorator key.
-   * 
-   * @param type The metadata type
-   * @param decoratorNameKey The decorator name or symbol key
-   * @param target The target class or object
-   * @param propertyName Optional property name
-   * @returns The metadata value associated with the decorator key
-   * @example
-   * ```ts
-   * const value = container.getClassMetadata('key', 'name', UserService);
-   * const value = container.getClassMetadata('key', 'name', UserService, 'method');
-   * ```
-   */
-  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object,
-    propertyName?: string) {
-    const originMap = this.getMetadataMap(type, target, propertyName);
-    return originMap.get(decoratorNameKey);
-  }
-
-  /**
-   * Save property metadata to the container.
+   * Save property metadata to the container with caching.
    * 
    * @param decoratorNameKey The key of the decorator metadata
    * @param data The metadata to be saved
@@ -575,6 +817,9 @@ export class Container implements IContainer {
     propertyName: string | symbol) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     originMap.set(propertyName, data);
+    
+    // Cache the property metadata
+    this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, data);
   }
 
   /**
@@ -596,10 +841,15 @@ export class Container implements IContainer {
       originMap.set(propertyName, []);
     }
     originMap.get(propertyName).push(data);
+    
+    // Update cache
+    const currentValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName) || [];
+    currentValue.push(data);
+    this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, currentValue);
   }
 
   /**
-   * Get property metadata by decorator name key.
+   * Get property metadata by decorator name key with caching.
    * 
    * @param decoratorNameKey The decorator name key
    * @param target The target class or object
@@ -612,8 +862,22 @@ export class Container implements IContainer {
    */
   public getPropertyData(decoratorNameKey: string | symbol, target: Function | object,
     propertyName: string | symbol) {
+    // Try cache first
+    const cachedValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName);
+    if (cachedValue !== undefined) {
+      return cachedValue;
+    }
+    
+    // Fallback to original method
     const originMap = this.getMetadataMap(decoratorNameKey, target);
-    return originMap.get(propertyName);
+    const value = originMap.get(propertyName);
+    
+    // Cache the result
+    if (value !== undefined) {
+      this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, value);
+    }
+    
+    return value;
   }
 
   /**
@@ -694,6 +958,11 @@ export class Container implements IContainer {
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
     this.circularDependencyDetector.clear();
+    
+    // Clear performance optimization components
+    this.metadataCache.clear();
+    
+    logger.Debug("Container cleared including performance optimization components");
   }
 }
 

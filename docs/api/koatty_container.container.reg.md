@@ -28,6 +28,8 @@ void
 
 {<!-- -->Error<!-- -->} When target is not a class
 
+{<!-- -->CircularDependencyError<!-- -->} When circular dependency is detected
+
 ## Example
 
 

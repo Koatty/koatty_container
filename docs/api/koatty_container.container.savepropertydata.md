@@ -4,7 +4,7 @@
 
 ## Container.savePropertyData() method
 
-Save property metadata to the container.
+Save property metadata to the container with caching.
 
 **Signature:**
 

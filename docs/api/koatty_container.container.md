@@ -6,7 +6,7 @@
 
 Container class implements IContainer interface for dependency injection. Manages class instances, metadata, and dependency injection in an IOC container. Uses singleton pattern to ensure only one container instance exists.
 
-Features: - Singleton instance management - Class and instance registration - Metadata management - Dependency injection - Component lifecycle management - Property injection - AOP support
+Features: - Singleton instance management - Class and instance registration - Metadata management with intelligent caching - Dependency injection - Component lifecycle management - Property injection - AOP support - Circular dependency detection - High-performance metadata caching for real-world scenarios
 
  Container  {<!-- -->IContainer<!-- -->}
 
@@ -24,21 +24,29 @@ export declare class Container implements IContainer
 |  [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.attachclassmetadata.md) |  | Attach class metadata to the target. |
 |  [attachPropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.container.attachpropertydata.md) |  | Attach property metadata to the target object/class. |
 |  [clear()](./koatty_container.container.clear.md) |  | clear all resources in container  Container |
+|  [generateDependencyReport()](./koatty_container.container.generatedependencyreport.md) |  | Generate and log dependency analysis report |
 |  [get(identifier, type, args)](./koatty_container.container.get.md) |  | Get component instance by identifier. |
 |  [getApp()](./koatty_container.container.getapp.md) |  | Get the application instance. |
+|  [getCircularDependencies()](./koatty_container.container.getcirculardependencies.md) |  | Get all circular dependencies |
+|  [getCircularDependencyDetector()](./koatty_container.container.getcirculardependencydetector.md) |  | Get circular dependency detector |
 |  [getClass(identifier, type)](./koatty_container.container.getclass.md) |  | Get class by identifier and type from container. |
-|  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.container.getclassmetadata.md) |  | Get metadata value by type and decorator key. |
+|  [getClassMetadata(type, decoratorNameKey, target, propertyName)](./koatty_container.container.getclassmetadata.md) |  | Get metadata value by type and decorator key with caching. |
 |  [getIdentifier(target)](./koatty_container.container.getidentifier.md) |  | Get the identifier for a target class or object. |
 |  [getInsByClass(target, args)](./koatty_container.container.getinsbyclass.md) |  | Get instance by class constructor |
 |  [getInstance()](./koatty_container.container.getinstance.md) | <code>static</code> | Get singleton instance of Container |
+|  [getMetadataCache()](./koatty_container.container.getmetadatacache.md) |  | Get metadata cache instance |
 |  [getMetadataMap(metadataKey, target, propertyKey)](./koatty_container.container.getmetadatamap.md) |  | Get metadata map for the specified target and key. |
-|  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.container.getpropertydata.md) |  | Get property metadata by decorator name key. |
+|  [getPerformanceStats()](./koatty_container.container.getperformancestats.md) |  | Get performance statistics |
+|  [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.container.getpropertydata.md) |  | Get property metadata by decorator name key with caching. |
 |  [getType(target)](./koatty_container.container.gettype.md) |  | Get the component type of target class or object. |
+|  [hasCircularDependencies()](./koatty_container.container.hascirculardependencies.md) |  | Check for circular dependencies in the container |
 |  [listClass(type)](./koatty_container.container.listclass.md) |  | List all registered classes of specified component type. |
 |  [listPropertyData(decoratorNameKey, target)](./koatty_container.container.listpropertydata.md) |  | Get property data by decorator name key. |
+|  [optimizePerformance()](./koatty_container.container.optimizeperformance.md) |  | Optimize container performance |
+|  [preloadMetadata(type)](./koatty_container.container.preloadmetadata.md) |  | Preload metadata for components of a specific type Useful before batch registration of a particular component type |
 |  [reg(identifier, target, options)](./koatty_container.container.reg.md) |  | Register a class or instance to the container. |
 |  [saveClass(type, module, identifier)](./koatty_container.container.saveclass.md) |  | Save class metadata and store class module in container. |
-|  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.saveclassmetadata.md) |  | Save class metadata to the container. |
-|  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.container.savepropertydata.md) |  | Save property metadata to the container. |
+|  [saveClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.saveclassmetadata.md) |  | Save class metadata to the container with caching. |
+|  [savePropertyData(decoratorNameKey, data, target, propertyName)](./koatty_container.container.savepropertydata.md) |  | Save property metadata to the container with caching. |
 |  [setApp(app)](./koatty_container.container.setapp.md) |  | Set application instance |
 

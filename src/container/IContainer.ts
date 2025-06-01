@@ -375,6 +375,32 @@ export interface IContainer {
    * @returns {string[][]} Array of circular dependency paths
    */
   getCircularDependencies(): string[][];
+
+  /**
+   * Preload metadata for components of a specific type
+   * Useful before batch registration of a particular component type
+   * @param type Component type to preload metadata for (optional, if not provided preloads all)
+   */
+  preloadMetadata(type?: ComponentType): void;
+
+  /**
+   * Get performance statistics including cache hit rates and memory usage
+   * @returns Performance statistics object
+   */
+  getPerformanceStats(): {
+    cache: any;
+    totalRegistered: number;
+    memoryUsage: {
+      classMap: number;
+      instanceMap: number;
+      metadataMap: number;
+    };
+  };
+
+  /**
+   * Optimize container performance
+   */
+  optimizePerformance(): void;
 }
 
 

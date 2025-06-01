@@ -4,7 +4,7 @@
 
 ## Container.saveClassMetadata() method
 
-Save class metadata to the container.
+Save class metadata to the container with caching.
 
 **Signature:**
 

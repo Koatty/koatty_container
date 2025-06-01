@@ -4,7 +4,7 @@
 
 ## Container.getClassMetadata() method
 
-Get metadata value by type and decorator key.
+Get metadata value by type and decorator key with caching.
 
 **Signature:**
 

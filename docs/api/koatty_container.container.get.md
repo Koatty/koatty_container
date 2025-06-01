@@ -26,6 +26,10 @@ T
 
 Component instance or null if not found
 
+## Exceptions
+
+{<!-- -->CircularDependencyError<!-- -->} When circular dependency is detected during resolution
+
  Returns singleton instance from cache by default. Creates new instance when: 1. Constructor arguments are provided 2. Component scope is Prototype
 
 ## Example

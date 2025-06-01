@@ -4,7 +4,7 @@
 
 ## Container.getPropertyData() method
 
-Get property metadata by decorator name key.
+Get property metadata by decorator name key with caching.
 
 **Signature:**
 
