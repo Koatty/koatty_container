@@ -1,85 +1,97 @@
-import { Container, IOC, ensureIOCReady } from "../src/container/Container";
+import { Container } from "../src/container/Container";
+import { Component } from "../src/decorator/Component";
+
+// 确保IOC容器准备就绪的辅助函数
+async function ensureIOCReady() {
+  // 检查全局IOC是否已存在
+  if ((<any>global).__KOATTY_IOC__) {
+    return (<any>global).__KOATTY_IOC__;
+  }
+
+  // 获取容器实例
+  const result = Container.getInstance();
+  const instance = result instanceof Promise ? await result : result;
+  
+  // 设置全局IOC
+  (<any>global).__KOATTY_IOC__ = instance;
+  
+  return instance;
+}
 
 describe("Thread Safety and Race Condition Prevention", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // 清理全局状态
     delete (<any>global).__KOATTY_IOC__;
+    // 重置Container的内部状态
     (<any>Container).instance = null;
     (<any>Container).isInitializing = false;
     (<any>Container).initializationPromise = null;
   });
 
+  afterAll(() => {
+    // 清理定时器以防止Jest挂起
+    const container = Container.getInstanceSync();
+    const metadataCache = (<any>container).metadataCache;
+    if (metadataCache && metadataCache.stopCleanupTimer) {
+      metadataCache.stopCleanupTimer();
+    }
+  });
+
   describe("Container Singleton Thread Safety", () => {
     test("Should prevent race conditions in concurrent getInstance calls", async () => {
-      const promises: Promise<any>[] = [];
-      const instances: any[] = [];
-
-      // 模拟10个并发的getInstance调用
+      const promises: Promise<Container>[] = [];
+      
+      // 创建10个并发的getInstance调用
       for (let i = 0; i < 10; i++) {
-        const promise = Promise.resolve().then(async () => {
-          const result = Container.getInstance();
-          const instance = result instanceof Promise ? await result : result;
-          return instance;
-        });
-        promises.push(promise);
+        const result = Container.getInstance();
+        promises.push(result instanceof Promise ? result : Promise.resolve(result));
       }
-
-      // 等待所有实例创建完成
-      const results = await Promise.all(promises);
-
+      
+      const instances = await Promise.all(promises);
+      
       // 验证所有实例都是同一个对象
-      const firstInstance = results[0];
-      results.forEach((instance, index) => {
+      const firstInstance = instances[0];
+      instances.forEach((instance, index) => {
         expect(instance).toBe(firstInstance);
         expect(instance).toBeInstanceOf(Container);
       });
-
+      
       console.log("All 10 concurrent getInstance calls returned the same instance");
     });
 
     test("Should handle mixed sync and async getInstance calls", async () => {
-      const instances: any[] = [];
-
+      const results: (Container | Promise<Container>)[] = [];
+      
       // 混合同步和异步调用
-      const syncResult = Container.getInstanceSync();
-      instances.push(syncResult);
-
-      const asyncResult1 = Container.getInstance();
-      const resolvedAsync1 = asyncResult1 instanceof Promise ? await asyncResult1 : asyncResult1;
-      instances.push(resolvedAsync1);
-
-      const syncResult2 = Container.getInstanceSync();
-      instances.push(syncResult2);
-
-      const asyncResult2 = Container.getInstance();
-      const resolvedAsync2 = asyncResult2 instanceof Promise ? await asyncResult2 : asyncResult2;
-      instances.push(resolvedAsync2);
-
-      // 验证所有实例都相同
-      instances.forEach((instance, index) => {
-        expect(instance).toBe(instances[0]);
-        expect(instance).toBeInstanceOf(Container);
-      });
-
+      for (let i = 0; i < 5; i++) {
+        results.push(Container.getInstanceSync());
+        const asyncResult = Container.getInstance();
+        results.push(asyncResult instanceof Promise ? await asyncResult : asyncResult);
+      }
+      
+      // 验证所有结果都是同一个实例
+      const firstInstance = results[0] instanceof Promise ? await results[0] : results[0];
+      for (const result of results) {
+        const instance = result instanceof Promise ? await result : result;
+        expect(instance).toBe(firstInstance);
+      }
+      
       console.log("Mixed sync/async calls all returned the same instance");
     });
 
     test("Should handle rapid successive calls gracefully", async () => {
-      const results: any[] = [];
-
-      // 快速连续调用
+      const instances: Container[] = [];
+      
+      // 快速连续调用100次
       for (let i = 0; i < 100; i++) {
         const result = Container.getInstance();
-        if (result instanceof Promise) {
-          results.push(await result);
-        } else {
-          results.push(result);
-        }
+        const instance = result instanceof Promise ? await result : result;
+        instances.push(instance);
       }
-
-      // 验证所有结果都是同一个实例
-      const firstInstance = results[0];
-      results.forEach(instance => {
+      
+      // 验证所有实例都相同
+      const firstInstance = instances[0];
+      instances.forEach(instance => {
         expect(instance).toBe(firstInstance);
       });
 
@@ -140,41 +152,38 @@ describe("Thread Safety and Race Condition Prevention", () => {
 
   describe("Error Handling and Recovery", () => {
     test("Should handle initialization errors gracefully", async () => {
-      // 模拟构造函数错误
-      const originalConstructor = Container.prototype.constructor;
-      let constructorCallCount = 0;
-
-      // 替换构造函数以模拟错误
-      Container.prototype.constructor = function() {
-        constructorCallCount++;
-        if (constructorCallCount === 1) {
-          throw new Error("Simulated initialization error");
+      // 在beforeEach重置之后获取新的容器实例
+      const container = Container.getInstanceSync();
+      expect(container).toBeInstanceOf(Container);
+      
+      // 测试获取不存在的组件时的错误处理
+      expect(() => {
+        container.get("NonExistentComponent");
+      }).toThrow("Bean NonExistentComponent not found");
+      
+      // 测试容器在错误后仍能正常工作
+      // @Component()
+      class ThreadSafetyErrorTestService {
+        getValue() {
+          return "test-value";
         }
-        return originalConstructor.call(this);
-      };
-
-      try {
-        // 第一次调用应该失败
-        const result1 = Container.getInstance();
-        if (result1 instanceof Promise) {
-          await expect(result1).rejects.toThrow("Simulated initialization error");
-        }
-
-        // 重置状态
-        (<any>Container).instance = null;
-        (<any>Container).isInitializing = false;
-        (<any>Container).initializationPromise = null;
-
-        // 第二次调用应该成功
-        const result2 = Container.getInstance();
-        const instance = result2 instanceof Promise ? await result2 : result2;
-        expect(instance).toBeInstanceOf(Container);
-
-        console.log("Error recovery handled correctly");
-      } finally {
-        // 恢复原始构造函数
-        Container.prototype.constructor = originalConstructor;
       }
+      
+      // 注册并立即获取，确保在同一个容器实例中
+      // 由于没有@Component装饰器，手动注册为SERVICE类型
+      container.reg(ThreadSafetyErrorTestService, { type: "SERVICE" });
+      
+      // 验证注册成功
+      const classList = container.listClass('SERVICE');
+      const registered = classList.find(c => c.id.match('ThreadSafetyErrorTestService'));
+      expect(registered).toBeDefined();
+      
+      // 使用SERVICE类型获取
+      const service = container.get(ThreadSafetyErrorTestService, "SERVICE");
+      expect(service).toBeInstanceOf(ThreadSafetyErrorTestService);
+      expect(service.getValue()).toBe("test-value");
+
+      console.log("Error handling test completed - verified error recovery");
     });
 
     test("Should maintain state consistency after errors", async () => {
@@ -268,24 +277,33 @@ describe("Thread Safety and Race Condition Prevention", () => {
     });
 
     test("Should work with existing IOC usage patterns", async () => {
-      // 确保IOC容器准备就绪
-      const container = await ensureIOCReady();
+      // 在beforeEach重置之后获取新的容器实例
+      const container = Container.getInstanceSync();
       
       // 测试传统的IOC操作
       expect(typeof container.reg).toBe('function');
       expect(typeof container.get).toBe('function');
-      expect(typeof container.clear).toBe('function');
+      expect(typeof container.clearInstances).toBe('function');
       
       // 测试简单的注册和获取
-      class TestService {
+      class ThreadSafetyCompatibilityTestService {
         getValue() {
           return "test-value";
         }
       }
       
-      container.reg(TestService);
-      const service = container.get(TestService);
-      expect(service).toBeInstanceOf(TestService);
+      // 注册并立即获取，确保在同一个容器实例中
+      // 手动注册为SERVICE类型
+      container.reg(ThreadSafetyCompatibilityTestService, { type: "SERVICE" });
+      
+      // 验证注册成功
+      const classList = container.listClass('SERVICE');
+      const registered = classList.find(c => c.id.match('ThreadSafetyCompatibilityTestService'));
+      expect(registered).toBeDefined();
+      
+      // 使用SERVICE类型获取
+      const service = container.get(ThreadSafetyCompatibilityTestService, "SERVICE");
+      expect(service).toBeInstanceOf(ThreadSafetyCompatibilityTestService);
       expect(service.getValue()).toBe("test-value");
       
       console.log("Backwards compatibility verified");

@@ -5,7 +5,6 @@
  * @ version: 2020-07-06 11:19:30
  */
 export type Scope = 'Singleton' | 'Prototype';
-export type ComponentType = 'COMPONENT' | 'CONTROLLER' | 'MIDDLEWARE' | 'SERVICE';
 
 // used to store class properties aop
 export const TAGGED_AOP = 'TAGGED_AOP';
@@ -178,7 +177,7 @@ export interface IContainer {
    * const userService = container.get(UserService, 'Prototype', [1, 2, 3]);
    * ```
    */
-  get<T>(identifier: string | Constructor<T>, type?: ComponentType, ...args: any[]): T;
+  get<T>(identifier: string | Constructor<T>, type?: string, ...args: any[]): T;
   /**
    * Get class by identifier and type from container.
    * 
@@ -191,7 +190,7 @@ export interface IContainer {
    * const userServiceClass = container.getClass(UserService, 'Service');
    * ```
    */
-  getClass(identifier: string, type?: ComponentType): Function;
+  getClass(identifier: string, type?: string): Function;
   /**
    * Get instance by class constructor
    * @param target The class constructor
@@ -242,13 +241,13 @@ export interface IContainer {
    * @param module The class module to be saved
    * @param identifier The unique identifier for the class
    */
-  saveClass(type: ComponentType, module: Function, identifier: string): void;
+  saveClass(type: string, module: Function, identifier: string): void;
   /**
    * List all registered classes of specified component type.
    * @param type The component type to filter
    * @returns Array of objects containing class id and target class
    */
-  listClass(type: ComponentType): {
+  listClass(type: string): {
     id: string;
     target: Function;
   }[];
@@ -354,6 +353,13 @@ export interface IContainer {
   clear(): void;
 
   /**
+   * Clear only instances while preserving class registrations and metadata
+   * This is useful for tests that need to reset state but keep decorator metadata
+   * @memberof Container
+   */
+  clearInstances(): void;
+
+  /**
    * Get circular dependency detector
    * @returns {CircularDepDetector} The circular dependency detector instance
    */
@@ -381,7 +387,7 @@ export interface IContainer {
    * Useful before batch registration of a particular component type
    * @param type Component type to preload metadata for (optional, if not provided preloads all)
    */
-  preloadMetadata(type?: ComponentType): void;
+  preloadMetadata(type?: string): void;
 
   /**
    * Get performance statistics including cache hit rates and memory usage
@@ -431,7 +437,7 @@ export interface ObjectDefinitionOptions {
   initMethod?: string;
   destroyMethod?: string;
   scope?: Scope;
-  type?: ComponentType;
+  type?: string;
   args?: any[];
 }
 

@@ -42,6 +42,7 @@ export class MetadataCache {
   // Preload registry for frequently accessed metadata
   private preloadRegistry: Set<string>;
   private hotKeys: Map<string, number>;
+  private cleanupTimer?: NodeJS.Timeout; // 
 
   constructor(options: {
     capacity?: number;
@@ -248,6 +249,9 @@ export class MetadataCache {
     
     this.hotKeys.clear();
     
+    // 清理定时器
+    this.stopCleanupTimer();
+    
     logger.Debug("MetadataCache cleared");
   }
 
@@ -389,9 +393,24 @@ export class MetadataCache {
    * Start cleanup timer for maintenance
    */
   private startCleanupTimer(): void {
-    setInterval(() => {
+    // 清理已存在的定时器
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
+    
+    this.cleanupTimer = setInterval(() => {
       this.cleanup();
     }, 60000); // Cleanup every minute
+  }
+
+  /**
+   * Stop cleanup timer
+   */
+  stopCleanupTimer(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = undefined;
+    }
   }
 
   /**

@@ -96,9 +96,10 @@ describe("AOP", () => {
     // 执行clear
     IOC.clear();
     
-    // 验证容器已清空
-    const afterClear = IOC.get("ClassA");
-    expect(afterClear).toBeNull();
+    // 验证容器已清空 - 应该抛出异常而不是返回null
+    expect(() => {
+      IOC.get("ClassA");
+    }).toThrow("Bean ClassA not found");
     
     // 验证app引用仍然存在
     expect(IOC.getApp()).toBe(app);

@@ -16,7 +16,7 @@ import {
 } from "../utils/MetadataOpertor";
 import {
   Application,
-  ComponentType, Constructor, IContainer,
+  Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
 } from "./IContainer";
 
@@ -254,7 +254,7 @@ export class Container implements IContainer {
    * const controllers = IOC.listClass('CONTROLLER');
    * controllers.forEach(({target, id}) => IOC.reg(target));
    */
-  public preloadMetadata(type?: ComponentType): void {
+  public preloadMetadata(type: string = "COMPONENT"): void {
     const startTime = Date.now();
     
     logger.Info(`Starting metadata preload for ${type || 'all'} components...`);
@@ -498,7 +498,11 @@ export class Container implements IContainer {
         }
         // async instance
         if (options.isAsync) {
-          this.app.on("appReady", () => this._setInstance(target, options));
+          if (this.app && typeof this.app.on === 'function') {
+            this.app.on("appReady", () => this._setInstance(target, options));
+          } else {
+            logger.Warn(`Cannot register async instance for ${identifier}: app.on is not available`);
+          }
         }
 
         this._setInstance(target, options);
@@ -653,7 +657,7 @@ export class Container implements IContainer {
    * const userService = container.get(UserService, 'Prototype', [1, 2, 3]);
    * ```
    */
-  public get<T>(identifier: string | Constructor<T>, type?: ComponentType,
+  public get<T>(identifier: string | Constructor<T>, type?: string,
     ...args: any[]): T {
     let className: string;
     if (helper.isClass(<any>identifier)) {
@@ -724,7 +728,7 @@ export class Container implements IContainer {
    * const userServiceClass = container.getClass(UserService, 'Service');
    * ```
    */
-  public getClass(identifier: string, type: ComponentType = "COMPONENT"): Function {
+  public getClass(identifier: string, type: string = "COMPONENT"): Function {
     return this.classMap.get(`${type}:${identifier}`);
   }
 
@@ -822,7 +826,7 @@ export class Container implements IContainer {
    * @param module The class module to be saved
    * @param identifier The unique identifier for the class
    */
-  public saveClass(type: ComponentType, module: Function, identifier: string) {
+  public saveClass(type: string, module: Function, identifier: string) {
     Reflect.defineMetadata(TAGGED_CLS, { id: identifier, type }, module);
     const key = `${type}:${identifier}`;
     if (!this.classMap.has(key)) {
@@ -835,7 +839,7 @@ export class Container implements IContainer {
    * @param type The component type to filter
    * @returns Array of objects containing class id and target class
    */
-  public listClass(type: ComponentType) {
+  public listClass(type: string = "COMPONENT") {
     return Array.from(this.classMap.entries())
       .filter(([k]) => k.startsWith(type))
       .map(([k, v]) => ({ id: k, target: v }));
@@ -1086,6 +1090,41 @@ export class Container implements IContainer {
     this.metadataCache.clear();
     
     logger.Debug("Container cleared including performance optimization components");
+  }
+  
+  /**
+   * Clear metadata while preserving class registrations and instances
+   * This is useful for tests that need to reset state but keep decorator metadata
+   * @memberof Container
+   */
+  public clearMetadata(): void {
+    this.metadataMap = new WeakMap();
+    this.metadataCache.clear();
+    
+    logger.Debug("Container metadata cleared");
+  }
+
+  /**
+   * Clear class registrations while preserving instances and metadata
+   * This is useful for tests that need to reset state but keep decorator metadata
+   * @memberof Container
+   */
+  public clearClass(): void {
+    this.classMap.clear();
+    logger.Debug("Container class cleared");
+  }
+
+  /**
+   * Clear only instances while preserving class registrations and metadata
+   * This is useful for tests that need to reset state but keep decorator metadata
+   * @memberof Container
+   */
+
+  public clearInstances(): void {
+    this.instanceMap = new WeakMap();
+    this.circularDependencyDetector.clear();
+    
+    logger.Debug("Container instances cleared, class registrations and metadata preserved");
   }
 
   /**

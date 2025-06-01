@@ -8,7 +8,7 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { IOC } from "../container/Container";
-import { ClassOrString, ComponentType, TAGGED_PROP } from "../container/IContainer";
+import { ClassOrString, TAGGED_PROP } from "../container/IContainer";
 import { getComponentTypeByClassName } from "../utils/MetadataOpertor";
 
 /**
@@ -29,17 +29,22 @@ import { getComponentTypeByClassName } from "../utils/MetadataOpertor";
  * private userService: UserService;
  * * ```
  */
-export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType, constructArgs?: any[],
+export function Autowired<T>(paramName?: ClassOrString<T>, cType: string = "COMPONENT", constructArgs?: any[],
   isDelay = false): PropertyDecorator {
   return (target: object, propertyKey: string) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
     let identifier = designType?.name;
-    if (!identifier || identifier === "Object") {
+    
+    // If paramName is provided (string or class), use it as the identifier
+    if (paramName) {
       if (helper.isString(paramName)) {
         identifier = helper.camelCase(paramName, true);
       } else {
         identifier = paramName?.name;
       }
+    } else if (!identifier || identifier === "Object") {
+      // Only throw error if no paramName is provided and we can't infer the type
+      throw Error("Autowired should refuse to inject incorrect types. Please provide a paramName or use explicit typing.");
     }
 
     if (!identifier) {
@@ -53,12 +58,16 @@ export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType
       throw new Error(`Controller bean cannot be injection!`);
     }
 
-    isDelay = !designType || designType.name === "Object";
+    // Set delay to true when:
+    // 1. Explicitly requested (isDelay = true)
+    // 2. Design type is Object (indicating any type or circular reference)
+    // 3. String identifier is used without proper typing
+    const shouldDelay = isDelay || !designType || designType.name === "Object" || helper.isString(paramName);
 
     IOC.savePropertyData(TAGGED_PROP, {
       type: cType,
       identifier,
-      delay: isDelay,
+      delay: shouldDelay,
       args: constructArgs ?? []
     }, target, propertyKey);
   };
@@ -80,7 +89,7 @@ export function Autowired<T>(paramName?: ClassOrString<T>, cType?: ComponentType
  * }
  * ```
  */
-export function Inject<T>(paramName?: ClassOrString<T>, cType?: ComponentType): ParameterDecorator {
+export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONENT"): ParameterDecorator {
   return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
     if (propertyKey) {
       throw new Error("the Inject decorator only used by constructor method");

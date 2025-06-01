@@ -75,16 +75,7 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
           isLazy = true;
         }
         
-        const dep = container.get(identifier, type, ...args);
-        
-        if (!dep) {
-          if (!isLazy) {
-            throw new Error(
-              `Component ${metaData[metaKey].identifier ?? ""} not found. It's inject in class ${target.name}`);
-          }
-          isLazy = true;
-        }
-
+        // Check if lazy loading is needed before attempting to get the dependency
         if (isLazy || options?.isAsync) {
           // Delay loading solves the problem of cyclic dependency
           logger.Debug(`Delay loading solves the problem of cyclic dependency(${identifier})`);
@@ -99,7 +90,34 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
           if (app?.once) {
             app.once("appReady", () => {
               try {
-                injectAutowired(target, prototypeChain, container, options, true);
+                logger.Debug(`Lazy loading triggered for ${className}.${metaKey} -> ${identifier}`);
+                
+                // Get the dependency now
+                const dep = container.get(identifier, type, ...args);
+                
+                if (!dep) {
+                  logger.Error(`Lazy loading failed: Component ${identifier} not found for ${className}.${metaKey}`);
+                  return;
+                }
+                
+                // Get the actual instance of the target class
+                const instance = container.getInsByClass(target);
+                if (!instance) {
+                  logger.Error(`Lazy loading failed: Instance of ${className} not found`);
+                  return;
+                }
+                
+                // Inject the dependency into the instance
+                logger.Debug(`Injecting ${identifier} into ${className}.${metaKey}`);
+                Object.defineProperty(instance, metaKey, {
+                  enumerable: true,
+                  configurable: false,
+                  writable: true,
+                  value: dep
+                });
+                
+                logger.Debug(`Lazy injection successful: ${className}.${metaKey} = ${dep.constructor.name}`);
+                
               } catch (lazyError) {
                 if (lazyError instanceof CircularDepError) {
                   logger.Error(`Circular dependency still exists when injecting lazily: ${className}.${metaKey}:`, lazyError.getDetailedMessage());
@@ -111,34 +129,46 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
                   
                   // try using null as a fallback
                   logger.Warn(`Use null as a fallback for ${className}.${metaKey}`);
-                  Reflect.defineProperty(prototypeChain, metaKey, {
-                    enumerable: true,
-                    configurable: false,
-                    writable: true,
-                    value: null
-                  });
+                  const instance = container.getInsByClass(target);
+                  if (instance) {
+                    Object.defineProperty(instance, metaKey, {
+                      enumerable: true,
+                      configurable: false,
+                      writable: true,
+                      value: null
+                    });
+                  }
                 } else {
                   logger.Error(`Lazy injection failed: ${className}.${metaKey}:`, lazyError);
                 }
               }
             });
           }
-        } else {
-          logger.Debug(
-            `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
-          
-          // validate if the dependency is valid
-          if (dep === null || dep === undefined) {
-            throw new Error(`Dependency ${identifier} is null or undefined for ${className}.${metaKey}`);
-          }
-          
-          Reflect.defineProperty(prototypeChain, metaKey, {
-            enumerable: true,
-            configurable: false,
-            writable: true,
-            value: dep
-          });
+          continue; // Skip immediate injection for lazy dependencies
         }
+        
+        // Only get the dependency if not lazy loading
+        const dep = container.get(identifier, type, ...args);
+        
+        if (!dep) {
+          throw new Error(
+            `Component ${metaData[metaKey].identifier ?? ""} not found. It's inject in class ${target.name}`);
+        }
+
+        logger.Debug(
+          `Register inject ${target.name} properties key: ${metaKey} => value: ${JSON.stringify(metaData[metaKey])}`);
+        
+        // validate if the dependency is valid
+        if (dep === null || dep === undefined) {
+          throw new Error(`Dependency ${identifier} is null or undefined for ${className}.${metaKey}`);
+        }
+        
+        Reflect.defineProperty(prototypeChain, metaKey, {
+          enumerable: true,
+          configurable: false,
+          writable: true,
+          value: dep
+        });
       } catch (error) {
         if (error instanceof CircularDepError) {
           logger.Error(`Circular dependency error in ${className}.${metaKey}:`, error.getDetailedMessage());
@@ -156,7 +186,20 @@ export function injectAutowired(target: Function, prototypeChain: object, contai
             if (app?.once) {
               app.once("appReady", () => {
                 try {
-                  injectAutowired(target, prototypeChain, container, options, true);
+                  logger.Debug(`Retry lazy loading for ${className}.${metaKey} -> ${identifier}`);
+                  
+                  const dep = container.get(identifier, type, ...args);
+                  const instance = container.getInsByClass(target);
+                  
+                  if (dep && instance) {
+                    Object.defineProperty(instance, metaKey, {
+                      enumerable: true,
+                      configurable: false,
+                      writable: true,
+                      value: dep
+                    });
+                    logger.Debug(`Retry lazy injection successful: ${className}.${metaKey}`);
+                  }
                 } catch (retryError) {
                   logger.Error(`Lazy loading retry failed: ${className}.${metaKey}:`, retryError);
                 }
