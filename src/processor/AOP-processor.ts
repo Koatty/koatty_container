@@ -13,7 +13,7 @@ import {
   AOPType, IAspect, IContainer, ObjectDefinitionOptions,
   TAGGED_AOP, TAGGED_CLS
 } from "../container/IContainer";
-import { getMethodNames } from "../utils/Util";
+import { getMethodNames } from "../utils/MetadataOpertor";
 
 
 /**

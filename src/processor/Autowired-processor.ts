@@ -12,7 +12,7 @@ import {
   IContainer, ObjectDefinitionOptions,
   TAGGED_PROP
 } from "../container/IContainer";
-import { recursiveGetMetadata } from "../utils/Util";
+import { recursiveGetMetadata } from "../utils/MetadataOpertor";
 import { CircularDependencyError } from "../utils/CircularDependencyDetector";
 
 /**

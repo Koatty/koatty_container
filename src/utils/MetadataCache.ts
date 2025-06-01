@@ -6,53 +6,7 @@
  */
 
 import { DefaultLogger as logger } from "koatty_logger";
-
-/**
- * LRU Cache implementation for metadata
- */
-class LRUCache<K, V> {
-  private capacity: number;
-  private cache: Map<K, V>;
-
-  constructor(capacity: number) {
-    this.capacity = capacity;
-    this.cache = new Map();
-  }
-
-  get(key: K): V | undefined {
-    if (this.cache.has(key)) {
-      // Move to end (most recently used)
-      const value = this.cache.get(key)!;
-      this.cache.delete(key);
-      this.cache.set(key, value);
-      return value;
-    }
-    return undefined;
-  }
-
-  set(key: K, value: V): void {
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    } else if (this.cache.size >= this.capacity) {
-      // Remove least recently used
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
-    this.cache.set(key, value);
-  }
-
-  has(key: K): boolean {
-    return this.cache.has(key);
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
-
-  size(): number {
-    return this.cache.size;
-  }
-}
+import { LRUCache } from "lru-cache";
 
 /**
  * Cache statistics for monitoring performance
@@ -66,31 +20,20 @@ interface CacheStats {
 }
 
 /**
- * Metadata cache entry with TTL support
- */
-interface CacheEntry<T> {
-  value: T;
-  timestamp: number;
-  accessCount: number;
-  ttl?: number;
-}
-
-/**
  * High-performance metadata cache system with intelligent caching strategies
  * 
  * Features:
- * - LRU cache with configurable capacity
- * - TTL (Time To Live) support for cache entries
+ * - LRU cache with configurable capacity and TTL
  * - Cache statistics and monitoring
  * - Preloading mechanism for frequently accessed metadata
  * - Memory usage optimization
  * - Batch operations for better performance
  */
 export class MetadataCache {
-  private reflectMetadataCache: LRUCache<string, CacheEntry<any>>;
-  private propertyMetadataCache: LRUCache<string, CacheEntry<any>>;
-  private classMetadataCache: LRUCache<string, CacheEntry<any>>;
-  private dependencyCache: LRUCache<string, CacheEntry<string[]>>;
+  private reflectMetadataCache: LRUCache<string, any>;
+  private propertyMetadataCache: LRUCache<string, any>;
+  private classMetadataCache: LRUCache<string, any>;
+  private dependencyCache: LRUCache<string, string[]>;
   
   private stats: CacheStats;
   private defaultTTL: number;
@@ -111,10 +54,22 @@ export class MetadataCache {
       maxMemoryUsage = 50 * 1024 * 1024 // 50MB
     } = options;
 
-    this.reflectMetadataCache = new LRUCache(capacity);
-    this.propertyMetadataCache = new LRUCache(capacity);
-    this.classMetadataCache = new LRUCache(capacity);
-    this.dependencyCache = new LRUCache(capacity / 2);
+    // 配置LRU缓存选项
+    const cacheOptions = {
+      max: capacity,
+      ttl: defaultTTL,
+      allowStale: false,
+      updateAgeOnGet: true,
+      updateAgeOnHas: false,
+    };
+
+    this.reflectMetadataCache = new LRUCache<string, any>(cacheOptions);
+    this.propertyMetadataCache = new LRUCache<string, any>(cacheOptions);
+    this.classMetadataCache = new LRUCache<string, any>(cacheOptions);
+    this.dependencyCache = new LRUCache<string, string[]>({
+      ...cacheOptions,
+      max: Math.floor(capacity / 2) // Dependencies cache smaller capacity
+    });
     
     this.defaultTTL = defaultTTL;
     this.maxMemoryUsage = maxMemoryUsage;
@@ -249,11 +204,11 @@ export class MetadataCache {
         if (value !== undefined) {
           // Store in appropriate cache based on key pattern
           if (key.includes(':reflect:')) {
-            this.reflectMetadataCache.set(key, this.createCacheEntry(value));
+            this.reflectMetadataCache.set(key, value, { ttl: this.defaultTTL });
           } else if (key.includes(':property:')) {
-            this.propertyMetadataCache.set(key, this.createCacheEntry(value));
+            this.propertyMetadataCache.set(key, value, { ttl: this.defaultTTL });
           } else if (key.includes(':class:')) {
-            this.classMetadataCache.set(key, this.createCacheEntry(value));
+            this.classMetadataCache.set(key, value, { ttl: this.defaultTTL });
           }
           preloadedCount++;
         }
@@ -297,22 +252,29 @@ export class MetadataCache {
   }
 
   /**
-   * Optimize cache by removing cold entries
+   * Optimize cache by removing cold entries and triggering garbage collection
    */
   optimize(): void {
     const startTime = Date.now();
     let removedCount = 0;
 
-    // Remove entries that haven't been accessed frequently
-    const threshold = 5; // Access count threshold
+    // Use LRU cache's internal optimization
+    this.reflectMetadataCache.purgeStale();
+    this.propertyMetadataCache.purgeStale();
+    this.classMetadataCache.purgeStale();
+    this.dependencyCache.purgeStale();
 
-    // Update hot keys statistics
+    // Remove cold entries from hot keys tracking
+    const threshold = 5; // Access count threshold
     for (const [key, count] of this.hotKeys) {
       if (count < threshold) {
         this.hotKeys.delete(key);
         removedCount++;
       }
     }
+
+    // Force memory recalculation
+    this.updateMemoryUsage();
 
     const optimizeTime = Date.now() - startTime;
     logger.Debug(`Cache optimization completed in ${optimizeTime}ms, removed ${removedCount} cold entries`);
@@ -321,7 +283,7 @@ export class MetadataCache {
   /**
    * Get cache by type
    */
-  private getCache(type: string): LRUCache<string, CacheEntry<any>> {
+  private getCache(type: string): LRUCache<string, any> {
     switch (type) {
       case 'reflect': return this.reflectMetadataCache;
       case 'property': return this.propertyMetadataCache;
@@ -332,26 +294,17 @@ export class MetadataCache {
   }
 
   /**
-   * Get cached value with TTL check
+   * Get cached value with statistics tracking
    */
-  private getCachedValue<T>(cache: LRUCache<string, CacheEntry<T>>, key: string): T | undefined {
+  private getCachedValue<T>(cache: LRUCache<string, T>, key: string): T | undefined {
     this.stats.totalRequests++;
     
-    const entry = cache.get(key);
-    if (entry) {
-      // Check TTL
-      if (entry.ttl && Date.now() - entry.timestamp > entry.ttl) {
-        cache.set(key, entry); // This will remove it from cache
-        this.stats.misses++;
-        return undefined;
-      }
-      
-      entry.accessCount++;
+    const value = cache.get(key);
+    if (value !== undefined) {
       this.hotKeys.set(key, (this.hotKeys.get(key) || 0) + 1);
       this.stats.hits++;
       this.updateHitRate();
-      
-      return entry.value;
+      return value;
     }
     
     this.stats.misses++;
@@ -360,23 +313,11 @@ export class MetadataCache {
   }
 
   /**
-   * Set cached value with TTL
+   * Set cached value with optional TTL
    */
-  private setCachedValue<T>(cache: LRUCache<string, CacheEntry<T>>, key: string, value: T, ttl?: number): void {
-    const entry = this.createCacheEntry(value, ttl);
-    cache.set(key, entry);
-  }
-
-  /**
-   * Create cache entry
-   */
-  private createCacheEntry<T>(value: T, ttl?: number): CacheEntry<T> {
-    return {
-      value,
-      timestamp: Date.now(),
-      accessCount: 1,
-      ttl: ttl || this.defaultTTL
-    };
+  private setCachedValue<T>(cache: LRUCache<string, T>, key: string, value: T, ttl?: number): void {
+    const options = ttl ? { ttl } : undefined;
+    cache.set(key, value, options);
   }
 
   /**
@@ -426,12 +367,14 @@ export class MetadataCache {
    * Update memory usage estimation
    */
   private updateMemoryUsage(): void {
-    // Rough estimation of memory usage
+    // Use LRU cache's calculatedSize if available, otherwise estimate
     let usage = 0;
-    usage += this.reflectMetadataCache.size() * 200; // Estimated bytes per entry
-    usage += this.propertyMetadataCache.size() * 150;
-    usage += this.classMetadataCache.size() * 180;
-    usage += this.dependencyCache.size() * 100;
+    
+    // LRU cache provides size information
+    usage += this.reflectMetadataCache.size * 200; // Estimated bytes per entry
+    usage += this.propertyMetadataCache.size * 150;
+    usage += this.classMetadataCache.size * 180;
+    usage += this.dependencyCache.size * 100;
     
     this.stats.memoryUsage = usage;
     
@@ -443,7 +386,7 @@ export class MetadataCache {
   }
 
   /**
-   * Start cleanup timer for expired entries
+   * Start cleanup timer for maintenance
    */
   private startCleanupTimer(): void {
     setInterval(() => {
@@ -452,13 +395,26 @@ export class MetadataCache {
   }
 
   /**
-   * Cleanup expired entries
+   * Cleanup and maintenance
    */
   private cleanup(): void {
-    const cleanedCount = 0;
-
-    // This would require extending LRUCache to support TTL-based cleanup
-    // For now, we'll just update memory usage
+    // LRU cache handles expiration automatically with TTL
+    // We just need to update memory usage and optionally purge stale entries
+    const beforeSize = this.reflectMetadataCache.size + this.propertyMetadataCache.size + 
+                       this.classMetadataCache.size + this.dependencyCache.size;
+    
+    // Purge stale entries
+    this.reflectMetadataCache.purgeStale();
+    this.propertyMetadataCache.purgeStale();
+    this.classMetadataCache.purgeStale();
+    this.dependencyCache.purgeStale();
+    
+    const afterSize = this.reflectMetadataCache.size + this.propertyMetadataCache.size + 
+                      this.classMetadataCache.size + this.dependencyCache.size;
+    
+    const cleanedCount = beforeSize - afterSize;
+    
+    // Update memory usage
     this.updateMemoryUsage();
     
     if (cleanedCount > 0) {

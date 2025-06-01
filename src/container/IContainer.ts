@@ -401,6 +401,22 @@ export interface IContainer {
    * Optimize container performance
    */
   optimizePerformance(): void;
+
+  /**
+   * Get version conflict detector
+   * @returns The version conflict detector instance
+   */
+  getVersionConflictDetector(): any;
+
+  /**
+   * Generate version conflict report
+   * @returns Version conflict report with detailed information
+   */
+  generateVersionConflictReport(): {
+    hasConflict: boolean;
+    conflictError?: any;
+    report: any;
+  };
 }
 
 

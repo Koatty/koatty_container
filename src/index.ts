@@ -9,9 +9,10 @@ export * from "./container/IContainer";
 export * from "./decorator/AOP";
 export * from "./decorator/Autowired";
 export * from "./decorator/Values";
-export * from "./utils/Util";
+export * from "./utils/MetadataOpertor";
 
 // Export performance optimization and utility classes
 export { MetadataCache } from "./utils/MetadataCache";
 export { CircularDependencyDetector, CircularDependencyError } from "./utils/CircularDependencyDetector";
+export { VersionConflictDetector, VersionConflictError } from "./utils/VersionConflictDetector";
 

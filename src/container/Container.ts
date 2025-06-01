@@ -13,7 +13,7 @@ import { injectValues } from "../processor/Values-processor";
 import {
   getComponentTypeByClassName,
   overridePrototypeValue
-} from "../utils/Util";
+} from "../utils/MetadataOpertor";
 import {
   Application,
   ComponentType, Constructor, IContainer,
@@ -23,6 +23,7 @@ import {
 // import circular dependency detector
 import { CircularDependencyDetector, CircularDependencyError } from "../utils/CircularDependencyDetector";
 import { MetadataCache } from "../utils/MetadataCache";
+import { VersionConflictDetector, VersionConflictError } from "../utils/VersionConflictDetector";
 import { DefaultLogger as logger } from "koatty_logger";
 
 /**
@@ -30,8 +31,12 @@ import { DefaultLogger as logger } from "koatty_logger";
  * Manages class instances, metadata, and dependency injection in an IOC container.
  * Uses singleton pattern to ensure only one container instance exists.
  * 
+ * Thread Safety Considerations:
+ * Although JavaScript is single-threaded, race conditions can occur in async scenarios.
+ * This implementation uses async-safe singleton pattern with proper synchronization.
+ * 
  * Features:
- * - Singleton instance management
+ * - Thread-safe singleton instance management
  * - Class and instance registration
  * - Metadata management with intelligent caching
  * - Dependency injection
@@ -51,18 +56,93 @@ export class Container implements IContainer {
   private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
   private static instance: Container;
   
+  // Thread safety for singleton pattern
+  private static isInitializing: boolean = false;
+  private static initializationPromise: Promise<Container> | null = null;
+  
   // circular dependency detector
   private circularDependencyDetector: CircularDependencyDetector;
   
   // performance optimization components
   private metadataCache: MetadataCache;
 
+  // version conflict detector for handling multiple koatty_container versions
+  private versionConflictDetector: VersionConflictDetector;
+
   /**
-   * Get singleton instance of Container
-   * @returns {Container} The singleton instance
+   * Get singleton instance of Container with async-safe double-checked locking
+   * Prevents race conditions in async scenarios where multiple calls might occur
+   * simultaneously before the first instance is fully created.
+   * 
+   * @returns {Container | Promise<Container>} The singleton instance
+   * @description
+   * This method implements async-safe singleton pattern:
+   * 1. First check if instance already exists (fast path)
+   * 2. If not, check if initialization is in progress
+   * 3. If already initializing, return the initialization promise
+   * 4. Otherwise, start initialization with proper synchronization
    */
-  static getInstance() {
-    return this.instance || (this.instance = new Container());
+  static getInstance(): Container | Promise<Container> {
+    // Fast path: instance already exists
+    if (this.instance) {
+      return this.instance;
+    }
+
+    // Check if initialization is already in progress
+    if (this.isInitializing && this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    // Start initialization
+    this.isInitializing = true;
+    this.initializationPromise = this.createInstanceSafely();
+    
+    return this.initializationPromise;
+  }
+
+  /**
+   * Safely create container instance with proper error handling
+   * @private
+   * @returns {Promise<Container>} Promise that resolves to the container instance
+   */
+  private static async createInstanceSafely(): Promise<Container> {
+    try {
+      // Double-check inside the critical section
+      if (this.instance) {
+        return this.instance;
+      }
+
+      // Create new instance
+      const newInstance = new Container();
+      
+      // Atomic assignment
+      this.instance = newInstance;
+      
+      logger.Debug("Container singleton instance created successfully");
+      return newInstance;
+      
+    } catch (error) {
+      logger.Error("Failed to create Container singleton instance:", error);
+      throw error;
+    } finally {
+      // Reset synchronization state
+      this.isInitializing = false;
+      this.initializationPromise = null;
+    }
+  }
+
+  /**
+   * Get singleton instance synchronously (for backwards compatibility)
+   * @returns {Container} The singleton instance
+   * @throws {Error} If instance is not yet initialized
+   */
+  static getInstanceSync(): Container {
+    if (!this.instance) {
+      // Fallback to immediate initialization for sync access
+      this.instance = new Container();
+      logger.Debug("Container singleton instance created synchronously (fallback)");
+    }
+    return this.instance;
   }
 
   /**
@@ -84,8 +164,43 @@ export class Container implements IContainer {
       defaultTTL: 10 * 60 * 1000, // 10 minutes
       maxMemoryUsage: 100 * 1024 * 1024 // 100MB
     });
+
+    // Initialize version conflict detector
+    this.versionConflictDetector = new VersionConflictDetector();
+    this.versionConflictDetector.registerVersion();
     
-    logger.Debug("Container initialized with metadata cache optimization");
+    // Check for version conflicts during initialization
+    this.checkVersionConflicts();
+    
+    logger.Debug("Container initialized with metadata cache and version conflict detection");
+  }
+
+  /**
+   * Check for version conflicts and handle them appropriately
+   * @private
+   */
+  private checkVersionConflicts(): void {
+    try {
+      const conflict = this.versionConflictDetector.detectVersionConflicts();
+      if (conflict) {
+        logger.Warn("=== Version Conflict Detected ===");
+        logger.Warn(conflict.getConflictDetails());
+        
+        const suggestions = conflict.getResolutionSuggestions();
+        logger.Warn("Resolution suggestions:");
+        suggestions.forEach(suggestion => logger.Warn(`  ${suggestion}`));
+        
+        // Try to resolve the conflict automatically
+        const resolved = this.versionConflictDetector.resolveVersionConflict('use_latest');
+        if (!resolved) {
+          logger.Error("Failed to automatically resolve version conflict. Manual intervention required.");
+          // In non-strict mode, we continue but log the issue
+          // In strict mode, we could throw an error here
+        }
+      }
+    } catch (error) {
+      logger.Error("Error during version conflict detection:", error);
+    }
   }
 
   /**
@@ -119,6 +234,14 @@ export class Container implements IContainer {
    */
   public getMetadataCache(): MetadataCache {
     return this.metadataCache;
+  }
+
+  /**
+   * Get version conflict detector
+   * @returns {VersionConflictDetector} The version conflict detector instance
+   */
+  public getVersionConflictDetector(): VersionConflictDetector {
+    return this.versionConflictDetector;
   }
 
   /**
@@ -964,27 +1087,151 @@ export class Container implements IContainer {
     
     logger.Debug("Container cleared including performance optimization components");
   }
+
+  /**
+   * Generate version conflict report
+   * @returns Version conflict report with detailed information
+   */
+  public generateVersionConflictReport(): {
+    hasConflict: boolean;
+    conflictError?: VersionConflictError;
+    report: any;
+  } {
+    const conflict = this.versionConflictDetector.detectVersionConflicts();
+    const report = this.versionConflictDetector.generateConflictReport();
+    
+    return {
+      hasConflict: report.hasConflict,
+      conflictError: conflict || undefined,
+      report
+    };
+  }
 }
 
 /**
- * Global IOC container instance.
+ * Global IOC container instance with async-safe initialization.
  * Singleton pattern implementation to ensure only one container instance exists.
- * Throws error if multiple versions of koatty_container are detected.
+ * Handles async scenarios properly to prevent race conditions.
  * 
  * @constant
  * @type {Container}
  * @throws {Error} When multiple container versions conflict
  */
 export const IOC: IContainer = (function () {
-    // Check global object first
+  // Global synchronization state
+  let globalInitialization: Promise<IContainer> | null = null;
+  let isGlobalInitializing = false;
+
+  // Immediate execution function with async safety
+  const initializeGlobalIOC = async (): Promise<IContainer> => {
+    // Check if already exists
     if ((<any>global).__KOATTY_IOC__) {
       return (<any>global).__KOATTY_IOC__;
     }
-    // First initialization
-    const instance = Container.getInstance();
+
+    // Prevent concurrent initialization
+    if (isGlobalInitializing && globalInitialization) {
+      return globalInitialization;
+    }
+
+    isGlobalInitializing = true;
+    
+    try {
+      // Double-check pattern
+      if ((<any>global).__KOATTY_IOC__) {
+        return (<any>global).__KOATTY_IOC__;
+      }
+
+      // Get or create container instance
+      const containerResult = Container.getInstance();
+      const instance = containerResult instanceof Promise ? await containerResult : containerResult;
+      
+      // Perform additional version conflict checks at global level
+      const versionReport = instance.generateVersionConflictReport();
+      if (versionReport.hasConflict) {
+        logger.Warn("Global IOC initialization detected version conflicts");
+        logger.Warn("Version conflict report:", JSON.stringify(versionReport.report, null, 2));
+        
+        if (versionReport.conflictError) {
+          // Log detailed conflict information
+          logger.Warn("Detailed conflict information:");
+          logger.Warn(versionReport.conflictError.getConflictDetails());
+          
+          // Provide resolution suggestions
+          const suggestions = versionReport.conflictError.getResolutionSuggestions();
+          logger.Info("Resolution suggestions:");
+          suggestions.forEach(suggestion => logger.Info(`  ${suggestion}`));
+        }
+      }
+      
+      // Atomic assignment to global
+      (<any>global).__KOATTY_IOC__ = instance;
+      
+      logger.Debug("Global IOC container initialized successfully");
+      return instance;
+      
+    } catch (error) {
+      logger.Error("Failed to initialize global IOC container:", error);
+      throw new Error(`IOC container initialization failed: ${error.message}`);
+    } finally {
+      isGlobalInitializing = false;
+      globalInitialization = null;
+    }
+  };
+
+  // Check if we're in a Node.js environment (which we are)
+  if (typeof global !== 'undefined') {
+    // For immediate synchronous access, try sync initialization first
+    try {
+      if ((<any>global).__KOATTY_IOC__) {
+        return (<any>global).__KOATTY_IOC__;
+      }
+      
+      // Try synchronous initialization
+      const instance = Container.getInstanceSync();
+      (<any>global).__KOATTY_IOC__ = instance;
+      return instance;
+      
+    } catch (error) {
+      logger.Warn("Synchronous IOC initialization failed, falling back to async:", error);
+      
+      // Store the promise for later resolution
+      globalInitialization = initializeGlobalIOC();
+      
+      // For module loading scenarios, return a proxy that will resolve later
+      return new Proxy({} as IContainer, {
+        get(target, prop) {
+          if ((<any>global).__KOATTY_IOC__) {
+            return (<any>global).__KOATTY_IOC__[prop];
+          }
+          throw new Error(`IOC container not ready. Please await container initialization or use IOC.ready().`);
+        }
+      });
+    }
+  }
+
+  // Fallback for other environments
+  const instance = Container.getInstanceSync();
   (<any>global).__KOATTY_IOC__ = instance;
-    return instance;
+  return instance;
 })();
+
+/**
+ * Ensure IOC container is ready for use
+ * @returns {Promise<IContainer>} Promise that resolves when container is ready
+ */
+export const ensureIOCReady = async (): Promise<IContainer> => {
+  if ((<any>global).__KOATTY_IOC__ && typeof (<any>global).__KOATTY_IOC__.reg === 'function') {
+    return (<any>global).__KOATTY_IOC__;
+  }
+  
+  // Re-initialize if needed
+  const containerResult = Container.getInstance();
+  const instance = containerResult instanceof Promise ? await containerResult : containerResult;
+  (<any>global).__KOATTY_IOC__ = instance;
+  
+  return instance;
+};
 
 /**
  * IOC container instance export.

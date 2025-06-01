@@ -13,7 +13,7 @@ import {
   IContainer, ObjectDefinitionOptions,
   TAGGED_ARGS
 } from "../container/IContainer";
-import { recursiveGetMetadata } from "../utils/Util";
+import { recursiveGetMetadata } from "../utils/MetadataOpertor";
 
 /**
  * Inject values into the target class prototype chain.

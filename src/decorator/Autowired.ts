@@ -9,7 +9,7 @@ import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { IOC } from "../container/Container";
 import { ClassOrString, ComponentType, TAGGED_PROP } from "../container/IContainer";
-import { getComponentTypeByClassName } from "../utils/Util";
+import { getComponentTypeByClassName } from "../utils/MetadataOpertor";
 
 /**
  * Decorator that marks a property for dependency injection.
