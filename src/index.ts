@@ -8,6 +8,7 @@ export * from "./container/Container";
 export * from "./container/IContainer";
 export * from "./decorator/AOP";
 export * from "./decorator/Autowired";
+export * from "./decorator/Component";
 export * from "./decorator/Values";
 export * from "./utils/MetadataOpertor";
 
