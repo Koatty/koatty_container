@@ -22,7 +22,7 @@ import {
 
 // import circular dependency detector
 import { CircularDepDetector, CircularDepError } from "../utils/CircularDepDetector";
-import { MetadataCache } from "../utils/MetadataCache";
+import { MetadataCache, CacheType } from "../utils/MetadataCache";
 import { VersionConflictDetector, VersionConflictError } from "../utils/VersionConflictDetector";
 import { DefaultLogger as logger } from "koatty_logger";
 
@@ -353,7 +353,7 @@ export class Container implements IContainer {
       
       // pre-load metadata
       let preloadedCount = 0;
-      this.metadataCache.preload((key: string) => {
+      this.metadataCache.preload(CacheType.REFLECT_METADATA, (key: string) => {
         try {
           const parts = key.split(':');
           const [cacheType, metadataKey, targetName, propertyKey] = parts;
@@ -709,7 +709,7 @@ export class Container implements IContainer {
       // inject properties values
       injectValues(<Function>target, (<Function>target).prototype, IOC, options);
       // inject AOP
-      injectAOP(<Function>target, (<Function>target).prototype, IOC, options);
+      injectAOP(<Function>target);
       
     } catch (error) {
       // if it is a circular dependency error, throw it again
@@ -1349,9 +1349,10 @@ export class Container implements IContainer {
   }
 
   /**
-   * clear performance cache
+   * Clear performance cache
    */
   public clearPerformanceCache(): void {
+    // clear metadata cache
     this.metadataCache.clear();
     
     // clear processor lru cache
@@ -1369,7 +1370,7 @@ export class Container implements IContainer {
       logger.Debug("AOP cache cleanup failed:", error);
     }
     
-    logger.Info("All LRU caches cleared");
+    logger.Debug("Performance cache cleared");
   }
 
   /**
@@ -1420,8 +1421,8 @@ export class Container implements IContainer {
 
     // get dependency processor lru cache stats
     try {
-      const { getDependencyCacheStats } = require("../processor/Autowired-processor");
-      lruCaches.dependencies = getDependencyCacheStats();
+      const { getAutowiredCacheStats } = require("../processor/Autowired-processor");
+      lruCaches.dependencies = getAutowiredCacheStats();
     } catch (error) {
       logger.Debug("Failed to get dependency cache stats:", error);
     }

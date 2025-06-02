@@ -9,6 +9,20 @@ import { DefaultLogger as logger } from "koatty_logger";
 import { LRUCache } from "lru-cache";
 
 /**
+ * Cache types for unified cache management
+ */
+export enum CacheType {
+  REFLECT_METADATA = 'reflect',
+  PROPERTY_METADATA = 'property',
+  CLASS_METADATA = 'class',
+  DEPENDENCY = 'dependency',
+  DEPENDENCY_PREPROCESS = 'dependencyPreprocess',
+  AOP_INTERCEPTORS = 'aopInterceptors',
+  METHOD_NAMES = 'methodNames',
+  ASPECT_INSTANCES = 'aspectInstances'
+}
+
+/**
  * Cache statistics for monitoring performance
  */
 interface CacheStats {
@@ -20,68 +34,73 @@ interface CacheStats {
 }
 
 /**
- * High-performance metadata cache system with intelligent caching strategies
+ * Detailed cache statistics by type
+ */
+interface DetailedCacheStats extends CacheStats {
+  byType: Record<string, {
+    size: number;
+    hits: number;
+    misses: number;
+    hitRate: number;
+  }>;
+}
+
+/**
+ * High-performance unified metadata cache system with intelligent caching strategies
  * 
  * Features:
- * - LRU cache with configurable capacity and TTL
- * - Cache statistics and monitoring
+ * - Unified LRU cache management for all cache types
+ * - Cache statistics and monitoring by type
  * - Preloading mechanism for frequently accessed metadata
  * - Memory usage optimization
  * - Batch operations for better performance
  */
 export class MetadataCache {
-  private reflectMetadataCache: LRUCache<string, any>;
-  private propertyMetadataCache: LRUCache<string, any>;
-  private classMetadataCache: LRUCache<string, any>;
-  private dependencyCache: LRUCache<string, string[]>;
-  
-  private stats: CacheStats;
+  private caches: Map<CacheType, LRUCache<string, any>>;
+  private stats: Record<CacheType, { hits: number; misses: number }>;
   private defaultTTL: number;
   private maxMemoryUsage: number;
   
   // Preload registry for frequently accessed metadata
   private preloadRegistry: Set<string>;
   private hotKeys: Map<string, number>;
-  private cleanupTimer?: NodeJS.Timeout; // 
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor(options: {
     capacity?: number;
     defaultTTL?: number; // milliseconds
     maxMemoryUsage?: number; // bytes
+    cacheConfigs?: Partial<Record<CacheType, { capacity?: number; ttl?: number }>>;
   } = {}) {
     const {
       capacity = 1000,
       defaultTTL = 5 * 60 * 1000, // 5 minutes
-      maxMemoryUsage = 50 * 1024 * 1024 // 50MB
+      maxMemoryUsage = 50 * 1024 * 1024, // 50MB
+      cacheConfigs = {}
     } = options;
 
-    // 配置LRU缓存选项
-    const cacheOptions = {
-      max: capacity,
-      ttl: defaultTTL,
-      allowStale: false,
-      updateAgeOnGet: true,
-      updateAgeOnHas: false,
-    };
-
-    this.reflectMetadataCache = new LRUCache<string, any>(cacheOptions);
-    this.propertyMetadataCache = new LRUCache<string, any>(cacheOptions);
-    this.classMetadataCache = new LRUCache<string, any>(cacheOptions);
-    this.dependencyCache = new LRUCache<string, string[]>({
-      ...cacheOptions,
-      max: Math.floor(capacity / 2) // Dependencies cache smaller capacity
-    });
-    
     this.defaultTTL = defaultTTL;
     this.maxMemoryUsage = maxMemoryUsage;
+    this.caches = new Map();
+    this.stats = {} as Record<CacheType, { hits: number; misses: number }>;
     
-    this.stats = {
-      hits: 0,
-      misses: 0,
-      totalRequests: 0,
-      hitRate: 0,
-      memoryUsage: 0
-    };
+    // Initialize caches for each type
+    Object.values(CacheType).forEach(type => {
+      const config = cacheConfigs[type] || {};
+      const cacheCapacity = config.capacity || this.getDefaultCapacity(type, capacity);
+      const cacheTTL = config.ttl || defaultTTL;
+      
+      const cacheOptions = {
+        max: cacheCapacity,
+        ttl: cacheTTL,
+        allowStale: false,
+        updateAgeOnGet: true,
+        updateAgeOnHas: false,
+      };
+
+      this.caches.set(type, new LRUCache<string, any>(cacheOptions));
+      this.stats[type] = { hits: 0, misses: 0 };
+    });
     
     this.preloadRegistry = new Set();
     this.hotKeys = new Map();
@@ -89,82 +108,127 @@ export class MetadataCache {
     // Start cleanup timer
     this.startCleanupTimer();
     
-    logger.Debug(`MetadataCache initialized with capacity: ${capacity}, TTL: ${defaultTTL}ms`);
+    logger.Debug(`MetadataCache initialized with ${this.caches.size} cache types, base capacity: ${capacity}, TTL: ${defaultTTL}ms`);
   }
 
   /**
-   * Get cached reflect metadata
+   * Get default capacity for specific cache type
    */
-  getReflectMetadata(key: string, target: any, propertyKey?: string | symbol): any {
-    const cacheKey = this.buildReflectKey(key, target, propertyKey);
-    return this.getCachedValue(this.reflectMetadataCache, cacheKey);
+  private getDefaultCapacity(type: CacheType, baseCapacity: number): number {
+    switch (type) {
+      case CacheType.DEPENDENCY:
+      case CacheType.DEPENDENCY_PREPROCESS:
+        return Math.floor(baseCapacity / 2); // Smaller for dependency caches
+      case CacheType.AOP_INTERCEPTORS:
+      case CacheType.ASPECT_INSTANCES:
+        return Math.floor(baseCapacity * 0.3); // Medium for AOP caches
+      case CacheType.METHOD_NAMES:
+        return Math.floor(baseCapacity * 0.4); // Medium for method names
+      default:
+        return baseCapacity; // Full capacity for metadata caches
+    }
   }
 
   /**
-   * Set cached reflect metadata
+   * Generic get operation for any cache type
    */
-  setReflectMetadata(key: string, target: any, value: any, propertyKey?: string | symbol, ttl?: number): void {
-    const cacheKey = this.buildReflectKey(key, target, propertyKey);
-    this.setCachedValue(this.reflectMetadataCache, cacheKey, value, ttl);
+  get<T = any>(type: CacheType, key: string): T | undefined {
+    const cache = this.caches.get(type);
+    if (!cache) {
+      logger.Error(`Cache type ${type} not found`);
+      return undefined;
+    }
+
+    const value = cache.get(key);
+    
+    if (value !== undefined) {
+      this.stats[type].hits++;
+      this.trackHotKey(key);
+      logger.Debug(`Cache hit for ${key}`);
+    } else {
+      this.stats[type].misses++;
+      logger.Debug(`Cache miss for ${key}, processing...`);
+    }
+
+    return value;
   }
 
   /**
-   * Get cached property metadata
+   * Generic set operation for any cache type
    */
-  getPropertyMetadata(decoratorKey: string, target: any, propertyName: string | symbol): any {
-    const cacheKey = this.buildPropertyKey(decoratorKey, target, propertyName);
-    return this.getCachedValue(this.propertyMetadataCache, cacheKey);
+  set<T = any>(type: CacheType, key: string, value: T, ttl?: number): void {
+    const cache = this.caches.get(type);
+    if (!cache) {
+      logger.Error(`Cache type ${type} not found`);
+      return;
+    }
+
+    if (ttl !== undefined) {
+      cache.set(key, value, { ttl });
+    } else {
+      cache.set(key, value);
+    }
+
+    logger.Debug(`Cached ${key} in ${type} cache`);
   }
 
   /**
-   * Set cached property metadata
+   * Check if key exists in cache
    */
-  setPropertyMetadata(decoratorKey: string, target: any, propertyName: string | symbol, value: any, ttl?: number): void {
-    const cacheKey = this.buildPropertyKey(decoratorKey, target, propertyName);
-    this.setCachedValue(this.propertyMetadataCache, cacheKey, value, ttl);
+  has(type: CacheType, key: string): boolean {
+    const cache = this.caches.get(type);
+    return cache ? cache.has(key) : false;
   }
 
   /**
-   * Get cached class metadata
+   * Delete key from cache
    */
-  getClassMetadata(type: string, decoratorKey: string, target: any, propertyName?: string): any {
-    const cacheKey = this.buildClassKey(type, decoratorKey, target, propertyName);
-    return this.getCachedValue(this.classMetadataCache, cacheKey);
+  delete(type: CacheType, key: string): boolean {
+    const cache = this.caches.get(type);
+    return cache ? cache.delete(key) : false;
   }
 
   /**
-   * Set cached class metadata
+   * Get cache size for specific type
    */
-  setClassMetadata(type: string, decoratorKey: string, target: any, value: any, propertyName?: string, ttl?: number): void {
-    const cacheKey = this.buildClassKey(type, decoratorKey, target, propertyName);
-    this.setCachedValue(this.classMetadataCache, cacheKey, value, ttl);
+  size(type: CacheType): number {
+    const cache = this.caches.get(type);
+    return cache ? cache.size : 0;
   }
 
   /**
-   * Get cached dependencies for a class
+   * Clear specific cache type
    */
-  getCachedDependencies(target: any): string[] | undefined {
-    const cacheKey = this.buildDependencyKey(target);
-    return this.getCachedValue(this.dependencyCache, cacheKey);
+  clearType(type: CacheType): void {
+    const cache = this.caches.get(type);
+    if (cache) {
+      cache.clear();
+      this.stats[type] = { hits: 0, misses: 0 };
+      logger.Debug(`Cleared ${type} cache`);
+    }
   }
 
   /**
-   * Set cached dependencies for a class
+   * Clear all caches
    */
-  setCachedDependencies(target: any, dependencies: string[], ttl?: number): void {
-    const cacheKey = this.buildDependencyKey(target);
-    this.setCachedValue(this.dependencyCache, cacheKey, dependencies, ttl);
+  clear(): void {
+    this.caches.forEach((cache, type) => {
+      cache.clear();
+      this.stats[type] = { hits: 0, misses: 0 };
+    });
+    this.preloadRegistry.clear();
+    this.hotKeys.clear();
+    logger.Debug('All caches cleared');
   }
 
   /**
    * Batch get operation for better performance
    */
-  batchGet(keys: string[], cacheType: 'reflect' | 'property' | 'class' | 'dependency' = 'reflect'): Map<string, any> {
-    const cache = this.getCache(cacheType);
-    const results = new Map<string, any>();
+  batchGet<T = any>(type: CacheType, keys: string[]): Map<string, T> {
+    const results = new Map<string, T>();
     
     for (const key of keys) {
-      const value = this.getCachedValue(cache, key);
+      const value = this.get<T>(type, key);
       if (value !== undefined) {
         results.set(key, value);
       }
@@ -176,11 +240,9 @@ export class MetadataCache {
   /**
    * Batch set operation for better performance
    */
-  batchSet(entries: Map<string, any>, cacheType: 'reflect' | 'property' | 'class' | 'dependency' = 'reflect', ttl?: number): void {
-    const cache = this.getCache(cacheType);
-    
+  batchSet<T = any>(type: CacheType, entries: Map<string, T>, ttl?: number): void {
     for (const [key, value] of entries) {
-      this.setCachedValue(cache, key, value, ttl);
+      this.set(type, key, value, ttl);
     }
   }
 
@@ -195,212 +257,224 @@ export class MetadataCache {
   /**
    * Preload frequently accessed metadata
    */
-  preload(metadataProvider: (key: string) => any): void {
+  preload(type: CacheType, metadataProvider: (key: string) => any): void {
     const preloadStart = Date.now();
     let preloadedCount = 0;
 
     for (const key of this.preloadRegistry) {
-      try {
-        const value = metadataProvider(key);
-        if (value !== undefined) {
-          // Store in appropriate cache based on key pattern
-          if (key.includes(':reflect:')) {
-            this.reflectMetadataCache.set(key, value, { ttl: this.defaultTTL });
-          } else if (key.includes(':property:')) {
-            this.propertyMetadataCache.set(key, value, { ttl: this.defaultTTL });
-          } else if (key.includes(':class:')) {
-            this.classMetadataCache.set(key, value, { ttl: this.defaultTTL });
+      if (!this.has(type, key)) {
+        try {
+          const value = metadataProvider(key);
+          if (value !== undefined) {
+            this.set(type, key, value);
+            preloadedCount++;
           }
-          preloadedCount++;
+        } catch (error) {
+          logger.Error(`Failed to preload metadata for key ${key}:`, error);
         }
-      } catch (error) {
-        logger.Warn(`Failed to preload metadata for key ${key}:`, error);
       }
     }
 
     const preloadTime = Date.now() - preloadStart;
-    logger.Info(`Preloaded ${preloadedCount} metadata entries in ${preloadTime}ms`);
+    logger.Info(`Preloaded ${preloadedCount} ${type} entries in ${preloadTime}ms`);
   }
 
   /**
-   * Get cache statistics
+   * Get detailed cache statistics
    */
-  getStats(): CacheStats {
-    this.updateMemoryUsage();
-    return { ...this.stats };
-  }
+  getStats(): DetailedCacheStats {
+    let totalHits = 0;
+    let totalMisses = 0;
+    let totalMemoryUsage = 0;
+    const byType: Record<string, any> = {};
 
-  /**
-   * Clear all caches
-   */
-  clear(): void {
-    this.reflectMetadataCache.clear();
-    this.propertyMetadataCache.clear();
-    this.classMetadataCache.clear();
-    this.dependencyCache.clear();
-    
-    this.stats = {
-      hits: 0,
-      misses: 0,
-      totalRequests: 0,
-      hitRate: 0,
-      memoryUsage: 0
+    this.caches.forEach((cache, type) => {
+      const typeStats = this.stats[type];
+      const hits = typeStats.hits;
+      const misses = typeStats.misses;
+      const hitRate = (hits + misses) > 0 ? hits / (hits + misses) : 0;
+
+      byType[type] = {
+        size: cache.size,
+        hits,
+        misses,
+        hitRate
+      };
+
+      totalHits += hits;
+      totalMisses += misses;
+      totalMemoryUsage += this.estimateCacheMemoryUsage(cache);
+    });
+
+    const totalRequests = totalHits + totalMisses;
+    const hitRate = totalRequests > 0 ? totalHits / totalRequests : 0;
+
+    return {
+      hits: totalHits,
+      misses: totalMisses,
+      totalRequests,
+      hitRate,
+      memoryUsage: totalMemoryUsage,
+      byType
     };
-    
-    this.hotKeys.clear();
-    
-    // 清理定时器
-    this.stopCleanupTimer();
-    
-    logger.Debug("MetadataCache cleared");
   }
 
   /**
-   * Optimize cache by removing cold entries and triggering garbage collection
+   * Optimize cache performance
    */
   optimize(): void {
-    const startTime = Date.now();
-    let removedCount = 0;
+    const optimizeStart = Date.now();
+    let totalCleaned = 0;
 
-    // Use LRU cache's internal optimization
-    this.reflectMetadataCache.purgeStale();
-    this.propertyMetadataCache.purgeStale();
-    this.classMetadataCache.purgeStale();
-    this.dependencyCache.purgeStale();
+    this.caches.forEach((cache, type) => {
+      const initialSize = cache.size;
+      
+      // Clean stale entries
+      cache.purgeStale();
+      
+      const finalSize = cache.size;
+      const cleaned = initialSize - finalSize;
+      totalCleaned += cleaned;
+      
+      logger.Debug(`Optimized ${type} cache: removed ${cleaned} stale entries`);
+    });
 
-    // Remove cold entries from hot keys tracking
-    const threshold = 5; // Access count threshold
-    for (const [key, count] of this.hotKeys) {
-      if (count < threshold) {
-        this.hotKeys.delete(key);
-        removedCount++;
-      }
-    }
-
-    // Force memory recalculation
-    this.updateMemoryUsage();
-
-    const optimizeTime = Date.now() - startTime;
-    logger.Debug(`Cache optimization completed in ${optimizeTime}ms, removed ${removedCount} cold entries`);
+    const optimizeTime = Date.now() - optimizeStart;
+    logger.Info(`Cache optimization completed: removed ${totalCleaned} stale entries in ${optimizeTime}ms`);
   }
 
   /**
-   * Get cache by type
+   * Convenience methods for specific cache types
    */
-  private getCache(type: string): LRUCache<string, any> {
-    switch (type) {
-      case 'reflect': return this.reflectMetadataCache;
-      case 'property': return this.propertyMetadataCache;
-      case 'class': return this.classMetadataCache;
-      case 'dependency': return this.dependencyCache;
-      default: return this.reflectMetadataCache;
-    }
+
+  // Reflect metadata cache
+  getReflectMetadata(key: string, target: any, propertyKey?: string | symbol): any {
+    const cacheKey = this.buildReflectKey(key, target, propertyKey);
+    return this.get(CacheType.REFLECT_METADATA, cacheKey);
+  }
+
+  setReflectMetadata(key: string, target: any, value: any, propertyKey?: string | symbol, ttl?: number): void {
+    const cacheKey = this.buildReflectKey(key, target, propertyKey);
+    this.set(CacheType.REFLECT_METADATA, cacheKey, value, ttl);
+  }
+
+  // Property metadata cache
+  getPropertyMetadata(decoratorKey: string, target: any, propertyName: string | symbol): any {
+    const cacheKey = this.buildPropertyKey(decoratorKey, target, propertyName);
+    return this.get(CacheType.PROPERTY_METADATA, cacheKey);
+  }
+
+  setPropertyMetadata(decoratorKey: string, target: any, propertyName: string | symbol, value: any, ttl?: number): void {
+    const cacheKey = this.buildPropertyKey(decoratorKey, target, propertyName);
+    this.set(CacheType.PROPERTY_METADATA, cacheKey, value, ttl);
+  }
+
+  // Class metadata cache
+  getClassMetadata(type: string, decoratorKey: string, target: any, propertyName?: string): any {
+    const cacheKey = this.buildClassKey(type, decoratorKey, target, propertyName);
+    return this.get(CacheType.CLASS_METADATA, cacheKey);
+  }
+
+  setClassMetadata(type: string, decoratorKey: string, target: any, value: any, propertyName?: string, ttl?: number): void {
+    const cacheKey = this.buildClassKey(type, decoratorKey, target, propertyName);
+    this.set(CacheType.CLASS_METADATA, cacheKey, value, ttl);
+  }
+
+  // Dependencies cache
+  getCachedDependencies(target: any): string[] | undefined {
+    const cacheKey = this.buildDependencyKey(target);
+    return this.get(CacheType.DEPENDENCY, cacheKey);
+  }
+
+  setCachedDependencies(target: any, dependencies: string[], ttl?: number): void {
+    const cacheKey = this.buildDependencyKey(target);
+    this.set(CacheType.DEPENDENCY, cacheKey, dependencies, ttl);
+  }
+
+  // Dependency preprocess cache
+  getDependencyPreprocess<T = any>(key: string): T | undefined {
+    return this.get(CacheType.DEPENDENCY_PREPROCESS, key);
+  }
+
+  setDependencyPreprocess<T = any>(key: string, value: T, ttl?: number): void {
+    this.set(CacheType.DEPENDENCY_PREPROCESS, key, value, ttl);
+  }
+
+  // AOP interceptors cache
+  getAOPInterceptor<T = any>(key: string): T | undefined {
+    return this.get(CacheType.AOP_INTERCEPTORS, key);
+  }
+
+  setAOPInterceptor<T = any>(key: string, value: T, ttl?: number): void {
+    this.set(CacheType.AOP_INTERCEPTORS, key, value, ttl);
+  }
+
+  // Method names cache
+  getMethodNames(key: string): string[] | undefined {
+    return this.get(CacheType.METHOD_NAMES, key);
+  }
+
+  setMethodNames(key: string, methods: string[], ttl?: number): void {
+    this.set(CacheType.METHOD_NAMES, key, methods, ttl);
+  }
+
+  // Aspect instances cache
+  getAspectInstance<T = any>(key: string): T | undefined {
+    return this.get(CacheType.ASPECT_INSTANCES, key);
+  }
+
+  setAspectInstance<T = any>(key: string, aspect: T, ttl?: number): void {
+    this.set(CacheType.ASPECT_INSTANCES, key, aspect, ttl);
   }
 
   /**
-   * Get cached value with statistics tracking
-   */
-  private getCachedValue<T>(cache: LRUCache<string, T>, key: string): T | undefined {
-    this.stats.totalRequests++;
-    
-    const value = cache.get(key);
-    if (value !== undefined) {
-      this.hotKeys.set(key, (this.hotKeys.get(key) || 0) + 1);
-      this.stats.hits++;
-      this.updateHitRate();
-      return value;
-    }
-    
-    this.stats.misses++;
-    this.updateHitRate();
-    return undefined;
-  }
-
-  /**
-   * Set cached value with optional TTL
-   */
-  private setCachedValue<T>(cache: LRUCache<string, T>, key: string, value: T, ttl?: number): void {
-    const options = ttl ? { ttl } : undefined;
-    cache.set(key, value, options);
-  }
-
-  /**
-   * Build cache key for reflect metadata
+   * Key building methods
    */
   private buildReflectKey(key: string, target: any, propertyKey?: string | symbol): string {
-    const targetName = typeof target === 'function' ? target.name : target.constructor?.name || 'unknown';
-    const propKey = propertyKey ? `:${String(propertyKey)}` : '';
-    return `reflect:${key}:${targetName}${propKey}`;
+    const className = target.name || target.constructor?.name || 'Anonymous';
+    const prop = propertyKey ? `:${String(propertyKey)}` : '';
+    return `reflect:${key}:${className}${prop}`;
   }
 
-  /**
-   * Build cache key for property metadata
-   */
   private buildPropertyKey(decoratorKey: string, target: any, propertyName: string | symbol): string {
-    const targetName = typeof target === 'function' ? target.name : target.constructor?.name || 'unknown';
-    return `property:${decoratorKey}:${targetName}:${String(propertyName)}`;
+    const className = target.name || target.constructor?.name || 'Anonymous';
+    return `property:${decoratorKey}:${className}:${String(propertyName)}`;
   }
 
-  /**
-   * Build cache key for class metadata
-   */
   private buildClassKey(type: string, decoratorKey: string, target: any, propertyName?: string): string {
-    const targetName = typeof target === 'function' ? target.name : target.constructor?.name || 'unknown';
-    const propKey = propertyName ? `:${propertyName}` : '';
-    return `class:${type}:${decoratorKey}:${targetName}${propKey}`;
+    const className = target.name || target.constructor?.name || 'Anonymous';
+    const prop = propertyName ? `:${propertyName}` : '';
+    return `class:${type}:${decoratorKey}:${className}${prop}`;
   }
 
-  /**
-   * Build cache key for dependencies
-   */
   private buildDependencyKey(target: any): string {
-    const targetName = typeof target === 'function' ? target.name : target.constructor?.name || 'unknown';
-    return `dependency:${targetName}`;
+    const className = target.name || target.constructor?.name || 'Anonymous';
+    return `dependency:${className}`;
   }
 
   /**
-   * Update hit rate
+   * Track hot keys for optimization
    */
-  private updateHitRate(): void {
-    this.stats.hitRate = this.stats.totalRequests > 0 
-      ? this.stats.hits / this.stats.totalRequests 
-      : 0;
+  private trackHotKey(key: string): void {
+    const count = this.hotKeys.get(key) || 0;
+    this.hotKeys.set(key, count + 1);
   }
 
   /**
-   * Update memory usage estimation
+   * Estimate memory usage of a cache
    */
-  private updateMemoryUsage(): void {
-    // Use LRU cache's calculatedSize if available, otherwise estimate
-    let usage = 0;
-    
-    // LRU cache provides size information
-    usage += this.reflectMetadataCache.size * 200; // Estimated bytes per entry
-    usage += this.propertyMetadataCache.size * 150;
-    usage += this.classMetadataCache.size * 180;
-    usage += this.dependencyCache.size * 100;
-    
-    this.stats.memoryUsage = usage;
-    
-    // If memory usage is too high, trigger optimization
-    if (usage > this.maxMemoryUsage) {
-      logger.Warn(`Cache memory usage (${usage} bytes) exceeds limit (${this.maxMemoryUsage} bytes), triggering optimization`);
-      this.optimize();
-    }
+  private estimateCacheMemoryUsage(cache: LRUCache<string, any>): number {
+    // Rough estimation: 100 bytes per entry on average
+    return cache.size * 100;
   }
 
   /**
-   * Start cleanup timer for maintenance
+   * Start cleanup timer
    */
   private startCleanupTimer(): void {
-    // 清理已存在的定时器
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer);
-    }
-    
     this.cleanupTimer = setInterval(() => {
       this.cleanup();
-    }, 60000); // Cleanup every minute
+    }, this.defaultTTL); // Cleanup every TTL period
   }
 
   /**
@@ -414,30 +488,20 @@ export class MetadataCache {
   }
 
   /**
-   * Cleanup and maintenance
+   * Cleanup stale data and optimize memory usage
    */
   private cleanup(): void {
-    // LRU cache handles expiration automatically with TTL
-    // We just need to update memory usage and optionally purge stale entries
-    const beforeSize = this.reflectMetadataCache.size + this.propertyMetadataCache.size + 
-                       this.classMetadataCache.size + this.dependencyCache.size;
-    
-    // Purge stale entries
-    this.reflectMetadataCache.purgeStale();
-    this.propertyMetadataCache.purgeStale();
-    this.classMetadataCache.purgeStale();
-    this.dependencyCache.purgeStale();
-    
-    const afterSize = this.reflectMetadataCache.size + this.propertyMetadataCache.size + 
-                      this.classMetadataCache.size + this.dependencyCache.size;
-    
-    const cleanedCount = beforeSize - afterSize;
-    
-    // Update memory usage
-    this.updateMemoryUsage();
-    
-    if (cleanedCount > 0) {
-      logger.Debug(`Cleaned up ${cleanedCount} expired cache entries`);
+    // Check memory usage
+    const stats = this.getStats();
+    if (stats.memoryUsage > this.maxMemoryUsage) {
+      logger.Warn(`Cache memory usage (${stats.memoryUsage} bytes) exceeds limit (${this.maxMemoryUsage} bytes), performing cleanup`);
+      this.optimize();
+    }
+
+    // Clean up hot keys map if it gets too large
+    if (this.hotKeys.size > 10000) {
+      this.hotKeys.clear();
+      logger.Debug('Cleared hot keys map due to size limit');
     }
   }
 } 
