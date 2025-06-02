@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0-0](https://github.com/koatty/koatty_container/compare/v1.12.0...v1.13.0-0) (2025-06-02)
+
+
+### Features
+
+* enhance Container API with type flexibility, improve async instance handling, add metadata management methods, and update decorators for better type safety and error handling ([0c6d423](https://github.com/koatty/koatty_container/commit/0c6d423e261be1b10796077ee656a9d08b9e4476))
+* enhance dependency injection with circular dependency support, improved AOP metadata resolution, and delayed loading for unresolved dependencies ([135f484](https://github.com/koatty/koatty_container/commit/135f4847d429549648f2e72d59f4415e969d9962))
+* implement circular dependency detection with detailed reporting and resolution suggestions ([82d7768](https://github.com/koatty/koatty_container/commit/82d776839b2a0b3d1aef73b0df65b02e7db13a11))
+* rename CircularDependencyDetector to CircularDepDetector and update related types and error handling ([7e9a604](https://github.com/koatty/koatty_container/commit/7e9a6047f1eaf63eb3606a06634506bd3a570e3c))
+
 ## [1.14.0](https://github.com/koatty/koatty_container/compare/v1.13.0...v1.14.0) (2025-01-27)
 
 ### ✨ Features
