@@ -13,7 +13,7 @@ class SimpleService {
 @Component()  
 class TestService {
   @Autowired()
-  simpleService: SimpleService;
+  simpleService!: SimpleService;
 
   getResult() {
     return this.simpleService?.getValue();
@@ -22,11 +22,15 @@ class TestService {
 
 describe("Simple Autowired Test", () => {
   beforeEach(() => {
-    IOC.clear();
+    IOC.clearInstances();
   });
 
   test("Should save and read @Autowired metadata correctly", () => {
     console.log("=== TESTING SIMPLE AUTOWIRED ===");
+    
+    // Check if decorator was applied
+    const hasMetadata = Reflect.hasMetadata(TAGGED_PROP, TestService.prototype);
+    console.log("TestService has TAGGED_PROP metadata:", hasMetadata);
     
     // Check metadata before registration
     const beforeMeta = IOC.listPropertyData(TAGGED_PROP, TestService.prototype);
@@ -35,9 +39,9 @@ describe("Simple Autowired Test", () => {
     const reflectMeta = Reflect.getMetadata(TAGGED_PROP, TestService.prototype);
     console.log("TestService Reflect metadata:", reflectMeta);
     
-    // Try direct reflection
-    const allKeys = Reflect.getMetadataKeys(TestService.prototype);
-    console.log("All metadata keys:", allKeys);
+    // Try direct reflection on property
+    const propMeta = Reflect.getMetadata(TAGGED_PROP, TestService.prototype, "simpleService");
+    console.log("simpleService property metadata:", propMeta);
     
     // Register services
     IOC.reg(SimpleService);

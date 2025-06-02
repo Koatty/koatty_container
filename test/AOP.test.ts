@@ -21,6 +21,10 @@ describe("AOP", () => {
     IOC.reg("ClassC", ClassC);
   })
 
+  beforeEach(() => {
+    IOC.clearInstances(); // Only clear instances, keep metadata
+  })
+
   test("Before", async () => {
     // 使用 jest.spyOn 来监控 console.log
     const logSpy = jest.spyOn(console, 'log');

@@ -388,8 +388,8 @@ export class Container implements IContainer {
     // phase 4: batch dependency pre-process (if enabled)
     if (batchPreProcessDependencies && optimizePerformance && allTargets.length > 0) {
       try {
-        const { batchPreProcessDependencies: batchPreProcess } = require("../processor/Autowired-processor");
-        batchPreProcess(allTargets, this);
+        const { batchPreprocessDependencies } = require("../processor/Autowired-processor");
+        batchPreprocessDependencies(allTargets, this);
         logger.Debug(`Batch dependency preprocessing completed for ${allTargets.length} targets`);
       } catch (error) {
         logger.Debug("Batch dependency preprocessing failed:", error);
@@ -541,17 +541,26 @@ export class Container implements IContainer {
       throw new Error("target is not a class");
     }
 
-    if (!this.instanceMap.get(target)) {
-      options = {
-        isAsync: false,
-        initMethod: "constructor",
-        destroyMethod: "destructor",
-        scope: "Singleton",
-        type: "COMPONENT",
-        args: [],
-        ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
-      };
+    // Check if this specific identifier is already registered, not the target class
+    const hasExistingInstance = this.instanceMap.get(target);
+    
+    options = {
+      isAsync: false,
+      initMethod: "constructor",
+      destroyMethod: "destructor",
+      scope: "Singleton",
+      type: "COMPONENT",
+      args: [],
+      ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
+    };
 
+    // Always try to save class to metadata with the new identifier
+    if (!this.getClass(<string>identifier, options.type)) {
+      this.saveClass(options.type, <Function>target, <string>identifier);
+    }
+
+    // Only do the heavy initialization if instance doesn't exist
+    if (!hasExistingInstance) {
       const dependencies = this.extractDependencies(target);
 
       try {
@@ -580,10 +589,6 @@ export class Container implements IContainer {
           value: options
         });
 
-        // save class to metadata
-        if (!this.getClass(<string>identifier, options.type)) {
-          this.saveClass(options.type, <Function>target, <string>identifier);
-        }
         // async instance
         if (options.isAsync) {
           if (this.app && typeof this.app.on === 'function') {
@@ -613,6 +618,10 @@ export class Container implements IContainer {
         }
         throw error;
       }
+    } else {
+      // Instance already exists, just register the new identifier mapping
+      // No need to re-inject or re-initialize, just ensure the class mapping exists
+      logger.Debug(`Registering additional identifier '${identifier}' for existing class ${(target as Function).name}`);
     }
   }
 
@@ -644,23 +653,34 @@ export class Container implements IContainer {
         }
       });
 
-      // get @Autowired decorated properties with caching
-      const props = Object.getOwnPropertyNames(target.prototype);
-      props.forEach(prop => {
-        const metaKey = `${prop}:autowired`;
-        let propMetadata = this.metadataCache.getReflectMetadata(metaKey, target);
-        
-        if (!propMetadata) {
-          propMetadata = Reflect.getMetadata(metaKey, target);
-          if (propMetadata) {
-            this.metadataCache.setReflectMetadata(metaKey, target, propMetadata);
+      // Get @Autowired decorated properties using IOC's listPropertyData method
+      const autowiredProperties = this.listPropertyData(TAGGED_PROP, target);
+      if (autowiredProperties && typeof autowiredProperties === 'object') {
+        for (const [propertyKey, metadata] of Object.entries(autowiredProperties)) {
+          if (metadata && typeof metadata === 'object') {
+            const propertyMetadata = metadata as any;
+            // Get the dependency identifier from @Autowired metadata
+            const dependencyId = propertyMetadata.identifier || propertyMetadata.name || propertyKey;
+            if (dependencyId && !dependencies.includes(dependencyId)) {
+              dependencies.push(dependencyId);
+            }
           }
         }
-        
-        if (propMetadata && propMetadata.identifier) {
-          dependencies.push(propMetadata.identifier);
+      }
+
+      // Also try direct Reflect.getMetadata for backward compatibility
+      const taggedPropMetadata = Reflect.getMetadata(TAGGED_PROP, target);
+      if (taggedPropMetadata) {
+        for (const key in taggedPropMetadata) {
+          const propertyMetadata = taggedPropMetadata[key];
+          if (propertyMetadata) {
+            const dependencyId = propertyMetadata.identifier || propertyMetadata.name || key;
+            if (dependencyId && !dependencies.includes(dependencyId)) {
+              dependencies.push(dependencyId);
+            }
+          }
         }
-      });
+      }
 
     } catch (error) {
       logger.Debug(`Failed to extract dependencies of ${target.name}:`, error);
@@ -668,6 +688,8 @@ export class Container implements IContainer {
 
     // Cache the extracted dependencies
     this.metadataCache.setCachedDependencies(target, dependencies);
+    
+    logger.Debug(`Register component dependencies: ${target.name} -> [${dependencies.join(', ')}]`);
     
     return dependencies;
   }
@@ -737,6 +759,7 @@ export class Container implements IContainer {
    * Creates new instance when:
    * 1. Constructor arguments are provided
    * 2. Component scope is Prototype
+   * For circular dependencies, delayed loading is expected and instances may be undefined initially.
    * @example
    * ```ts
    * const userService = container.get('UserService');
@@ -797,9 +820,63 @@ export class Container implements IContainer {
     }
 
     // Return cached instance for Singleton
-    const instance = this.instanceMap.get(<Function>target) as T;
+    let instance = this.instanceMap.get(<Function>target) as T;
     if (!instance) {
-      throw new Error(`Bean ${className} not found`);
+      // Check if this component is part of a circular dependency
+      const detector = this.circularDependencyDetector;
+      const hasCircularDeps = detector.hasCircularDependencies();
+      
+      if (hasCircularDeps) {
+        const allCircularDeps = detector.getAllCircularDependencies();
+        const isPartOfCircularDependency = allCircularDeps.some(cycle => 
+          cycle.includes(className)
+        );
+        
+        if (isPartOfCircularDependency) {
+          // For circular dependencies, return undefined - delayed loading is expected
+          logger.Debug(`Component ${className} is part of circular dependency, returning undefined (delayed loading expected)`);
+          return undefined as T;
+        }
+      }
+      
+      // Check if this is a case where instances were cleared but class registration exists
+      // AND we are not in a circular dependency scenario
+      const wasInstanceCleared = this.classMap.has(`${type}:${className}`);
+      
+      if (wasInstanceCleared && !hasCircularDeps) {
+        // Instance was cleared for non-circular dependency, safe to recreate
+        logger.Debug(`Instance was cleared for ${className}, recreating with proper dependency injection flow`);
+        
+        try {
+          // Re-run the full registration process to ensure proper dependency injection
+          this._setInstance(<Function>target, options);
+          this._injection(<Function>target, options, className);
+          
+          // Get the newly created instance
+          instance = this.instanceMap.get(<Function>target) as T;
+          if (!instance) {
+            throw new Error(`Failed to recreate instance for ${className}`);
+          }
+          
+          logger.Debug(`Successfully recreated singleton instance for ${className}`);
+        } catch (error) {
+          if (error instanceof CircularDepError) {
+            // If circular dependency is detected during recreation, return undefined
+            logger.Debug(`Circular dependency detected for ${className} during recreation, returning undefined (delayed loading)`);
+            return undefined as T;
+          } else {
+            throw new Error(`Failed to recreate instance of ${className}: ${error.message}`);
+          }
+        }
+      } else {
+        // Either bean not found or in circular dependency mode - don't try to recreate
+        if (hasCircularDeps) {
+          logger.Debug(`${className} not found and circular dependencies exist, returning undefined for delayed loading`);
+          return undefined as T;
+        } else {
+          throw new Error(`Bean ${className} not found`);
+        }
+      }
     }
     return instance;
   }

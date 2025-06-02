@@ -218,6 +218,10 @@ export class MetadataCache {
     });
     this.preloadRegistry.clear();
     this.hotKeys.clear();
+    
+    // Stop cleanup timer to prevent memory leaks
+    this.stopCleanupTimer();
+    
     logger.Debug('All caches cleared');
   }
 
@@ -475,6 +479,11 @@ export class MetadataCache {
     this.cleanupTimer = setInterval(() => {
       this.cleanup();
     }, this.defaultTTL); // Cleanup every TTL period
+    
+    // Use unref to allow the process to exit
+    if (this.cleanupTimer && typeof this.cleanupTimer.unref === 'function') {
+      this.cleanupTimer.unref();
+    }
   }
 
   /**

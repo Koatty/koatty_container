@@ -50,11 +50,11 @@ export class VersionConflictError extends Error {
    */
   getResolutionSuggestions(): string[] {
     return [
-      "1. version conflict detected, please check the version of koatty_container in the dependency tree",
-      "2. use 'npm ls koatty_container' to check the version of koatty_container in the dependency tree",
-      "3. update the version of koatty_container in the package.json",
-      "4. delete the node_modules and reinstall the dependencies",
-      "5. consider using the resolutions field to force the version"
+      "1. 统一所有依赖的koatty_container版本",
+      "2. 使用npm ls koatty_container检查版本依赖树",
+      "3. 在package.json中使用resolutions字段强制版本",
+      "4. 更新所有相关包到兼容版本",
+      "5. 考虑使用单一版本的koatty_container"
     ];
   }
 }

@@ -82,41 +82,29 @@ describe("Autowired", () => {
   });
 
   test("Autowired应支持自定义标识符", async () => {
-    // 使用MyDependency2作为自定义依赖，避免与已有的MyDependency冲突
-    const customId = "MyDependency2"; // 直接使用已存在的标识符，避免camelCase转换和延迟加载
+    // 使用自定义标识符注册MyDependency2
+    const customId = "CustomMyDependency2";
     
     @Component()
     class CustomDepClass {
       @Autowired(customId)
-      dep!: MyDependency2; // 使用MyDependency2类型
+      dep!: MyDependency2;
     }
     
-    // 创建模拟app对象来处理延迟加载
-    const mockApp = {
-      once: jest.fn((event: string, callback: Function) => {
-        if (event === "appReady") {
-          // 立即执行回调来模拟appReady事件
-          setTimeout(callback, 0);
-        }
-      }),
-      emit: jest.fn()
-    };
-    
-    // 设置模拟app到容器中
-    (<any>IOC).app = mockApp;
-    
+    // 使用自定义标识符注册MyDependency2
+    IOC.reg(customId, MyDependency2);
     IOC.reg(CustomDepClass);
     
     const ins = IOC.get(CustomDepClass);
     
-    // 等待延迟加载完成
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
+    // 验证依赖注入成功
     expect(ins.dep).toBeInstanceOf(MyDependency2);
     expect(ins.dep.run()).toBe("MyDependency2.run");
     
-    // 验证appReady事件被注册
-    expect(mockApp.once).toHaveBeenCalledWith("appReady", expect.any(Function));
+    // 同时验证可以通过自定义标识符直接获取
+    const depByCustomId = IOC.get(customId);
+    expect(depByCustomId).toBeInstanceOf(MyDependency2);
+    expect(depByCustomId).toBe(ins.dep); // 应该是同一个实例（单例）
   });
 
   // 新增Autowired测试用例

@@ -19,6 +19,7 @@ import { MetadataCache, CacheType } from "../utils/MetadataCache";
 interface DependencyPreProcessData {
   dependencies: {
     name: string;
+    propertyKey: string;
     type?: string;
     method?: Function;
     args?: any[];
@@ -92,10 +93,20 @@ function preprocessDependencies(target: Function, container: IContainer): Depend
   const dependencies: DependencyPreProcessData['dependencies'] = [];
   
   // Process each dependency
-  for (const { name, type, method, args } of Object.values(metaData)) {
-    if (name) {
+  for (const key in metaData) {
+    const { name, type, method, args, identifier } = metaData[key];
+    // Use identifier for resolving the dependency, but keep the original key as the property name
+    let dependencyName = identifier || name || key;
+    
+    // If identifier is a class constructor function, use its name
+    if (typeof dependencyName === 'function' && dependencyName.name) {
+      dependencyName = dependencyName.name;
+    }
+    
+    if (dependencyName) {
       dependencies.push({
-        name,
+        name: dependencyName,        // Used for IOC container resolution
+        propertyKey: key,           // Original property name to set on the instance
         type: type || undefined,
         method: helper.isFunction(method) ? method : undefined,
         args: args || undefined
@@ -133,51 +144,245 @@ export function injectAutowired(target: Function, prototypeChain: object,
     }
 
     if (!preprocessedData.dependencies || preprocessedData.dependencies.length === 0) {
-      logger.Debug(`No dependencies to inject for ${className}`);
       return;
     }
 
     let injectedCount = 0;
-
-    // Inject each dependency
+    const delayedDependencies: Array<{
+      dependency: { name: string; propertyKey: string; type?: string; method?: Function; args?: any[] };
+      isCircular: boolean;
+    }> = [];
+    
+    // Step 0: Complete circular dependency detection for ALL dependencies (principle 6+)
+    // Class successful registration doesn't mean no circular dependencies exist
+    const detector = container.getCircularDependencyDetector();
+    const hasCircularDeps = detector.hasCircularDependencies();
+    const allCircularDeps = hasCircularDeps ? detector.getAllCircularDependencies() : [];
+    
+    // Check each dependency for circular relationships, regardless of immediate availability
+    const dependencyCircularityMap = new Map<string, boolean>();
     for (const dependency of preprocessedData.dependencies) {
-      try {
-        let targetValue = dependency.method ? dependency.method() : container.get(dependency.name, dependency.type, ...(dependency.args || []));
+      if (dependency.name) {
+        const isCircularDependency = allCircularDeps.some(cycle => 
+          cycle.includes(className) || cycle.includes(dependency.name)
+        );
+        dependencyCircularityMap.set(dependency.propertyKey, isCircularDependency);
         
-        // Handle dependency resolution errors gracefully
-        if (!targetValue) {
-          logger.Warn(`Failed to resolve dependency ${dependency.name} for ${className}, using fallback`);
-          targetValue = {}; // Fallback empty object
+        if (isCircularDependency) {
+          logger.Debug(`Circular dependency detected: ${className}.${dependency.propertyKey} -> ${dependency.name} (even if resolvable)`);
         }
-
-        Reflect.defineProperty(prototypeChain, dependency.name, {
-          enumerable: true,
-          configurable: false,
-          writable: true,
-          value: targetValue,
-        });
-
-        injectedCount++;
-        logger.Debug(`Injected dependency ${dependency.name} into ${className}`);
-      } catch (error) {
-        logger.Error(`Failed to inject dependency ${dependency.name} into ${className}:`, error);
-        
-        // Create a fallback empty object for failed dependencies
-        Reflect.defineProperty(prototypeChain, dependency.name, {
-          enumerable: true,
-          configurable: false,
-          writable: true,
-          value: {},
-        });
       }
+    }
+    
+    // Step 1: Process each dependency individually with improved string identifier support
+    for (const dependency of preprocessedData.dependencies) {
+      let dependencyValue: any = undefined;
+      let resolved = false;
+      let isCircular = false;
+      
+      // First, check for circular dependencies (principle 6+)
+      // Class successful registration doesn't mean no circular dependencies exist
+      isCircular = dependencyCircularityMap.get(dependency.name) || false;
+      
+      try {
+        if (dependency.type === 'string') {
+          // Enhanced string identifier resolution (principle 3)
+          // Priority: immediate injection if class registered and no actual circular dependency
+          const targetClass = container.getClass(dependency.name);
+          
+          if (targetClass && !isCircular) {
+            // Class is registered and no circular dependency detected - immediate injection
+            dependencyValue = container.get(dependency.name);
+            if (dependencyValue !== undefined) {
+              resolved = true;
+            }
+          } else if (targetClass && isCircular) {
+            // Class is registered but circular dependency exists - use delayed loading
+            logger.Debug(`Circular dependency detected: ${className}.${dependency.propertyKey} -> ${dependency.name} (even if resolvable)`);
+            resolved = false; // Force delayed loading
+          } else {
+            // Class not registered - will need delayed loading
+            resolved = false;
+          }
+        } else {
+          // CLASS type dependency resolution
+          if (!isCircular) {
+            dependencyValue = container.get(dependency.name);
+            if (dependencyValue !== undefined) {
+              resolved = true;
+            }
+          } else {
+            logger.Debug(`Using delayed loading for circular dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}`);
+            resolved = false;
+          }
+        }
+        
+        if (resolved && dependencyValue !== undefined) {
+          // Immediate injection to prototype (principle 2)
+          Object.defineProperty(prototypeChain, dependency.propertyKey, {
+            value: dependencyValue,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          });
+          injectedCount++;
+          logger.Debug(`Immediately injected: ${className}.${dependency.propertyKey} = ${dependency.name}`);
+        } else {
+          // Add to delayed dependencies for later processing
+          delayedDependencies.push({
+            dependency,
+            isCircular
+          });
+          logger.Debug(`Delayed dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}${isCircular ? ' (circular)' : ' (not available)'}`);
+        }
+      } catch (error) {
+        // If immediate injection fails, add to delayed dependencies
+        delayedDependencies.push({
+          dependency,
+          isCircular
+        });
+        logger.Debug(`Failed immediate injection for ${className}.${dependency.propertyKey}, will use delayed loading: ${error}`);
+      }
+    }
+    
+    // Step 2: Set up delayed loading for dependencies that couldn't be resolved immediately
+    if (delayedDependencies.length > 0) {
+      setupDelayedInjection(container, prototypeChain, className, delayedDependencies);
     }
 
     const injectionTime = Date.now() - injectionStart;
     logger.Debug(`Dependency injection completed for ${className}: ${injectedCount}/${preprocessedData.dependencies.length} dependencies in ${injectionTime}ms`);
 
   } catch (error) {
-    logger.Error(`Failed to inject dependencies for ${className}:`, error);
+    logger.Error(`Autowired injection failed for ${className}:`, error);
+    throw error;
   }
+}
+
+/**
+ * Set up delayed injection for dependencies that couldn't be resolved immediately
+ * This includes circular dependencies and dependencies that are not yet available
+ */
+function setupDelayedInjection(
+  container: IContainer, 
+  prototypeChain: object, 
+  className: string,
+  delayedDependencies: Array<{
+    dependency: { name: string; propertyKey: string; type?: string; method?: Function; args?: any[] };
+    isCircular: boolean;
+  }>
+): void {
+  const app = container.getApp();
+  if (!app || typeof app.on !== 'function') {
+    logger.Debug(`Cannot setup delayed injection for ${className}: app.on is not available`);
+    return;
+  }
+  
+  // Use a unique event handler to avoid duplicates
+  const delayedInjectionHandler = () => {
+    logger.Debug(`Executing delayed injection for ${className} with ${delayedDependencies.length} dependencies`);
+    
+    let successfulDelayedInjections = 0;
+    let failedInjections = 0;
+    
+    for (const { dependency, isCircular } of delayedDependencies) {
+      try {
+        let delayedValue;
+        let injectionSuccessful = false;
+        
+        if (isCircular) {
+          // For circular dependencies, use a safer approach to avoid re-triggering circular detection
+          try {
+            const dependencyClass = container.getClass(dependency.name, dependency.type);
+            if (dependencyClass) {
+              delayedValue = container.getInsByClass(dependencyClass);
+              injectionSuccessful = true;
+            }
+          } catch {
+            // Fallback to property key for circular dependencies
+            try {
+              const dependencyClass = container.getClass(dependency.propertyKey, dependency.type);
+              if (dependencyClass) {
+                delayedValue = container.getInsByClass(dependencyClass);
+                injectionSuccessful = true;
+              }
+            } catch {
+              logger.Debug(`Circular dependency ${dependency.name} still not available for delayed injection`);
+            }
+          }
+        } else {
+          // For non-circular delayed dependencies, try normal resolution
+          try {
+            delayedValue = container.get(dependency.name, dependency.type);
+            injectionSuccessful = true;
+          } catch {
+            // Fallback to propertyKey for string-based dependencies
+            try {
+              delayedValue = container.get(dependency.propertyKey, dependency.type);
+              injectionSuccessful = true;
+            } catch {
+              logger.Debug(`Delayed dependency ${dependency.name} still not available`);
+            }
+          }
+        }
+        
+        // Inject the resolved value or set to null if failed
+        const finalValue = injectionSuccessful && delayedValue !== undefined ? delayedValue : null;
+        
+        // Always define the property on prototype to ensure all instances have access
+        Object.defineProperty(prototypeChain, dependency.propertyKey, {
+          value: finalValue,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
+        
+        // Additionally, fix existing instances if they have undefined properties
+        try {
+          const targetClass = container.getClass(className);
+          if (targetClass) {
+            const instance = container.getInsByClass(targetClass);
+            if (instance && (instance as any)[dependency.propertyKey] === undefined) {
+              // Directly assign the value to existing instance
+              (instance as any)[dependency.propertyKey] = finalValue;
+            }
+          }
+        } catch {
+          // Silently handle any errors in instance property setting
+        }
+        
+        if (injectionSuccessful) {
+          successfulDelayedInjections++;
+          logger.Debug(`Successfully injected delayed dependency: ${className}.${dependency.propertyKey} = ${dependency.name}`);
+        } else {
+          failedInjections++;
+          logger.Debug(`Failed to resolve delayed dependency ${className}.${dependency.propertyKey}, set to null`);
+        }
+        
+      } catch (error) {
+        failedInjections++;
+        logger.Debug(`Failed to inject delayed dependency ${dependency.name} into ${className}.${dependency.propertyKey}:`, error);
+        
+        // Even on error, set property to null to ensure it exists
+        try {
+          Object.defineProperty(prototypeChain, dependency.propertyKey, {
+            value: null,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          });
+        } catch {
+          // Silently handle defineProperty errors
+        }
+      }
+    }
+    
+    logger.Debug(`Delayed injection completed for ${className}: ${successfulDelayedInjections} successful, ${failedInjections} failed (set to null)`);
+  };
+  
+  // Add event listener for delayed injection
+  app.on('appReady', delayedInjectionHandler);
+  logger.Debug(`Setup delayed injection for ${className} with ${delayedDependencies.length} dependencies`);
 }
 
 /**
