@@ -50,7 +50,7 @@ class UserService {
   }
 }
 
-@Component()
+@Controller()
 class UserController {
   @Autowired()
   private userService: UserService;
