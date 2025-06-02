@@ -8,7 +8,19 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "../processor/AOP-processor";
-import { injectAutowired } from "../processor/Autowired-processor";
+import { 
+  injectAutowired, 
+  batchPreprocessDependencies,
+  clearDependencyCache,
+  optimizeDependencyCache,
+  getAutowiredCacheStats
+} from "../processor/Autowired-processor";
+import { 
+  warmupAOPCache,
+  clearAOPCache,
+  optimizeAOPCache,
+  getAOPCacheStats
+} from "../processor/AOP-processor";
 import { injectValues } from "../processor/Values-processor";
 import {
   getComponentTypeByClassName,
@@ -388,7 +400,6 @@ export class Container implements IContainer {
     // phase 4: batch dependency pre-process (if enabled)
     if (batchPreProcessDependencies && optimizePerformance && allTargets.length > 0) {
       try {
-        const { batchPreprocessDependencies } = require("../processor/Autowired-processor");
         batchPreprocessDependencies(allTargets, this);
         logger.Debug(`Batch dependency preprocessing completed for ${allTargets.length} targets`);
       } catch (error) {
@@ -399,8 +410,7 @@ export class Container implements IContainer {
     // phase 5: aop cache warmup (if enabled)
     if (warmupCaches && optimizePerformance && allTargets.length > 0) {
       try {
-        const { warmupAOPCache } = require("../processor/AOP-processor");
-        warmupAOPCache(allTargets, this);
+        warmupAOPCache(allTargets);
         logger.Debug(`AOP cache warmup completed for ${allTargets.length} targets`);
       } catch (error) {
         logger.Debug("AOP cache warmup failed:", error);
@@ -410,14 +420,12 @@ export class Container implements IContainer {
     // phase 6: post-optimization processing (if enabled)
     if (optimizePerformance) {
       try {
-        const { optimizeDependencyCache } = require("../processor/Autowired-processor");
         optimizeDependencyCache();
       } catch (error) {
         logger.Debug("Dependency cache optimization failed:", error);
       }
 
       try {
-        const { optimizeAOPCache } = require("../processor/AOP-processor");
         optimizeAOPCache();
       } catch (error) {
         logger.Debug("AOP cache optimization failed:", error);
@@ -1434,14 +1442,12 @@ export class Container implements IContainer {
     
     // clear processor lru cache
     try {
-      const { clearDependencyCache } = require("../processor/Autowired-processor");
       clearDependencyCache();
     } catch (error) {
       logger.Debug("Autowired cache cleanup failed:", error);
     }
     
     try {
-      const { clearAOPCache } = require("../processor/AOP-processor");
       clearAOPCache();
     } catch (error) {
       logger.Debug("AOP cache cleanup failed:", error);
@@ -1498,7 +1504,6 @@ export class Container implements IContainer {
 
     // get dependency processor lru cache stats
     try {
-      const { getAutowiredCacheStats } = require("../processor/Autowired-processor");
       lruCaches.dependencies = getAutowiredCacheStats();
     } catch (error) {
       logger.Debug("Failed to get dependency cache stats:", error);
@@ -1506,7 +1511,6 @@ export class Container implements IContainer {
 
     // get aop processor lru cache stats
     try {
-      const { getAOPCacheStats } = require("../processor/AOP-processor");
       lruCaches.aop = getAOPCacheStats();
     } catch (error) {
       logger.Debug("Failed to get AOP cache stats:", error);
