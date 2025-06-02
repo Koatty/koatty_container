@@ -8,14 +8,14 @@
 import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "../processor/AOP-processor";
-import { 
-  injectAutowired, 
+import {
+  injectAutowired,
   batchPreprocessDependencies,
   clearDependencyCache,
   optimizeDependencyCache,
   getAutowiredCacheStats
 } from "../processor/Autowired-processor";
-import { 
+import {
   warmupAOPCache,
   clearAOPCache,
   optimizeAOPCache,
@@ -35,7 +35,6 @@ import {
 // import circular dependency detector
 import { CircularDepDetector, CircularDepError } from "../utils/CircularDepDetector";
 import { MetadataCache, CacheType } from "../utils/MetadataCache";
-import { VersionConflictDetector, VersionConflictError } from "../utils/VersionConflictDetector";
 import { DefaultLogger as logger } from "koatty_logger";
 
 /**
@@ -67,19 +66,16 @@ export class Container implements IContainer {
   private instanceMap: WeakMap<object | Function, any>;
   private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
   private static instance: Container;
-  
+
   // Thread safety for singleton pattern
   private static isInitializing: boolean = false;
   private static initializationPromise: Promise<Container> | null = null;
-  
+
   // circular dependency detector
   private circularDependencyDetector: CircularDepDetector;
-  
+
   // performance optimization components
   private metadataCache: MetadataCache;
-
-  // version conflict detector for handling multiple koatty_container versions
-  private versionConflictDetector: VersionConflictDetector;
 
   /**
    * Get singleton instance of Container with async-safe double-checked locking
@@ -108,7 +104,7 @@ export class Container implements IContainer {
     // Start initialization
     this.isInitializing = true;
     this.initializationPromise = this.createInstanceSafely();
-    
+
     return this.initializationPromise;
   }
 
@@ -126,13 +122,13 @@ export class Container implements IContainer {
 
       // Create new instance
       const newInstance = new Container();
-      
+
       // Atomic assignment
       this.instance = newInstance;
-      
+
       logger.Debug("Container singleton instance created successfully");
       return newInstance;
-      
+
     } catch (error) {
       logger.Error("Failed to create Container singleton instance:", error);
       throw error;
@@ -169,7 +165,7 @@ export class Container implements IContainer {
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
     this.circularDependencyDetector = new CircularDepDetector();
-    
+
     // Initialize metadata cache for real-world performance optimization
     this.metadataCache = new MetadataCache({
       capacity: 2000,
@@ -177,42 +173,7 @@ export class Container implements IContainer {
       maxMemoryUsage: 100 * 1024 * 1024 // 100MB
     });
 
-    // Initialize version conflict detector
-    this.versionConflictDetector = new VersionConflictDetector();
-    this.versionConflictDetector.registerVersion();
-    
-    // Check for version conflicts during initialization
-    this.checkVersionConflicts();
-    
-    logger.Debug("Container initialized with metadata cache and version conflict detection");
-  }
-
-  /**
-   * Check for version conflicts and handle them appropriately
-   * @private
-   */
-  private checkVersionConflicts(): void {
-    try {
-      const conflict = this.versionConflictDetector.detectVersionConflicts();
-      if (conflict) {
-        logger.Warn("=== Version Conflict Detected ===");
-        logger.Warn(conflict.getConflictDetails());
-        
-        const suggestions = conflict.getResolutionSuggestions();
-        logger.Warn("Resolution suggestions:");
-        suggestions.forEach(suggestion => logger.Warn(`  ${suggestion}`));
-        
-        // Try to resolve the conflict automatically
-        const resolved = this.versionConflictDetector.resolveVersionConflict('use_latest');
-        if (!resolved) {
-          logger.Error("Failed to automatically resolve version conflict. Manual intervention required.");
-          // In non-strict mode, we continue but log the issue
-          // In strict mode, we could throw an error here
-        }
-      }
-    } catch (error) {
-      logger.Error("Error during version conflict detection:", error);
-    }
+    logger.Debug("Container initialized with metadata cache");
   }
 
   /**
@@ -246,14 +207,6 @@ export class Container implements IContainer {
    */
   public getMetadataCache(): MetadataCache {
     return this.metadataCache;
-  }
-
-  /**
-   * Get version conflict detector
-   * @returns {VersionConflictDetector} The version conflict detector instance
-   */
-  public getVersionConflictDetector(): VersionConflictDetector {
-    return this.versionConflictDetector;
   }
 
   /**
@@ -292,54 +245,54 @@ export class Container implements IContainer {
     } = options;
 
     const startTime = Date.now();
-    
+
     // determine the types to process
     const targetTypes = types.length > 0 ? types : ["CONTROLLER", "SERVICE", "COMPONENT"];
-    
+
     logger.Info(`Starting ${optimizePerformance ? 'optimized' : 'standard'} metadata preload for types: [${targetTypes.join(', ')}]...`);
-    
+
     // phase 1: optional cache cleanup and optimization
     if (optimizePerformance) {
       if (clearStaleCache) {
         this.clearPerformanceCache();
         logger.Debug("Performance caches cleared before preload");
       }
-      
+
       // optimize metadata lru cache
       this.metadataCache.optimize();
     }
-    
+
     // phase 2: sort types by access frequency and process
     const sortedTypes = targetTypes.sort((a, b) => {
       const aCount = this.listClass(a).length;
       const bCount = this.listClass(b).length;
       return bCount - aCount; // descending, process types with more components first
     });
-    
+
     let totalProcessed = 0;
     const allTargets: Function[] = [];
-    
+
     for (const type of sortedTypes) {
       const typeStartTime = Date.now();
-      
+
       // get all components of this type
       const componentsToPreload = this.listClass(type);
-      
+
       if (componentsToPreload.length === 0) {
         logger.Debug(`No components found for type: ${type}`);
         continue;
       }
-      
+
       // collect all target classes
       const typeTargets = componentsToPreload.map(c => c.target);
       allTargets.push(...typeTargets);
-      
+
       // phase 3: metadata pre-load
       const preloadKeys: string[] = [];
-      
+
       componentsToPreload.forEach(({ target, id }) => {
         const [, identifier] = id.split(':');
-        
+
         // common metadata keys
         preloadKeys.push(
           `reflect:design:paramtypes:${identifier}`,
@@ -348,7 +301,7 @@ export class Container implements IContainer {
           `reflect:autowired:${identifier}`,
           `reflect:values:${identifier}`
         );
-        
+
         // property specific metadata
         const propertyNames = Object.getOwnPropertyNames(target.prototype);
         propertyNames.forEach(propName => {
@@ -360,40 +313,40 @@ export class Container implements IContainer {
           }
         });
       });
-      
+
       this.metadataCache.registerForPreload(preloadKeys);
-      
+
       // pre-load metadata
       let preloadedCount = 0;
       this.metadataCache.preload(CacheType.REFLECT_METADATA, (key: string) => {
         try {
           const parts = key.split(':');
           const [cacheType, metadataKey, targetName, propertyKey] = parts;
-          
+
           const target = this.findTargetByName(targetName);
           if (!target) return undefined;
-          
+
           if (cacheType === 'reflect') {
             const value = propertyKey && propertyKey !== targetName
               ? Reflect.getMetadata(metadataKey, target, propertyKey)
               : Reflect.getMetadata(metadataKey, target);
-            
+
             if (value !== undefined) {
               preloadedCount++;
             }
             return value;
           }
-          
+
           return undefined;
         } catch (error) {
           logger.Debug(`Failed to preload metadata for key ${key}:`, error);
           return undefined;
         }
       });
-      
+
       const typeTime = Date.now() - typeStartTime;
       totalProcessed += componentsToPreload.length;
-      
+
       logger.Debug(`Processed ${type}: ${componentsToPreload.length} components, ${preloadedCount} metadata entries in ${typeTime}ms`);
     }
 
@@ -431,27 +384,27 @@ export class Container implements IContainer {
         logger.Debug("AOP cache optimization failed:", error);
       }
     }
-    
+
     const totalTime = Date.now() - startTime;
     const cacheStats = this.metadataCache.getStats();
-    
+
     // output statistics information
     if (optimizePerformance) {
       const detailedStats = this.getDetailedPerformanceStats();
-      
+
       logger.Info(`Optimized metadata preload completed in ${totalTime}ms:`);
       logger.Info(`  - Types processed: [${sortedTypes.join(', ')}]`);
       logger.Info(`  - Total components: ${totalProcessed}`);
       logger.Info(`  - Metadata cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
-      
+
       if (detailedStats.lruCaches.dependencies) {
         logger.Info(`  - Dependencies cache hit rate: ${(detailedStats.lruCaches.dependencies.hitRate * 100).toFixed(2)}%`);
       }
-      
+
       if (detailedStats.lruCaches.aop) {
         logger.Info(`  - AOP cache hit rate: ${(detailedStats.lruCaches.aop.hitRates.overall * 100).toFixed(2)}%`);
       }
-      
+
       logger.Info(`  - Total cache size: ${this.calculateTotalCacheSize(detailedStats.lruCaches)}`);
     } else {
       logger.Info(`Standard metadata preload completed in ${totalTime}ms:`);
@@ -486,7 +439,7 @@ export class Container implements IContainer {
     };
   } {
     const cacheStats = this.metadataCache.getStats();
-    
+
     return {
       cache: cacheStats,
       totalRegistered: this.classMap.size,
@@ -551,7 +504,7 @@ export class Container implements IContainer {
 
     // Check if this specific identifier is already registered, not the target class
     const hasExistingInstance = this.instanceMap.get(target);
-    
+
     options = {
       isAsync: false,
       initMethod: "constructor",
@@ -607,21 +560,21 @@ export class Container implements IContainer {
         }
 
         this._setInstance(target, options);
-        
+
         // mark component resolution completed
         this.circularDependencyDetector.finishResolving(identifier);
-        
+
       } catch (error) {
         if (error instanceof CircularDepError) {
           // log circular dependency error details
           logger.Error("Circular dependency detection failed:", error.toJSON());
           logger.Error("Detailed information:", error.getDetailedMessage());
-          
+
           // provide resolution suggestions
           const suggestions = this.circularDependencyDetector.getResolutionSuggestions(error.circularPath);
           logger.Info("Resolution suggestions:");
           suggestions.forEach(suggestion => logger.Info(suggestion));
-          
+
           throw error;
         }
         throw error;
@@ -646,7 +599,7 @@ export class Container implements IContainer {
     }
 
     const dependencies: string[] = [];
-    
+
     try {
       // get constructor parameter types with caching
       let paramTypes = this.metadataCache.getReflectMetadata('design:paramtypes', target);
@@ -654,7 +607,7 @@ export class Container implements IContainer {
         paramTypes = Reflect.getMetadata('design:paramtypes', target) || [];
         this.metadataCache.setReflectMetadata('design:paramtypes', target, paramTypes);
       }
-      
+
       paramTypes.forEach((type: any) => {
         if (type && type.name) {
           dependencies.push(type.name);
@@ -696,9 +649,9 @@ export class Container implements IContainer {
 
     // Cache the extracted dependencies
     this.metadataCache.setCachedDependencies(target, dependencies);
-    
+
     logger.Debug(`Register component dependencies: ${target.name} -> [${dependencies.join(', ')}]`);
-    
+
     return dependencies;
   }
 
@@ -733,20 +686,20 @@ export class Container implements IContainer {
     try {
       // start resolving dependencies
       this.circularDependencyDetector.startResolving(identifier);
-      
+
       // inject autowired
       injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
       // inject properties values
       injectValues(<Function>target, (<Function>target).prototype, IOC, options);
       // inject AOP
       injectAOP(<Function>target);
-      
+
     } catch (error) {
       // if it is a circular dependency error, throw it again
       if (error instanceof CircularDepError) {
         throw error;
       }
-      
+
       // other injection errors
       logger.Error(`Injection failed for ${identifier}:`, error);
       throw error;
@@ -784,11 +737,11 @@ export class Container implements IContainer {
     } else {
       className = <string>identifier;
     }
-    
+
     if (!type) {
       type = getComponentTypeByClassName(className);
     }
-    
+
     const target = <T>this.getClass(className, type);
     if (!target) {
       throw new Error(`Bean ${className} not found`);
@@ -815,7 +768,7 @@ export class Container implements IContainer {
             throw circularError;
           }
         }
-        
+
         const instance = Reflect.construct(<Function>target, args, <Function>target);
         overridePrototypeValue(<Function>instance);
         return instance as T;
@@ -833,39 +786,39 @@ export class Container implements IContainer {
       // Check if this component is part of a circular dependency
       const detector = this.circularDependencyDetector;
       const hasCircularDeps = detector.hasCircularDependencies();
-      
+
       if (hasCircularDeps) {
         const allCircularDeps = detector.getAllCircularDependencies();
-        const isPartOfCircularDependency = allCircularDeps.some(cycle => 
+        const isPartOfCircularDependency = allCircularDeps.some(cycle =>
           cycle.includes(className)
         );
-        
+
         if (isPartOfCircularDependency) {
           // For circular dependencies, return undefined - delayed loading is expected
           logger.Debug(`Component ${className} is part of circular dependency, returning undefined (delayed loading expected)`);
           return undefined as T;
         }
       }
-      
+
       // Check if this is a case where instances were cleared but class registration exists
       // AND we are not in a circular dependency scenario
       const wasInstanceCleared = this.classMap.has(`${type}:${className}`);
-      
+
       if (wasInstanceCleared && !hasCircularDeps) {
         // Instance was cleared for non-circular dependency, safe to recreate
         logger.Debug(`Instance was cleared for ${className}, recreating with proper dependency injection flow`);
-        
+
         try {
           // Re-run the full registration process to ensure proper dependency injection
           this._setInstance(<Function>target, options);
           this._injection(<Function>target, options, className);
-          
+
           // Get the newly created instance
           instance = this.instanceMap.get(<Function>target) as T;
           if (!instance) {
             throw new Error(`Failed to recreate instance for ${className}`);
           }
-          
+
           logger.Debug(`Successfully recreated singleton instance for ${className}`);
         } catch (error) {
           if (error instanceof CircularDepError) {
@@ -1035,7 +988,7 @@ export class Container implements IContainer {
     propertyName?: string) {
     const originMap = this.getMetadataMap(type, target, propertyName);
     originMap.set(decoratorNameKey, data);
-    
+
     // Cache the metadata for faster access
     this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, data, propertyName);
   }
@@ -1061,16 +1014,16 @@ export class Container implements IContainer {
     if (cachedValue !== undefined) {
       return cachedValue;
     }
-    
+
     // Fallback to original method
     const originMap = this.getMetadataMap(type, target, propertyName);
     const value = originMap.get(decoratorNameKey);
-    
+
     // Cache the result for next time
     if (value !== undefined) {
       this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, value, propertyName);
     }
-    
+
     return value;
   }
 
@@ -1094,7 +1047,7 @@ export class Container implements IContainer {
       originMap.set(decoratorNameKey, []);
     }
     originMap.get(decoratorNameKey).push(data);
-    
+
     // Update cache
     const currentValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName) || [];
     currentValue.push(data);
@@ -1117,7 +1070,7 @@ export class Container implements IContainer {
     propertyName: string | symbol) {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     originMap.set(propertyName, data);
-    
+
     // Cache the property metadata
     this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, data);
   }
@@ -1141,7 +1094,7 @@ export class Container implements IContainer {
       originMap.set(propertyName, []);
     }
     originMap.get(propertyName).push(data);
-    
+
     // Update cache
     const currentValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName) || [];
     currentValue.push(data);
@@ -1167,16 +1120,16 @@ export class Container implements IContainer {
     if (cachedValue !== undefined) {
       return cachedValue;
     }
-    
+
     // Fallback to original method
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     const value = originMap.get(propertyName);
-    
+
     // Cache the result
     if (value !== undefined) {
       this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, value);
     }
-    
+
     return value;
   }
 
@@ -1205,17 +1158,17 @@ export class Container implements IContainer {
    */
   public generateDependencyReport(): void {
     const report = this.circularDependencyDetector.generateDependencyReport();
-    
+
     logger.Info("=== Dependency analysis report ===");
     logger.Info(`Total components: ${report.totalComponents}`);
     logger.Info(`Resolved components: ${report.resolvedComponents}`);
     logger.Info(`Unresolved components: ${report.unresolvedComponents.length}`);
-    
+
     if (report.circularDependencies.length > 0) {
       logger.Warn(`Found ${report.circularDependencies.length} circular dependencies:`);
       report.circularDependencies.forEach((cycle, index) => {
         logger.Warn(`  ${index + 1}. ${cycle.join(' -> ')}`);
-        
+
         // provide resolution suggestions
         const suggestions = this.circularDependencyDetector.getResolutionSuggestions(cycle);
         suggestions.forEach(suggestion => logger.Info(`     ${suggestion}`));
@@ -1223,12 +1176,12 @@ export class Container implements IContainer {
     } else {
       logger.Info("✓ No circular dependencies found");
     }
-    
+
     if (report.unresolvedComponents.length > 0) {
       logger.Warn("Unresolved components:");
       report.unresolvedComponents.forEach(comp => logger.Warn(`  - ${comp}`));
     }
-    
+
     // output dependency graph visualization
     logger.Debug(this.circularDependencyDetector.getDependencyGraphVisualization());
   }
@@ -1258,13 +1211,13 @@ export class Container implements IContainer {
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
     this.circularDependencyDetector.clear();
-    
+
     // Clear performance optimization components
     this.metadataCache.clear();
-    
+
     logger.Debug("Container cleared including performance optimization components");
   }
-  
+
   /**
    * Clear metadata while preserving class registrations and instances
    * This is useful for tests that need to reset state but keep decorator metadata
@@ -1273,7 +1226,7 @@ export class Container implements IContainer {
   public clearMetadata(): void {
     this.metadataMap = new WeakMap();
     this.metadataCache.clear();
-    
+
     logger.Debug("Container metadata cleared");
   }
 
@@ -1296,164 +1249,8 @@ export class Container implements IContainer {
   public clearInstances(): void {
     this.instanceMap = new WeakMap();
     this.circularDependencyDetector.clear();
-    
+
     logger.Debug("Container instances cleared, class registrations and metadata preserved");
-  }
-
-  /**
-   * Generate version conflict report
-   * @returns Version conflict report with detailed information
-   */
-  public generateVersionConflictReport(): {
-    hasConflict: boolean;
-    conflictError?: VersionConflictError;
-    report: any;
-  } {
-    const conflict = this.versionConflictDetector.detectVersionConflicts();
-    const report = this.versionConflictDetector.generateConflictReport();
-    
-    return {
-      hasConflict: report.hasConflict,
-      conflictError: conflict || undefined,
-      report
-    };
-  }
-
-  /**
-   * Batch register components
-   * @param components - The components to register
-   * @param batchOptions - The batch options
-   * @example
-   * ```ts
-   * container.batchRegister([UserService, UserRepository], { preProcessDependencies: true, warmupAOP: true });
-   * ```
-   */
-  public batchRegister(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[], 
-                      batchOptions: { preProcessDependencies?: boolean, warmupAOP?: boolean } = {}): void {
-    const startTime = Date.now();
-    logger.Info(`Starting batch registration for ${components.length} components...`);
-    
-    try {
-      // phase 1: if enabled pre-process, use unified preloadMetadata for optimization
-      if (batchOptions.preProcessDependencies || batchOptions.warmupAOP) {
-        // extract all component types
-        const componentTypes = [...new Set(components.map(c => {
-          const identifier = c.identifier || this.getIdentifier(c.target);
-          return this.getType(c.target) || getComponentTypeByClassName(identifier);
-        }))];
-        
-        this.preloadMetadata(componentTypes, {
-          optimizePerformance: true,
-          batchPreProcessDependencies: batchOptions.preProcessDependencies,
-          warmupCaches: batchOptions.warmupAOP,
-          clearStaleCache: false
-        });
-        
-        logger.Debug(`Integrated optimization completed for types: [${componentTypes.join(', ')}]`);
-      }
-      
-      // phase 2: sort components by dependency order
-      const sortedComponents = this.topologicalSortComponents(components);
-      
-      // phase 3: batch registration
-      let successCount = 0;
-      for (const component of sortedComponents) {
-        try {
-          const { target, identifier, options } = component;
-          const id = identifier || this.getIdentifier(target);
-          this.reg(id, target, options);
-          successCount++;
-        } catch (error) {
-          logger.Error(`Failed to register component ${component.identifier || component.target.name}:`, error);
-        }
-      }
-      
-      const totalTime = Date.now() - startTime;
-      logger.Info(`Batch registration completed: ${successCount}/${components.length} components registered in ${totalTime}ms`);
-      
-    } catch (error) {
-      logger.Error("Batch registration failed:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * topological sort components (by dependency order)
-   */
-  private topologicalSortComponents(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[]): typeof components {
-    const dependencyGraph = new Map<string, string[]>();
-    const componentMap = new Map<string, typeof components[0]>();
-    
-    // build dependency graph
-    for (const component of components) {
-      const identifier = component.identifier || this.getIdentifier(component.target);
-      componentMap.set(identifier, component);
-      
-      const dependencies = this.extractDependencies(component.target);
-      dependencyGraph.set(identifier, dependencies.filter(dep => 
-        components.some(c => (c.identifier || this.getIdentifier(c.target)) === dep)
-      ));
-    }
-    
-    // topological sort
-    const sorted: typeof components = [];
-    const visited = new Set<string>();
-    const visiting = new Set<string>();
-    
-    const visit = (identifier: string) => {
-      if (visiting.has(identifier)) {
-        logger.Warn(`Circular dependency detected involving ${identifier}, using registration order`);
-        return;
-      }
-      if (visited.has(identifier)) return;
-      
-      visiting.add(identifier);
-      const dependencies = dependencyGraph.get(identifier) || [];
-      
-      for (const dep of dependencies) {
-        if (componentMap.has(dep)) {
-          visit(dep);
-        }
-      }
-      
-      visiting.delete(identifier);
-      visited.add(identifier);
-      
-      const component = componentMap.get(identifier);
-      if (component) {
-        sorted.push(component);
-      }
-    };
-    
-    for (const component of components) {
-      const identifier = component.identifier || this.getIdentifier(component.target);
-      visit(identifier);
-    }
-    
-    return sorted;
-  }
-
-  /**
-   * Clear performance cache
-   */
-  public clearPerformanceCache(): void {
-    // clear metadata cache
-    this.metadataCache.clear();
-    
-    // clear processor lru cache
-    try {
-      clearDependencyCache();
-    } catch (error) {
-      logger.Debug("Autowired cache cleanup failed:", error);
-    }
-    
-    try {
-      clearAOPCache();
-    } catch (error) {
-      logger.Debug("AOP cache cleanup failed:", error);
-    }
-    
-    logger.Debug("Performance cache cleared");
   }
 
   /**
@@ -1482,19 +1279,19 @@ export class Container implements IContainer {
     };
   } {
     const cacheStats = this.metadataCache.getStats();
-    
+
     // count the number of components of each type
     const typeStats: Record<string, number> = {};
     const typeOrder = ["CONTROLLER", "SERVICE", "COMPONENT", "REPOSITORY"];
-    
+
     for (const type of typeOrder) {
       typeStats[type] = this.listClass(type).length;
     }
-    
+
     // count the number of circular dependencies
     const circularCount = this.circularDependencyDetector.getAllCircularDependencies().length;
     const mostAccessedTypes = Object.entries(typeStats)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .map(([type]) => type);
 
     // get lru cache stats
@@ -1515,7 +1312,7 @@ export class Container implements IContainer {
     } catch (error) {
       logger.Debug("Failed to get AOP cache stats:", error);
     }
-    
+
     return {
       cache: cacheStats,
       containers: {
@@ -1541,24 +1338,161 @@ export class Container implements IContainer {
    */
   private calculateTotalCacheSize(lruCaches: any): string {
     let totalSize = 0;
-    
+
     // metadata cache memory usage
     if (lruCaches.metadata && lruCaches.metadata.memoryUsage) {
       totalSize += lruCaches.metadata.memoryUsage;
     }
-    
+
     // dependency cache size (estimated)
     if (lruCaches.dependencies && lruCaches.dependencies.cacheSize) {
       totalSize += lruCaches.dependencies.cacheSize * 1024; // estimated 1KB per dependency
     }
-    
+
     // aop cache size (estimated)
     if (lruCaches.aop && lruCaches.aop.cacheSize) {
       const aopSize = lruCaches.aop.cacheSize;
       totalSize += (aopSize.aspects + aopSize.methodNames + aopSize.interceptors) * 2048; // estimated 2KB per aop item
     }
-    
+
     return `${(totalSize / 1024).toFixed(1)}KB`;
+  }
+
+  /**
+   * Batch register components
+   * @param components - The components to register
+   * @param batchOptions - The batch options
+   * @example
+   * ```ts
+   * container.batchRegister([UserService, UserRepository], { preProcessDependencies: true, warmupAOP: true });
+   * ```
+   */
+  public batchRegister(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[],
+    batchOptions: { preProcessDependencies?: boolean, warmupAOP?: boolean } = {}): void {
+    const startTime = Date.now();
+    logger.Info(`Starting batch registration for ${components.length} components...`);
+
+    try {
+      // phase 1: if enabled pre-process, use unified preloadMetadata for optimization
+      if (batchOptions.preProcessDependencies || batchOptions.warmupAOP) {
+        // extract all component types
+        const componentTypes = [...new Set(components.map(c => {
+          const identifier = c.identifier || this.getIdentifier(c.target);
+          return this.getType(c.target) || getComponentTypeByClassName(identifier);
+        }))];
+
+        this.preloadMetadata(componentTypes, {
+          optimizePerformance: true,
+          batchPreProcessDependencies: batchOptions.preProcessDependencies,
+          warmupCaches: batchOptions.warmupAOP,
+          clearStaleCache: false
+        });
+
+        logger.Debug(`Integrated optimization completed for types: [${componentTypes.join(', ')}]`);
+      }
+
+      // phase 2: sort components by dependency order
+      const sortedComponents = this.topologicalSortComponents(components);
+
+      // phase 3: batch registration
+      let successCount = 0;
+      for (const component of sortedComponents) {
+        try {
+          const { target, identifier, options } = component;
+          const id = identifier || this.getIdentifier(target);
+          this.reg(id, target, options);
+          successCount++;
+        } catch (error) {
+          logger.Error(`Failed to register component ${component.identifier || component.target.name}:`, error);
+        }
+      }
+
+      const totalTime = Date.now() - startTime;
+      logger.Info(`Batch registration completed: ${successCount}/${components.length} components registered in ${totalTime}ms`);
+
+    } catch (error) {
+      logger.Error("Batch registration failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * topological sort components (by dependency order)
+   */
+  private topologicalSortComponents(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[]): typeof components {
+    const dependencyGraph = new Map<string, string[]>();
+    const componentMap = new Map<string, typeof components[0]>();
+
+    // build dependency graph
+    for (const component of components) {
+      const identifier = component.identifier || this.getIdentifier(component.target);
+      componentMap.set(identifier, component);
+
+      const dependencies = this.extractDependencies(component.target);
+      dependencyGraph.set(identifier, dependencies.filter(dep =>
+        components.some(c => (c.identifier || this.getIdentifier(c.target)) === dep)
+      ));
+    }
+
+    // topological sort
+    const sorted: typeof components = [];
+    const visited = new Set<string>();
+    const visiting = new Set<string>();
+
+    const visit = (identifier: string) => {
+      if (visiting.has(identifier)) {
+        logger.Warn(`Circular dependency detected involving ${identifier}, using registration order`);
+        return;
+      }
+      if (visited.has(identifier)) return;
+
+      visiting.add(identifier);
+      const dependencies = dependencyGraph.get(identifier) || [];
+
+      for (const dep of dependencies) {
+        if (componentMap.has(dep)) {
+          visit(dep);
+        }
+      }
+
+      visiting.delete(identifier);
+      visited.add(identifier);
+
+      const component = componentMap.get(identifier);
+      if (component) {
+        sorted.push(component);
+      }
+    };
+
+    for (const component of components) {
+      const identifier = component.identifier || this.getIdentifier(component.target);
+      visit(identifier);
+    }
+
+    return sorted;
+  }
+
+  /**
+   * Clear performance cache
+   */
+  public clearPerformanceCache(): void {
+    // clear metadata cache
+    this.metadataCache.clear();
+
+    // clear processor lru cache
+    try {
+      clearDependencyCache();
+    } catch (error) {
+      logger.Debug("Autowired cache cleanup failed:", error);
+    }
+
+    try {
+      clearAOPCache();
+    } catch (error) {
+      logger.Debug("AOP cache cleanup failed:", error);
+    }
+
+    logger.Debug("Performance cache cleared");
   }
 }
 
@@ -1589,7 +1523,7 @@ export const IOC: IContainer = (function () {
     }
 
     isGlobalInitializing = true;
-    
+
     try {
       // Double-check pattern
       if ((<any>global).__KOATTY_IOC__) {
@@ -1599,31 +1533,13 @@ export const IOC: IContainer = (function () {
       // Get or create container instance
       const containerResult = Container.getInstance();
       const instance = containerResult instanceof Promise ? await containerResult : containerResult;
-      
-      // Perform additional version conflict checks at global level
-      const versionReport = instance.generateVersionConflictReport();
-      if (versionReport.hasConflict) {
-        logger.Warn("Global IOC initialization detected version conflicts");
-        logger.Warn("Version conflict report:", JSON.stringify(versionReport.report, null, 2));
-        
-        if (versionReport.conflictError) {
-          // Log detailed conflict information
-          logger.Warn("Detailed conflict information:");
-          logger.Warn(versionReport.conflictError.getConflictDetails());
-          
-          // Provide resolution suggestions
-          const suggestions = versionReport.conflictError.getResolutionSuggestions();
-          logger.Info("Resolution suggestions:");
-          suggestions.forEach(suggestion => logger.Info(`  ${suggestion}`));
-        }
-      }
-      
+
       // Atomic assignment to global
       (<any>global).__KOATTY_IOC__ = instance;
-      
+
       logger.Debug("Global IOC container initialized successfully");
       return instance;
-      
+
     } catch (error) {
       logger.Error("Failed to initialize global IOC container:", error);
       throw new Error(`IOC container initialization failed: ${error.message}`);
@@ -1640,18 +1556,18 @@ export const IOC: IContainer = (function () {
       if ((<any>global).__KOATTY_IOC__) {
         return (<any>global).__KOATTY_IOC__;
       }
-      
+
       // Try synchronous initialization
       const instance = Container.getInstanceSync();
       (<any>global).__KOATTY_IOC__ = instance;
       return instance;
-      
+
     } catch (error) {
       logger.Warn("Synchronous IOC initialization failed, falling back to async:", error);
-      
+
       // Store the promise for later resolution
       globalInitialization = initializeGlobalIOC();
-      
+
       // For module loading scenarios, return a proxy that will resolve later
       return new Proxy({} as IContainer, {
         get(target, prop) {
@@ -1678,12 +1594,12 @@ export const ensureIOCReady = async (): Promise<IContainer> => {
   if ((<any>global).__KOATTY_IOC__ && typeof (<any>global).__KOATTY_IOC__.reg === 'function') {
     return (<any>global).__KOATTY_IOC__;
   }
-  
+
   // Re-initialize if needed
   const containerResult = Container.getInstance();
   const instance = containerResult instanceof Promise ? await containerResult : containerResult;
   (<any>global).__KOATTY_IOC__ = instance;
-  
+
   return instance;
 };
 

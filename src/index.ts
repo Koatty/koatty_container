@@ -12,7 +12,6 @@ export * from "./decorator/Values";
 export * from "./utils/MetadataOpertor";
 
 // Export performance optimization and utility classes
-export { MetadataCache } from "./utils/MetadataCache";
-export { CircularDepDetector, CircularDepError } from "./utils/CircularDepDetector";
-export { VersionConflictDetector, VersionConflictError } from "./utils/VersionConflictDetector";
+// export { MetadataCache } from "./utils/MetadataCache";
+// export { CircularDepDetector, CircularDepError } from "./utils/CircularDepDetector";
 
