@@ -80,7 +80,7 @@
     "typescript": "^5.x.x"
   },
   "dependencies": {
-    "koatty_lib": "^1.4.3",
+    "koatty_lib": "^1.x.x",
     "koatty_logger": "^2.x.x",
     "lru-cache": "^11.1.0"
   },
