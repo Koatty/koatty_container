@@ -26,6 +26,7 @@
 |  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | Decorator that marks a property for dependency injection. |
 |  [Before(paramName)](./koatty_container.before.md) | <p>Before decorator, used to define a method-level AOP interceptor that executes before the target method.</p> |
 |  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | Decorator that marks a class to execute before each method. |
+|  [Component(identifier, type)](./koatty_container.component.md) | Component decorator, used to mark a class as a component and register it to IOC container. |
 |  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | Get component type based on class name identifier |
 |  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Gets all method names from a class target and optionally its prototype chain |
 |  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) | Get metadata from target object or class by metadata key. If metadata doesn't exist, create a new Map and define it. |
