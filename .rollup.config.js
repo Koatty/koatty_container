@@ -11,7 +11,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from "@rollup/plugin-json";
 import resolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
-import del from "rollup-plugin-delete";
 import typescript from 'rollup-plugin-typescript2';
 // import babel from '@rollup/plugin-babel';
 import terser from "@rollup/plugin-terser";
@@ -33,7 +32,6 @@ export default [
       }
     ],
     plugins: [
-      del({ targets: ["dist/*", "temp/*", "docs/api"] }),
       // babel({
       //     babelHelpers: "runtime",
       //     configFile: './babel.config.js',

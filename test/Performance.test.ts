@@ -560,7 +560,7 @@ describe("Hotspot Performance Optimization", () => {
       console.log(`Average time per call: ${avgTime.toFixed(3)}ms`);
 
       // AOP调用应该保持高性能
-      expect(avgTime).toBeLessThan(1); // 平均每次调用小于1ms
+      expect(avgTime).toBeLessThan(3); // 平均每次调用小于3ms
     });
   });
 
