@@ -77,13 +77,13 @@
     "standard-version": "^9.x.x",
     "ts-jest": "^29.x.x",
     "ts-node": "^10.x.x",
-    "tslib": "^2.x.x",
     "typescript": "^5.x.x"
   },
   "dependencies": {
     "koatty_lib": "^1.x.x",
     "koatty_logger": "^2.x.x",
-    "lru-cache": "^11.1.0"
+    "lru-cache": "^11.1.0",
+    "tslib": "^2.x.x"
   },
   "peerDependencies": {
     "koatty_lib": "^1.x.x",
