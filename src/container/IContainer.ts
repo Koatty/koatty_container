@@ -57,7 +57,9 @@ export enum AOPType {
   "Before" = "Before",
   "BeforeEach" = "BeforeEach",
   "After" = "After",
-  "AfterEach" = "AfterEach"
+  "AfterEach" = "AfterEach",
+  "Around" = "Around",
+  "AroundEach" = "AroundEach"
 }
 
 /**
@@ -451,5 +453,5 @@ export interface ObjectDefinitionOptions {
 export interface IAspect {
   app: Application;
 
-  run: (...args: any[]) => Promise<any>;
+  run: (args: any[], proceed?: Function) => Promise<any>;
 }

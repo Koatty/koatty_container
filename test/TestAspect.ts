@@ -10,11 +10,16 @@
 import { IAspect } from "../src/container/IContainer";
 import { Aspect } from "../src/decorator/AOP";
 
+interface TestAspectArgs {
+  event: string;
+}
+
 @Aspect()
 export class TestAspect implements IAspect {
   app: any;
-  run(event: string): Promise<any> {
-    console.log(event);
+  run(args: TestAspectArgs[]): Promise<any> {
+    const aa = ["aa", 1, "e"]
+    console.log(args);
     return Promise.resolve();
   }
 }

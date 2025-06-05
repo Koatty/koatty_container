@@ -108,7 +108,7 @@ await initializeApp();
 ### 方法拦截
 
 ```typescript
-import { Component, Before, After } from "koatty_container";
+import { Component, Before, After, Around, AroundEach } from "koatty_container";
 
 @Component()
 class LoggingAspect {
@@ -126,6 +126,120 @@ class LoggingAspect {
 // 注册切面
 IOC.reg(LoggingAspect);
 IOC.reg(PerformanceAspect);
+```
+
+### 环绕通知 (Around)
+
+Around 是最强大的通知类型，可以完全控制方法的执行流程：
+
+```typescript
+@Aspect()
+class TransactionAspect {
+  async run(target: any, methodName: string, args: any[], proceed: Function): Promise<any> {
+    console.log(`🔄 开始事务: ${target.constructor.name}.${methodName}`);
+    
+    try {
+      // 可以修改参数
+      const modifiedArgs = args.map(arg => 
+        typeof arg === 'object' ? { ...arg, transactionId: Date.now() } : arg
+      );
+      
+      // 执行原方法
+      const result = await proceed(modifiedArgs);
+      
+      console.log(`✅ 提交事务: ${methodName}`);
+      
+      // 可以修改返回值
+      return {
+        ...result,
+        transactionStatus: 'committed',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.log(`❌ 回滚事务: ${methodName}`, error);
+      throw error;
+    }
+  }
+}
+
+@Service()
+class UserService {
+  // 方法级别的环绕通知
+  @Around(TransactionAspect)
+  async createUser(userData: any) {
+    // 这个方法会被 TransactionAspect 环绕
+    return { id: Date.now(), ...userData };
+  }
+  
+  async getUser(id: string) {
+    return { id, name: "User" };
+  }
+}
+
+// 类级别的环绕通知 - 对所有方法生效
+@AroundEach(TransactionAspect)
+@Service()
+class OrderService {
+  async createOrder(orderData: any) {
+    // 所有方法都会被 TransactionAspect 环绕
+    return { orderId: Date.now(), ...orderData };
+  }
+  
+  async updateOrder(id: string, data: any) {
+    return { id, ...data, updated: true };
+  }
+}
+
+// 类级别的前置和后置通知
+@BeforeEach(LoggingAspect)  // 对类中所有方法执行前置通知
+@AfterEach(AuditAspect)     // 对类中所有方法执行后置通知
+@Service()
+class PaymentService {
+  async processPayment(amount: number) {
+    // 每个方法都会被 LoggingAspect 前置拦截和 AuditAspect 后置拦截
+    return { paymentId: Date.now(), amount, status: "success" };
+  }
+  
+  async refundPayment(paymentId: string) {
+    // 同样会被类级别的切面拦截
+    return { refundId: Date.now(), paymentId, status: "refunded" };
+  }
+}
+```
+
+### AOP 执行顺序
+
+```typescript
+@Service()
+class ExampleService {
+  // 执行顺序：
+  // 1. @Before 切面
+  // 2. @Around 切面 (before proceed)
+  // 3. 原方法执行
+  // 4. @Around 切面 (after proceed)
+  // 5. @After 切面
+  
+  @Before(LoggingAspect)
+  @Around(TransactionAspect)
+  @After(AuditAspect)
+  async complexMethod(data: any) {
+    return { processed: data };
+  }
+}
+```
+
+### 切面优先级和组合
+
+```typescript
+// 多个 Around 切面的嵌套执行
+@Around(SecurityAspect)      // 外层：安全检查
+@Around(TransactionAspect)   // 中层：事务管理
+@Around(CacheAspect)         // 内层：缓存处理
+async sensitiveOperation(data: any) {
+  // 执行顺序：
+  // SecurityAspect -> TransactionAspect -> CacheAspect -> 原方法 -> CacheAspect -> TransactionAspect -> SecurityAspect
+  return data;
+}
 ```
 
 ## 🔧 智能循环依赖处理
@@ -340,6 +454,9 @@ beforeEach(() => {
 | `@Before(pointcut)` | 前置通知 | `@Before("*.save*")` |
 | `@After(pointcut)` | 后置通知 | `@After("UserService.*")` |
 | `@Around(pointcut)` | 环绕通知 | `@Around("*Service.*")` |
+| `@BeforeEach(pointcut)` | 类级前置通知 | `@BeforeEach("LogAspect")` |
+| `@AfterEach(pointcut)` | 类级后置通知 | `@AfterEach("LogAspect")` |
+| `@AroundEach(pointcut)` | 类级环绕通知 | `@AroundEach("TransactionAspect")` |
 
 ### 性能优化 API
 

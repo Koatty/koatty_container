@@ -7,16 +7,8 @@
 
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOCContainer } from "../container/Container";
-import { TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
+import { IAspect, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
 import { MetadataCache, CacheType } from "../utils/MetadataCache";
-
-/**
- * Interface for aspect instances
- */
-export interface IAspect {
-  name?: string;
-  [key: string]: any; // Allow dynamic method access
-}
 
 // Unified cache instance for all AOP operations
 const metadataCache = new MetadataCache({
@@ -248,69 +240,63 @@ function getMethodNames(target: any): string[] {
  * Get AOP metadata for a method with enhanced caching
  */
 export function getAOPMethodMetadata(target: any, methodName: string): any[] {
-  const className = target.name || target.constructor?.name || 'Anonymous';
-  const cacheKey = `aop:${className}:${methodName}`;
+  const cacheKey = `aop:${target.name}:${methodName}`;
   
-  if (isAOPCacheEnabled()) {
-    const cached = metadataCache.get(CacheType.CLASS_METADATA, cacheKey);
-    if (cached !== undefined) {
-      return cached;
+  // Check cache first
+  const cached = metadataCache.get(CacheType.CLASS_METADATA, cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // Get class AOP data
+  const classAOPData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) || [];
+
+  // Get method-specific AOP data
+  const methodAOPData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target, methodName) || [];
+
+  // Combine and filter metadata
+  const aopMetadata: any[] = [];
+
+  // Add method-specific metadata first (higher priority)
+  for (const data of methodAOPData) {
+    if (data.method === methodName) {
+      aopMetadata.push({
+        type: data.type,
+        aopName: data.name,
+        method: "run",
+        order: data.order || 0
+      });
     }
   }
 
-  // Get AOP metadata from IOC container where decorators save them
-  let aopMetadata: any[] = [];
-  
-  try {
-    // Get class-level AOP metadata set by decorators - preserve original order
-    const classAopData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) || [];
-    
-    // Keep the original decorator declaration order by processing data as-is
-    // Filter and transform metadata for the specific method (Before, After)
-    const methodSpecificMetadata = classAopData
-      .filter((metadata: any) => 
-        metadata.method === methodName && (metadata.type === 'Before' || metadata.type === 'After')
-      )
-      .map((metadata: any) => ({
-        type: metadata.type,
-        aopName: metadata.name,
-        method: 'run', // aspects typically use 'run' method
-        order: metadata.order || 0 // Preserve declaration order if available
-      }));
-    
-    // Add method-specific metadata in declaration order
-    aopMetadata = aopMetadata.concat(methodSpecificMetadata);
-    
-    // Check for class-level metadata (BeforeEach, AfterEach) - preserve order
-    const classLevelMetadata = classAopData
-      .filter((metadata: any) => 
-        !metadata.method && (metadata.type === 'BeforeEach' || metadata.type === 'AfterEach')
-      )
-      .map((metadata: any) => ({
-        type: metadata.type,
-        aopName: metadata.name,
-        method: 'run',
-        order: metadata.order || 0
-      }));
-    
-    // Add class-level metadata in declaration order
-    aopMetadata = aopMetadata.concat(classLevelMetadata);
-    
-    // Also check legacy TAGGED_AOP metadata (for backward compatibility)
-    const legacyMethodMetadata = Reflect.getMetadata(TAGGED_AOP, target, methodName) || [];
-    aopMetadata = aopMetadata.concat(legacyMethodMetadata);
-    
-    // Sort by order to ensure decorator declaration order is preserved
-    aopMetadata.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
-  } catch (error) {
-    logger.Debug(`Failed to get AOP metadata for ${className}.${methodName}:`, error);
+  // Add class-level metadata for methods that match the criteria
+  for (const data of classAOPData) {
+    // For AroundEach, BeforeEach, AfterEach - apply to all methods
+    if (['AroundEach', 'BeforeEach', 'AfterEach'].includes(data.type)) {
+      aopMetadata.push({
+        type: data.type,
+        aopName: data.name,
+        method: "run",
+        order: data.order || 0
+      });
+    }
+    // For Around, Before, After - only apply to specific methods
+    else if (['Around', 'Before', 'After'].includes(data.type) && data.method === methodName) {
+      aopMetadata.push({
+        type: data.type,
+        aopName: data.name,
+        method: "run",
+        order: data.order || 0
+      });
+    }
   }
-  
-  if (isAOPCacheEnabled()) {
-    metadataCache.set(CacheType.CLASS_METADATA, cacheKey, aopMetadata);
-  }
-  
+
+  // Sort by order to preserve decorator declaration order
+  aopMetadata.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  // Cache the result
+  metadataCache.set(CacheType.CLASS_METADATA, cacheKey, aopMetadata);
+
   return aopMetadata;
 }
 
@@ -323,8 +309,8 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // Call aspect.run with the first argument (or methodName)
-          await aspect.run(args[0] || methodName);
+          // Call aspect.run with only args parameter for simplicity
+          await aspect.run(args);
           // Before aspects typically don't modify arguments
         }
       } catch (error) {
@@ -345,9 +331,8 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // Call aspect.run with the first argument from original method call
-          const aspectArg = originalArgs && originalArgs.length > 0 ? originalArgs[0] : methodName;
-          await aspect.run(aspectArg);
+          // Call aspect.run with only args parameter for simplicity
+          await aspect.run(originalArgs || []);
         }
       } catch (error) {
         logger.Error(`After aspect execution failed for ${data.aopName}:`, error);
@@ -362,7 +347,7 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
  * Execute around aspects
  */
 async function executeAround(target: any, methodName: string, args: any[], aspectData: any[], originalMethod: Function): Promise<any> {
-  const aroundAspects = aspectData.filter(data => data.type === 'Around');
+  const aroundAspects = aspectData.filter(data => data.type === 'Around' || data.type === 'AroundEach');
   
   if (aroundAspects.length === 0) {
     return await originalMethod.apply(target, args);
@@ -377,11 +362,12 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
       const data = aroundAspects[index++];
       try {
         const aspect = await get(data.aopName);
-        if (aspect && typeof aspect[data.method] === 'function') {
-          return await aspect[data.method](target, methodName, currentArgs, proceed);
+        if (aspect && typeof aspect.run === 'function') {
+          // Call aspect.run with only args and proceed parameters for simplicity
+          return await aspect.run(currentArgs, proceed);
         }
       } catch (error) {
-        logger.Error(`Around aspect execution failed for ${data.aopName}.${data.method}:`, error);
+        logger.Error(`Around aspect execution failed for ${data.aopName}:`, error);
       }
       return await proceed(currentArgs);
     } else {
@@ -446,6 +432,16 @@ function compileAOPInterceptor(target: any, methodName: string): CompiledAOPInte
 
 /**
  * Enhanced AOP method wrapper with compiled interceptors and proper priority handling
+ * __before and __after have the highest priority and are mutually exclusive with @BeforeEach/@AfterEach
+ * 
+ * Execution order:
+ * 1. __before (if exists) - mutually exclusive with @BeforeEach
+ * 2. @Before aspects
+ * 3. @BeforeEach aspects (only if __before doesn't exist)
+ * 4. @Around aspects or original method
+ * 5. @AfterEach aspects (only if __after doesn't exist)
+ * 6. @After aspects
+ * 7. __after (if exists) - mutually exclusive with @AfterEach
  */
 function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
@@ -457,22 +453,22 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
     const aspectData = getAOPMethodMetadata(target, methodName);
     
     try {
-      // Check for __before method - highest priority, prevents BeforeEach execution
+      // Check for __before method - highest priority, mutually exclusive with @BeforeEach
       const hasDefaultBefore = typeof this.__before === 'function';
       
-      // Execute @Before aspects first (these always execute)
+      // 1. Execute __before if exists (highest priority, always first)
+      if (hasDefaultBefore) {
+        await this.__before();
+      }
+      
+      // 2. Execute @Before aspects
       let processedArgs = args;
       const beforeAspects = aspectData.filter(data => data.type === 'Before');
       if (beforeAspects.length > 0) {
         processedArgs = await executeBefore(this, methodName, args, beforeAspects);
       }
       
-      // Execute __before if exists (highest priority, but doesn't prevent @Before)
-      if (hasDefaultBefore) {
-        await this.__before();
-      }
-      
-      // Execute BeforeEach aspects only if __before doesn't exist
+      // 3. Execute BeforeEach aspects only if __before doesn't exist (mutually exclusive)
       if (!hasDefaultBefore) {
         const beforeEachAspects = aspectData.filter(data => data.type === 'BeforeEach');
         if (beforeEachAspects.length > 0) {
@@ -480,13 +476,13 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
         }
       }
       
-      // Execute Around aspects or original method
+      // 4. Execute Around aspects or original method
       let result = await executeAround(this, methodName, processedArgs, aspectData, originalMethod);
       
-      // Check for __after method - highest priority, prevents AfterEach execution
+      // Check for __after method - highest priority, mutually exclusive with @AfterEach
       const hasDefaultAfter = typeof this.__after === 'function';
       
-      // Execute AfterEach aspects only if __after doesn't exist
+      // 5. Execute AfterEach aspects only if __after doesn't exist (mutually exclusive)
       if (!hasDefaultAfter) {
         const afterEachAspects = aspectData.filter(data => data.type === 'AfterEach');
         if (afterEachAspects.length > 0) {
@@ -494,15 +490,15 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
         }
       }
       
-      // Execute __after if exists (highest priority, but doesn't prevent @After)
-      if (hasDefaultAfter) {
-        await this.__after();
-      }
-      
-      // Execute @After aspects last (these always execute)
+      // 6. Execute @After aspects
       const afterAspects = aspectData.filter(data => data.type === 'After');
       if (afterAspects.length > 0) {
         result = await executeAfter(this, methodName, result, afterAspects, args);
+      }
+      
+      // 7. Execute __after if exists (highest priority, always last)
+      if (hasDefaultAfter) {
+        await this.__after();
       }
       
       return result;
@@ -520,6 +516,12 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
  */
 export function injectAOP(target: any): any {
   if (!target?.prototype) {
+    return target;
+  }
+
+  // Check if AOP has already been applied to prevent duplicate application
+  if (target.prototype.__aopApplied) {
+    logger.Debug(`AOP already applied to ${target.name}, skipping duplicate application`);
     return target;
   }
 
@@ -545,6 +547,14 @@ export function injectAOP(target: any): any {
       }
     }
   }
+
+  // Mark AOP as applied to prevent duplicate application
+  Object.defineProperty(target.prototype, '__aopApplied', {
+    value: true,
+    writable: false,
+    enumerable: false,
+    configurable: false
+  });
 
   if (aopMethodCount > 0) {
     logger.Debug(`Applied AOP to ${target.name}: ${aopMethodCount} methods enhanced`);
