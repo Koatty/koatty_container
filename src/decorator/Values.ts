@@ -33,14 +33,33 @@ import { TAGGED_ARGS } from "../container/IContainer";
 export function Values(value: unknown | Function, defaultValue?: unknown): PropertyDecorator {
   return (target: object, propertyKey: string) => {
     const paramTypes = Reflect.getMetadata("design:type", target, propertyKey);
-    const types = paramTypes.name || "object";
     let targetValue = value;
+    
     if (!helper.isFunction(targetValue)) {
       if (defaultValue !== undefined) {
         targetValue = helper.isTrueEmpty(targetValue) ? defaultValue : targetValue;
       }
-      if (typeof targetValue !== types.toLowerCase()) {
-        throw new Error("The type of the value is not the same as the type of the parameter");
+      
+      // 改进的类型检查逻辑
+      if (paramTypes && targetValue !== null && targetValue !== undefined) {
+        const expectedType = paramTypes.name?.toLowerCase();
+        const actualType = typeof targetValue;
+        
+        // 支持的类型映射
+        const typeMapping: Record<string, string[]> = {
+          'string': ['string'],
+          'number': ['number'],
+          'boolean': ['boolean'],
+          'object': ['object'],
+          'array': ['object'], // Array 在 typeof 中返回 object
+          'date': ['object'],   // Date 在 typeof 中返回 object
+        };
+        
+        const allowedTypes = typeMapping[expectedType] || [expectedType];
+        
+        if (expectedType && !allowedTypes.includes(actualType)) {
+          throw new Error(`Type mismatch: expected ${expectedType}, but received ${actualType} for property '${propertyKey}'`);
+        }
       }
     }
 
