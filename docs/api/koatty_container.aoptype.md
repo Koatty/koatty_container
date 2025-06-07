@@ -20,6 +20,8 @@ export declare enum AOPType
 |  --- | --- | --- |
 |  After | <code>&quot;After&quot;</code> |  |
 |  AfterEach | <code>&quot;AfterEach&quot;</code> |  |
+|  Around | <code>&quot;Around&quot;</code> |  |
+|  AroundEach | <code>&quot;AroundEach&quot;</code> |  |
 |  Before | <code>&quot;Before&quot;</code> |  |
 |  BeforeEach | <code>&quot;BeforeEach&quot;</code> |  |
 

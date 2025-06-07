@@ -22,6 +22,8 @@
 |  --- | --- |
 |  [After(paramName)](./koatty_container.after.md) | <p>After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.</p> |
 |  [AfterEach(paramName)](./koatty_container.aftereach.md) | <p>Decorator that marks a class to execute after each method.</p> |
+|  [Around(paramName)](./koatty_container.around.md) | <p>Around decorator, used to define a method-level AOP interceptor that wraps around the target method. The around aspect can control whether the original method is executed and can modify arguments and return values.</p> |
+|  [AroundEach(paramName)](./koatty_container.aroundeach.md) | <p>Decorator that marks a class to execute around each method. The around aspect wraps around every method in the target class.</p> |
 |  [Aspect(identifier)](./koatty_container.aspect.md) | Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system. |
 |  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | Decorator that marks a property for dependency injection. |
 |  [Before(paramName)](./koatty_container.before.md) | <p>Before decorator, used to define a method-level AOP interceptor that executes before the target method.</p> |

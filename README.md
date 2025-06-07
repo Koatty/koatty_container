@@ -12,7 +12,7 @@
 - 🚀 高缓存命中率，极速启动
 - 💾 智能内存管理，批量加载优化
 - 🔗 智能循环依赖处理
-- 🎯 完整 AOP 支持，Before/After 切面编程
+- 🎯 完整 AOP 支持，Before/After/Around 切面编程
 - 💉 多种注入方式，构造函数、属性、字符串标识符
 - 🔄 生命周期管理，Singleton/Prototype 作用域
 
@@ -40,7 +40,7 @@ class UserRepository {
   }
 }
 
-@Service()
+@Component()
 class UserService {
   @Autowired()
   private userRepository: UserRepository;
@@ -50,7 +50,7 @@ class UserService {
   }
 }
 
-@Controller()
+@Component()
 class UserController {
   @Autowired()
   private userService: UserService;
@@ -108,24 +108,30 @@ await initializeApp();
 ### 方法拦截
 
 ```typescript
-import { Component, Before, After, Around, AroundEach } from "koatty_container";
+@Aspect()
+export class TestAspect implements IAspect {
+  app: any;
+  
+  async run(args: any[], proceed?: Function): Promise<any> {
+    // TestAspect输出接收的参数数组
+    console.log(args);
+    return Promise.resolve();
+  }
+}
+
 
 @Component()
 class LoggingAspect {
-  @Before("UserService.getUser")
+  @Before(TestAspect)
   logBefore(target: any, methodName: string, args: any[]) {
     console.log(`🔍 调用 ${target.constructor.name}.${methodName}`, args);
   }
 
-  @After("UserService.*")
+  @After(TestAspect)
   logAfter(target: any, methodName: string, result: any) {
     console.log(`✅ 完成 ${target.constructor.name}.${methodName}`, result);
   }
 }
-
-// 注册切面
-IOC.reg(LoggingAspect);
-IOC.reg(PerformanceAspect);
 ```
 
 ### 环绕通知 (Around)
@@ -162,7 +168,7 @@ class TransactionAspect {
   }
 }
 
-@Service()
+@Component()
 class UserService {
   // 方法级别的环绕通知
   @Around(TransactionAspect)
@@ -178,7 +184,7 @@ class UserService {
 
 // 类级别的环绕通知 - 对所有方法生效
 @AroundEach(TransactionAspect)
-@Service()
+@Component()
 class OrderService {
   async createOrder(orderData: any) {
     // 所有方法都会被 TransactionAspect 环绕
@@ -193,7 +199,7 @@ class OrderService {
 // 类级别的前置和后置通知
 @BeforeEach(LoggingAspect)  // 对类中所有方法执行前置通知
 @AfterEach(AuditAspect)     // 对类中所有方法执行后置通知
-@Service()
+@Component()
 class PaymentService {
   async processPayment(amount: number) {
     // 每个方法都会被 LoggingAspect 前置拦截和 AuditAspect 后置拦截
@@ -210,7 +216,7 @@ class PaymentService {
 ### AOP 执行顺序
 
 ```typescript
-@Service()
+@Component()
 class ExampleService {
   // 执行顺序：
   // 1. @Before 切面
@@ -228,27 +234,13 @@ class ExampleService {
 }
 ```
 
-### 切面优先级和组合
-
-```typescript
-// 多个 Around 切面的嵌套执行
-@Around(SecurityAspect)      // 外层：安全检查
-@Around(TransactionAspect)   // 中层：事务管理
-@Around(CacheAspect)         // 内层：缓存处理
-async sensitiveOperation(data: any) {
-  // 执行顺序：
-  // SecurityAspect -> TransactionAspect -> CacheAspect -> 原方法 -> CacheAspect -> TransactionAspect -> SecurityAspect
-  return data;
-}
-```
-
 ## 🔧 智能循环依赖处理
 
 koatty_container 具备循环依赖处理能力，支持自动检测和智能解决方案：
 
 ```typescript
 // 循环依赖示例 - 自动处理
-@Service()
+@Component()
 class OrderService {
   @Autowired("UserService")  // 使用字符串标识符
   userService: UserService;
@@ -259,7 +251,7 @@ class OrderService {
   }
 }
 
-@Service()
+@Component()
 class UserService {
   @Autowired("OrderService")  // 循环依赖，但会自动处理
   orderService: OrderService;
