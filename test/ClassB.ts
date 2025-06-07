@@ -18,8 +18,8 @@ export class ClassB {
 
   protected readonly myDependency2: MyDependency2;
 
-  constructor(@Inject(MyDependency2) myDependency2) {
-    // Now `myDependency` can be used throughout the service.
+  constructor(@Inject(MyDependency2) myDependency2: MyDependency2) {
+    this.myDependency2 = myDependency2;
   }
 
   run() {

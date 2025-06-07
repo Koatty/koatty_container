@@ -31,8 +31,24 @@ import { recursiveGetMetadata } from "../utils/MetadataOpertor";
 export function injectValues(target: Function, prototypeChain: object,
   container?: IContainer, _options?: ObjectDefinitionOptions) {
   const metaData = recursiveGetMetadata(container, TAGGED_ARGS, target);
-  for (const { name, method } of Object.values(metaData)) {
-    logger.Debug(`Register inject ${name} properties => value: ${JSON.stringify(metaData[name])}`);
+  
+  // Safe iteration over metadata values with proper null/undefined checks
+  for (const metadataValue of Object.values(metaData)) {
+    // Skip null, undefined, or invalid metadata entries
+    if (!metadataValue || typeof metadataValue !== 'object') {
+      continue;
+    }
+    
+    // Safe destructuring with default values
+    const name = (metadataValue as any).name;
+    const method = (metadataValue as any).method;
+    
+    // Skip entries without proper name
+    if (!name) {
+      continue;
+    }
+    
+    logger.Debug(`Register inject ${name} properties => value: ${JSON.stringify(metadataValue)}`);
     let targetValue = method;
     if (helper.isFunction(method)) {
       targetValue = method();

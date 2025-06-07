@@ -14,6 +14,7 @@ import { ReturnValueModifyAspect } from "./ReturnValueModifyAspect";
 import { ErrorAspect } from "./ErrorAspect";
 import { OrderAspect } from "./OrderAspect";
 import { TestAspect } from "./TestAspect";
+import { Test2Aspect } from "./Test2Aspect";
 
 @BeforeEach(OrderAspect)
 @AfterEach(OrderAspect)
@@ -51,9 +52,9 @@ export class ClassE {
     throw new Error("Test exception in ClassE");
   }
 
-  // 测试多个相同类型装饰器
+  // 测试多个相同类型装饰器 - 重复装饰器测试
   @Before(TestAspect)
-  @Before(OrderAspect)
+  @Before(Test2Aspect)  // 这个应该覆盖前面的TestAspect
   async multipleSameTypeMethod(input: string): Promise<string> {
     return `SameType: ${input}`;
   }
@@ -67,5 +68,22 @@ export class ClassE {
   // 普通方法，只受类级别装饰器影响
   async normalMethod(input: string): Promise<string> {
     return `Normal: ${input}`;
+  }
+
+  // 新增：测试重复方法级别装饰器
+  @Before(TestAspect)
+  @Before(Test2Aspect)  // 应该覆盖TestAspect
+  async duplicateMethodLevelMethod(input: string): Promise<string> {
+    return `DuplicateMethodLevel: ${input}`;
+  }
+
+  // 新增：测试重复类级别装饰器
+  async duplicateClassLevelMethod(input: string): Promise<string> {
+    return `DuplicateClassLevel: ${input}`;
+  }
+
+  // 新增：测试优先级
+  async priorityMethod(input: string): Promise<string> {
+    return `Priority: ${input}`;
   }
 } 

@@ -664,9 +664,11 @@ export class Container implements IContainer {
    * If scope is Singleton, the instance will be sealed to prevent modifications.
    */
   private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
-    const instance = Reflect.construct(<Function>target, options.args);
+    // Ensure options and args are properly defined
+    const constructorArgs = options?.args || [];
+    const instance = Reflect.construct(<Function>target, constructorArgs);
     overridePrototypeValue(instance);
-    if (options.scope === "Singleton") {
+    if (options?.scope === "Singleton") {
       Object.seal(instance);
     }
 
@@ -776,7 +778,11 @@ export class Container implements IContainer {
         if (error instanceof CircularDepError) {
           throw error;
         }
-        throw new Error(`Failed to create instance of ${className}: ${error.message}`);
+        // Safely handle error message extraction
+        const errorMessage = error && typeof error === 'object' && 'message' in error 
+          ? (error as Error).message 
+          : String(error || 'Unknown error');
+        throw new Error(`Failed to create instance of ${className}: ${errorMessage}`);
       }
     }
 
@@ -810,8 +816,10 @@ export class Container implements IContainer {
 
         try {
           // Re-run the full registration process to ensure proper dependency injection
-          this._setInstance(<Function>target, options);
-          this._injection(<Function>target, options, className);
+          // Ensure options is defined with default values
+          const safeOptions = options || { scope: "Singleton", args: [] };
+          this._setInstance(<Function>target, safeOptions);
+          this._injection(<Function>target, safeOptions, className);
 
           // Get the newly created instance
           instance = this.instanceMap.get(<Function>target) as T;
@@ -826,7 +834,11 @@ export class Container implements IContainer {
             logger.Debug(`Circular dependency detected for ${className} during recreation, returning undefined (delayed loading)`);
             return undefined as T;
           } else {
-            throw new Error(`Failed to recreate instance of ${className}: ${error.message}`);
+            // Safely handle error message extraction
+            const errorMessage = error && typeof error === 'object' && 'message' in error 
+              ? (error as Error).message 
+              : String(error || 'Unknown error');
+            throw new Error(`Failed to recreate instance of ${className}: ${errorMessage}`);
           }
         }
       } else {

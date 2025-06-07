@@ -10,16 +10,20 @@
 import { IAspect } from "../src/container/IContainer";
 import { Aspect } from "../src/decorator/AOP";
 
-interface TestAspectArgs {
-  event: string;
-}
-
 @Aspect()
 export class TestAspect implements IAspect {
   app: any;
-  run(args: TestAspectArgs[]): Promise<any> {
-    const aa = ["aa", 1, "e"]
+  
+  async run(args: any[], proceed?: Function): Promise<any> {
+    // TestAspect输出接收的参数数组
     console.log(args);
+    
+    // 如果有proceed函数（Around类型），需要调用它来继续执行链
+    if (proceed) {
+      return await proceed();
+    }
+    
+    // 对于Before/After类型，不需要返回值
     return Promise.resolve();
   }
 }

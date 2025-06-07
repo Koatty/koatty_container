@@ -205,6 +205,7 @@ async function get(aopName: string): Promise<IAspect> {
 
 /**
  * Get all methods of a target class/object with caching
+ * Excludes constructor, init, __before, __after methods for BeforeEach/AfterEach/AroundEach decorators
  */
 function getMethodNames(target: any): string[] {
   const targetKey = target.name || target.constructor?.name || 'Anonymous';
@@ -219,10 +220,13 @@ function getMethodNames(target: any): string[] {
   const methods: string[] = [];
   let currentProto = target.prototype || target;
   
+  // 需要排除的方法名（根据原则2）
+  const excludedMethods = ['constructor', 'init', '__before', '__after'];
+  
   while (currentProto && currentProto !== Object.prototype) {
     const names = Object.getOwnPropertyNames(currentProto);
     for (const name of names) {
-      if (name !== 'constructor' && 
+      if (!excludedMethods.includes(name) && 
         typeof currentProto[name] === 'function' && 
         !methods.includes(name)) {
         methods.push(name);
@@ -248,51 +252,124 @@ export function getAOPMethodMetadata(target: any, methodName: string): any[] {
     return cached;
   }
 
-  // Get class AOP data
+  // Get class AOP data (now returns array due to attachClassMetadata)
   const classAOPData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) || [];
 
-  // Get method-specific AOP data
+  // Get method-specific AOP data (now returns array due to attachClassMetadata)  
   const methodAOPData = IOCContainer.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target, methodName) || [];
 
-  // Combine and filter metadata
-  const aopMetadata: any[] = [];
+  logger.Debug(`Processing AOP metadata for ${target.name}.${methodName}:`);
+  logger.Debug(`  Class AOP data: ${JSON.stringify(classAOPData)}`);
+  logger.Debug(`  Method AOP data: ${JSON.stringify(methodAOPData)}`);
 
-  // Add method-specific metadata first (higher priority)
+  // Use Map to store only the last decorator of each type for each cut point
+  const methodLevelDecorators = new Map<string, any>();
+  const classLevelDecorators = new Map<string, any>();
+
+  // Process method-specific metadata first (higher priority)
+  // methodAOPData is now an array, process each item
   for (const data of methodAOPData) {
     if (data.method === methodName) {
-      aopMetadata.push({
+      // For method-level decorators, later decorators override earlier ones (regardless of order)
+      const currentData = {
         type: data.type,
         aopName: data.name,
         method: "run",
         order: data.order || 0
-      });
+      };
+      
+      const existingData = methodLevelDecorators.get(data.type);
+      logger.Debug(`  Method-level ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
+      
+      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
+      if (!existingData || currentData.order < existingData.order) {
+        methodLevelDecorators.set(data.type, currentData);
+        if (existingData) {
+          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+        } else {
+          logger.Debug(`    -> Using ${data.name} (first occurrence)`);
+        }
+      } else {
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+      }
     }
   }
 
-  // Add class-level metadata for methods that match the criteria
+  // Process class-level metadata
+  // classAOPData is now an array, process each item
   for (const data of classAOPData) {
     // For AroundEach, BeforeEach, AfterEach - apply to all methods
     if (['AroundEach', 'BeforeEach', 'AfterEach'].includes(data.type)) {
-      aopMetadata.push({
+      // For class-level decorators, later decorators override earlier ones (regardless of order)
+      const currentData = {
         type: data.type,
         aopName: data.name,
         method: "run",
         order: data.order || 0
-      });
+      };
+      
+      const existingData = classLevelDecorators.get(data.type);
+      logger.Debug(`  Class-level ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
+      
+      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
+      if (!existingData || currentData.order < existingData.order) {
+        classLevelDecorators.set(data.type, currentData);
+        if (existingData) {
+          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+        } else {
+          logger.Debug(`    -> Using ${data.name} (first occurrence)`);
+        }
+      } else {
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+      }
     }
     // For Around, Before, After - only apply to specific methods
     else if (['Around', 'Before', 'After'].includes(data.type) && data.method === methodName) {
-      aopMetadata.push({
+      // For method-level decorators from class metadata, later decorators override earlier ones (regardless of order)
+      const currentData = {
         type: data.type,
         aopName: data.name,
         method: "run",
         order: data.order || 0
-      });
+      };
+      
+      const existingData = methodLevelDecorators.get(data.type);
+      logger.Debug(`  Method-level from class ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
+      
+      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
+      if (!existingData || currentData.order < existingData.order) {
+        methodLevelDecorators.set(data.type, currentData);
+        if (existingData) {
+          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+        } else {
+          logger.Debug(`    -> Using ${data.name} (first occurrence)`);
+        }
+      } else {
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+      }
+    }
+  }
+
+  // Combine all decorators, method-level takes precedence over class-level
+  const aopMetadata: any[] = [];
+  
+  // Add method-level decorators
+  for (const decorator of methodLevelDecorators.values()) {
+    aopMetadata.push(decorator);
+  }
+  
+  // Add class-level decorators (only if method-level doesn't have the same type)
+  for (const decorator of classLevelDecorators.values()) {
+    if (!methodLevelDecorators.has(decorator.type)) {
+      aopMetadata.push(decorator);
     }
   }
 
   // Sort by order to preserve decorator declaration order
+  // Later decorators will naturally override earlier ones due to Map override mechanism
   aopMetadata.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  logger.Debug(`  Final AOP metadata: ${JSON.stringify(aopMetadata)}`);
 
   // Cache the result
   metadataCache.set(CacheType.CLASS_METADATA, cacheKey, aopMetadata);
@@ -309,9 +386,8 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // Call aspect.run with only args parameter for simplicity
+          // For Before/BeforeEach aspects, call with args (TestAspect expects args, others ignore them)
           await aspect.run(args);
-          // Before aspects typically don't modify arguments
         }
       } catch (error) {
         logger.Error(`Before aspect execution failed for ${data.aopName}:`, error);
@@ -331,7 +407,7 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // Call aspect.run with only args parameter for simplicity
+          // For After/AfterEach aspects, call with original args (TestAspect expects args, others ignore them)
           await aspect.run(originalArgs || []);
         }
       } catch (error) {
@@ -363,7 +439,7 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // Call aspect.run with only args and proceed parameters for simplicity
+          // Call aspect.run with args and proceed parameters for Around aspects
           return await aspect.run(currentArgs, proceed);
         }
       } catch (error) {
@@ -455,6 +531,20 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
     try {
       // Check for __before method - highest priority, mutually exclusive with @BeforeEach
       const hasDefaultBefore = typeof this.__before === 'function';
+      const hasBeforeEach = aspectData.some(data => data.type === 'BeforeEach');
+      
+      // Check for __after method - highest priority, mutually exclusive with @AfterEach  
+      const hasDefaultAfter = typeof this.__after === 'function';
+      const hasAfterEach = aspectData.some(data => data.type === 'AfterEach');
+      
+      // Warn about mutual exclusion (rule 3)
+      if (hasDefaultBefore && hasBeforeEach) {
+        logger.Warn(`__before and @BeforeEach both detected on ${target.name}.${methodName}, __before takes priority and @BeforeEach will be ignored`);
+      }
+      
+      if (hasDefaultAfter && hasAfterEach) {
+        logger.Warn(`__after and @AfterEach both detected on ${target.name}.${methodName}, __after takes priority and @AfterEach will be ignored`);
+      }
       
       // 1. Execute __before if exists (highest priority, always first)
       if (hasDefaultBefore) {
@@ -478,9 +568,6 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
       
       // 4. Execute Around aspects or original method
       let result = await executeAround(this, methodName, processedArgs, aspectData, originalMethod);
-      
-      // Check for __after method - highest priority, mutually exclusive with @AfterEach
-      const hasDefaultAfter = typeof this.__after === 'function';
       
       // 5. Execute AfterEach aspects only if __after doesn't exist (mutually exclusive)
       if (!hasDefaultAfter) {
@@ -535,15 +622,24 @@ export function injectAOP(target: any): any {
     }
     
     const aspectData = getAOPMethodMetadata(target, methodName);
-    const hasAspectsOrDefaults = aspectData.length > 0 || 
-      (target.prototype.__before && typeof target.prototype.__before === 'function') ||
-      (target.prototype.__after && typeof target.prototype.__after === 'function');
+    
+    // Check for built-in methods more thoroughly - check both prototype and instance
+    const hasBuiltinBefore = typeof target.prototype.__before === 'function' ||
+      Object.prototype.hasOwnProperty.call(target.prototype, '__before');
+    const hasBuiltinAfter = typeof target.prototype.__after === 'function' ||
+      Object.prototype.hasOwnProperty.call(target.prototype, '__after');
+    
+    const hasAspectsOrDefaults = aspectData.length > 0 || hasBuiltinBefore || hasBuiltinAfter;
     
     if (hasAspectsOrDefaults) {
       const descriptor = Object.getOwnPropertyDescriptor(target.prototype, methodName);
       if (descriptor && descriptor.value) {
         Object.defineProperty(target.prototype, methodName, defineAOPMethod(target, methodName, descriptor));
         aopMethodCount++;
+        
+        if (hasBuiltinBefore || hasBuiltinAfter) {
+          logger.Debug(`Applied AOP to ${target.name}.${methodName} with built-in methods: __before=${hasBuiltinBefore}, __after=${hasBuiltinAfter}`);
+        }
       }
     }
   }

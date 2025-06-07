@@ -13,7 +13,8 @@ import { Aspect } from "../src/decorator/AOP";
 @Aspect()
 export class Test2Aspect implements IAspect {
   app: any;
-  run(): Promise<any> {
+  
+  async run(args: any[], proceed?: Function): Promise<any> {
     console.log("Test2Aspect");
     return Promise.resolve("Test2Aspect");
   }

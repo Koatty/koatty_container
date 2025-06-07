@@ -8,25 +8,28 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
+import { IAspect } from "../src/container/IContainer";
 import { Aspect } from "../src/decorator/AOP";
 
 @Aspect()
-export class OrderAspect {
+export class OrderAspect implements IAspect {
+  app: any;
+  
   async run(args: any[], proceed?: Function): Promise<any> {
-    // 从 args 中获取方法名（如果有的话）
-    const methodName = args && args.length > 0 && typeof args[0] === 'string' ? args[0] : 'unknown';
-    console.log(`Order Before: ${methodName}`);
+    // 输出传入的args参数，与TestAspect保持一致
+    console.log(args);
     
     let result;
     if (proceed) {
-      // Around 类型
+      // Around 类型 - Around会在前后都执行
       result = await proceed(args);
+      // Around After阶段也输出args
+      console.log(args);
     } else {
-      // Before/After 类型
+      // Before/After 类型 - Before和After分别执行，只输出一次
       result = args;
     }
     
-    console.log(`Order After: ${methodName}`);
     return result;
   }
 } 

@@ -88,14 +88,14 @@ export function recursiveGetMetadata(container: IContainer, metadataKey: any, ta
   _propertyKey?: string | symbol): any[] {
   // get metadata value of a metadata key on the prototype
   // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
-  const metadata = container.listPropertyData(metadataKey, target) ?? {};
+  let metadata = container.listPropertyData(metadataKey, target) ?? {};
   // get metadata value of a metadata key on the prototype chain
   let parent = ordinaryGetPrototypeOf(target);
   while (parent !== null) {
     // metadata = Reflect.getOwnMetadata(metadataKey, parent, propertyKey);
     const parentMetadata = container.listPropertyData(metadataKey, parent);
     if (parentMetadata) {
-      mergeMetadata(parentMetadata, metadata);
+      metadata = mergeMetadata(parentMetadata, metadata);
     }
     parent = ordinaryGetPrototypeOf(parent);
   }

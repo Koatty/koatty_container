@@ -8,12 +8,15 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
+import { IAspect } from "../src/container/IContainer";
 import { Aspect } from "../src/decorator/AOP";
 
 @Aspect()
-export class ErrorAspect {
-  async run(target: any, methodName: string, args: any[], proceed?: Function): Promise<any> {
-    console.log(`Error Before: ${methodName}`);
+export class ErrorAspect implements IAspect {
+  app: any;
+  
+  async run(args: any[], proceed?: Function): Promise<any> {
+    console.log("Error Before");
     
     try {
       let result;
@@ -25,10 +28,10 @@ export class ErrorAspect {
         result = args;
       }
       
-      console.log(`Error After: ${methodName}`);
+      console.log("Error After");
       return result;
     } catch (error) {
-      console.log(`Error Caught: ${methodName} - ${error.message}`);
+      console.log(`Error Caught: ${error.message}`);
       // 重新抛出异常
       throw error;
     }

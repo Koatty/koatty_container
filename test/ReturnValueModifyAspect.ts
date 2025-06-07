@@ -8,12 +8,15 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
+import { IAspect } from "../src/container/IContainer";
 import { Aspect } from "../src/decorator/AOP";
 
 @Aspect()
-export class ReturnValueModifyAspect {
-  async run(target: any, methodName: string, args: any[], proceed?: Function): Promise<any> {
-    console.log(`ReturnModify Before: ${methodName}`);
+export class ReturnValueModifyAspect implements IAspect {
+  app: any;
+  
+  async run(args: any[], proceed?: Function): Promise<any> {
+    console.log("ReturnModify Before");
     
     let result;
     if (proceed) {
@@ -28,7 +31,7 @@ export class ReturnValueModifyAspect {
       result = args;
     }
     
-    console.log(`ReturnModify After: ${methodName}`);
+    console.log("ReturnModify After");
     return result;
   }
 } 
