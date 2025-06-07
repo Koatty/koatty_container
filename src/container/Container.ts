@@ -818,8 +818,8 @@ export class Container implements IContainer {
           // Re-run the full registration process to ensure proper dependency injection
           // Ensure options is defined with default values
           const safeOptions = options || { scope: "Singleton", args: [] };
-          this._setInstance(<Function>target, safeOptions);
           this._injection(<Function>target, safeOptions, className);
+          this._setInstance(<Function>target, safeOptions);
 
           // Get the newly created instance
           instance = this.instanceMap.get(<Function>target) as T;
