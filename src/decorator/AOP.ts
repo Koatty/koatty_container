@@ -9,6 +9,9 @@ import { Helper } from "koatty_lib";
 import { IOC } from "../container/Container";
 import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
 
+// 全局计数器，确保装饰器声明顺序正确性
+let AOPOrderCounter = 0;
+
 
 /**
  * Aspect decorator for AOP implementation.
@@ -63,7 +66,8 @@ export function Before<T>(paramName: ClassOrString<T>): MethodDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
@@ -93,7 +97,8 @@ export function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.BeforeEach,
       name: aopName,
@@ -124,7 +129,8 @@ export function After<T>(paramName: ClassOrString<T>): MethodDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: symbol | string, _descriptor: PropertyDescriptor) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
@@ -155,7 +161,8 @@ export function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AfterEach,
       name: aopName,
@@ -186,7 +193,8 @@ export function Around<T>(paramName: ClassOrString<T>): MethodDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Around,
       name: aopName,
@@ -218,7 +226,8 @@ export function AroundEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AroundEach,
       name: aopName,

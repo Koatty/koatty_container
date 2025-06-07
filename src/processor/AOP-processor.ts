@@ -220,8 +220,8 @@ function getMethodNames(target: any): string[] {
   const methods: string[] = [];
   let currentProto = target.prototype || target;
   
-  // 需要排除的方法名（根据原则2）
-  const excludedMethods = ['constructor', 'init', '__before', '__after'];
+  // 需要排除的方法名（根据原则2：constructor, init, before, _after除外）
+  const excludedMethods = ['constructor', 'init', 'before', '_after', '__before', '__after'];
   
   while (currentProto && currentProto !== Object.prototype) {
     const names = Object.getOwnPropertyNames(currentProto);
@@ -281,16 +281,16 @@ export function getAOPMethodMetadata(target: any, methodName: string): any[] {
       const existingData = methodLevelDecorators.get(data.type);
       logger.Debug(`  Method-level ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
       
-      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
-      if (!existingData || currentData.order < existingData.order) {
+      // For duplicate decorators, use the one with larger order (later declared decorator, overrides earlier)
+      if (!existingData || currentData.order > existingData.order) {
         methodLevelDecorators.set(data.type, currentData);
         if (existingData) {
-          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+          logger.Debug(`    -> Using ${data.name} (larger order: later declared decorator, overrides earlier)`);
         } else {
           logger.Debug(`    -> Using ${data.name} (first occurrence)`);
         }
       } else {
-        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (larger order: later declared decorator, keeps override)`);
       }
     }
   }
@@ -311,16 +311,16 @@ export function getAOPMethodMetadata(target: any, methodName: string): any[] {
       const existingData = classLevelDecorators.get(data.type);
       logger.Debug(`  Class-level ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
       
-      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
-      if (!existingData || currentData.order < existingData.order) {
+      // For duplicate decorators, use the one with larger order (later declared decorator, overrides earlier)
+      if (!existingData || currentData.order > existingData.order) {
         classLevelDecorators.set(data.type, currentData);
         if (existingData) {
-          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+          logger.Debug(`    -> Using ${data.name} (larger order: later declared decorator, overrides earlier)`);
         } else {
           logger.Debug(`    -> Using ${data.name} (first occurrence)`);
         }
       } else {
-        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (larger order: later declared decorator, keeps override)`);
       }
     }
     // For Around, Before, After - only apply to specific methods
@@ -336,16 +336,16 @@ export function getAOPMethodMetadata(target: any, methodName: string): any[] {
       const existingData = methodLevelDecorators.get(data.type);
       logger.Debug(`  Method-level from class ${data.type}: ${data.name} (order: ${currentData.order}) ${existingData ? `vs existing ${existingData.aopName} (order: ${existingData.order})` : '(first)'}`);
       
-      // For duplicate decorators, use the one with smaller order (later declared in code, executed first)
-      if (!existingData || currentData.order < existingData.order) {
+      // For duplicate decorators, use the one with larger order (later declared decorator, overrides earlier)
+      if (!existingData || currentData.order > existingData.order) {
         methodLevelDecorators.set(data.type, currentData);
         if (existingData) {
-          logger.Debug(`    -> Using ${data.name} (smaller order: later declared)`);
+          logger.Debug(`    -> Using ${data.name} (larger order: later declared decorator, overrides earlier)`);
         } else {
           logger.Debug(`    -> Using ${data.name} (first occurrence)`);
         }
       } else {
-        logger.Debug(`    -> Keeping existing ${existingData.aopName} (smaller order: later declared)`);
+        logger.Debug(`    -> Keeping existing ${existingData.aopName} (larger order: later declared decorator, keeps override)`);
       }
     }
   }

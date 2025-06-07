@@ -332,23 +332,23 @@ describe("AOP", () => {
     const ins: ClassE = IOC.get("ClassE");
     const result = await ins.parameterChainMethod("test");
     
-    // parameterChainMethod有两个@Around装饰器：@Around(ParameterModifyAspect)和@Around(ReturnValueModifyAspect)
-    // 根据原则4：相同类型装饰器，后面的覆盖前面的（装饰器从下到上执行），所以只有ReturnValueModifyAspect生效
+    // parameterChainMethod有两个@Around装饰器：@Around(ReturnValueModifyAspect)和@Around(ParameterModifyAspect)
+    // 根据原则4：相同类型装饰器，后面的覆盖前面的，所以只有ParameterModifyAspect生效
     
     // ClassE类装饰器：OrderAspect BeforeEach
     expect(logSpy).toHaveBeenCalledWith(["test"]);
     
-    // ReturnValueModifyAspect Around Before
-    expect(logSpy).toHaveBeenCalledWith("ReturnModify Before");
+    // ParameterModifyAspect Around Before
+    expect(logSpy).toHaveBeenCalledWith("Parameter Modify Before");
     
-    // ReturnValueModifyAspect Around After  
-    expect(logSpy).toHaveBeenCalledWith("ReturnModify After");
+    // ParameterModifyAspect Around After  
+    expect(logSpy).toHaveBeenCalledWith("Parameter Modify After");
     
     // ClassE类装饰器：OrderAspect AfterEach
     expect(logSpy).toHaveBeenCalledWith(["test"]);
     
-    // 返回值被ReturnValueModifyAspect修改：Chain: test -> Return_Chain: test
-    expect(result).toBe("Return_Chain: test");
+    // 参数被ParameterModifyAspect修改：Chain: test -> Chain: Modified_test
+    expect(result).toBe("Chain: Modified_test");
     
     logSpy.mockRestore();
   })
@@ -422,14 +422,14 @@ describe("AOP", () => {
     const result = await ins.duplicateBeforeMethod("test");
     
     // DuplicateMethodLevelTest.duplicateBeforeMethod有两个@Before装饰器：@Before(TestAspect)和@Before(Test2Aspect)
-    // 根据原则4：相同类型装饰器，后面的覆盖前面的，所以只有Test2Aspect生效
+    // 根据原则4：相同类型装饰器，后面的覆盖前面的，所以只有TestAspect生效
     
     const calls = logSpy.mock.calls.map(call => call[0]);
     
-    // 验证只有最后一个Before装饰器生效（Test2Aspect，因为它是后声明的装饰器）
-    expect(calls).toContain("Test2Aspect");
-    // 验证第一个装饰器（TestAspect）没有生效
-    expect(calls).not.toContainEqual(["test"]);
+    // 验证只有最后一个Before装饰器生效（TestAspect，因为它是后声明的装饰器）
+    expect(calls).toContainEqual(["test"]);
+    // 验证第一个装饰器（Test2Aspect）没有生效
+    expect(calls).not.toContain("Test2Aspect");
     
     expect(result).toBe("Before: test");
     
