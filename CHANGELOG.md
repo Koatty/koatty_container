@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/koatty/koatty_container/compare/v1.13.0-1...v1.13.0) (2025-06-07)
+
+
+### Bug Fixes
+
+* enhance AOP decorator safety and metadata processing with null checks, order management, and built-in method priority handling ([7df0563](https://github.com/koatty/koatty_container/commit/7df056347a8e5f97c20bda065bdbc744d1cf61b9))
+* improve AOP decorator order management using counter instead of random values and adjust processor logic to prioritize later-declared decorators ([9071665](https://github.com/koatty/koatty_container/commit/90716655047255039666af0e3f06f1f67c75ace4))
+* improve type checking logic in Values decorator with enhanced type mapping and error messages ([fd52533](https://github.com/koatty/koatty_container/commit/fd52533bd835a22c86d134f6def3b6dfd439724d))
+* restructure instance registration flow in Container to separate injection and instance setting steps ([3b8d54b](https://github.com/koatty/koatty_container/commit/3b8d54b8c6a2a7c523c8692c27049bab48c648a0))
+
 ## [1.13.0-1](https://github.com/koatty/koatty_container/compare/v1.13.0-0...v1.13.0-1) (2025-06-02)
 
 ## [1.13.0-0](https://github.com/koatty/koatty_container/compare/v1.12.0...v1.13.0-0) (2025-06-02)
