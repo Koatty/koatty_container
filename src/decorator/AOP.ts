@@ -290,7 +290,8 @@ export function AroundEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
-    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
+    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
+    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AroundEach,
       name: aopName,
