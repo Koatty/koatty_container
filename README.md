@@ -50,7 +50,7 @@ class UserService {
   }
 }
 
-@Controller()
+@Component()
 class UserController {
   @Autowired()
   private userService: UserService;
@@ -268,7 +268,7 @@ class TransactionAspect {
   }
 }
 
-@Service()
+@Component()
 class UserService {
   // 方法级别的环绕通知
   @Around(TransactionAspect)
@@ -284,7 +284,7 @@ class UserService {
 
 // 类级别的环绕通知 - 对所有方法生效
 @AroundEach(TransactionAspect)
-@Service()
+@Component()
 class OrderService {
   async createOrder(orderData: any) {
     // 所有方法都会被 TransactionAspect 环绕
@@ -299,7 +299,7 @@ class OrderService {
 // 类级别的前置和后置通知
 @BeforeEach(LoggingAspect)  // 对类中所有方法执行前置通知
 @AfterEach(AuditAspect)     // 对类中所有方法执行后置通知
-@Service()
+@Component()
 class PaymentService {
   async processPayment(amount: number) {
     // 每个方法都会被 LoggingAspect 前置拦截和 AuditAspect 后置拦截
@@ -316,7 +316,7 @@ class PaymentService {
 ### AOP 执行顺序
 
 ```typescript
-@Service()
+@Component()
 class ExampleService {
   // 执行顺序：
   // 1. @Before 切面
@@ -331,20 +331,6 @@ class ExampleService {
   async complexMethod(data: any) {
     return { processed: data };
   }
-}
-```
-
-### 切面优先级和组合
-
-```typescript
-// 多个 Around 切面的嵌套执行
-@Around(SecurityAspect)      // 外层：安全检查
-@Around(TransactionAspect)   // 中层：事务管理
-@Around(CacheAspect)         // 内层：缓存处理
-async sensitiveOperation(data: any) {
-  // 执行顺序：
-  // SecurityAspect -> TransactionAspect -> CacheAspect -> 原方法 -> CacheAspect -> TransactionAspect -> SecurityAspect
-  return data;
 }
 ```
 
