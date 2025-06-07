@@ -258,10 +258,12 @@ export function Around<T>(paramName: ClassOrString<T>): MethodDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
+    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Around,
       name: aopName,
       method: methodName,
+      order
     }, target);
   };
 }
@@ -288,9 +290,11 @@ export function AroundEach<T>(paramName: ClassOrString<T>): ClassDecorator {
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
+    const order = Date.now() + Math.random(); // 确保唯一性，用于处理重复装饰器
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AroundEach,
-      name: aopName
+      name: aopName,
+      order
     }, target);
   };
 }
