@@ -7,8 +7,8 @@
  * @License: BSD (3-Clause)
  * @Copyright (c): <richenlin(at)gmail.com>
  */
-import { IAspect } from "../src/container/IContainer";
-import { Aspect } from "../src/decorator/AOP";
+import { IAspect } from "../src/container/icontainer";
+import { Aspect } from "../src/decorator/aop";
 
 @Aspect()
 export class TestAspect implements IAspect {

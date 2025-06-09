@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { Around, AroundEach } from "../src/decorator/AOP";
+import { Around, AroundEach } from "../src/decorator/aop";
 import { AroundAspect } from "./AroundAspect";
 
 @AroundEach(AroundAspect)

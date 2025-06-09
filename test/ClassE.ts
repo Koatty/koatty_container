@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { Before, After, Around, BeforeEach, AfterEach } from "../src/decorator/AOP";
+import { Before, After, Around, BeforeEach, AfterEach } from "../src/decorator/aop";
 import { ParameterModifyAspect } from "./ParameterModifyAspect";
 import { ReturnValueModifyAspect } from "./ReturnValueModifyAspect";
 import { ErrorAspect } from "./ErrorAspect";

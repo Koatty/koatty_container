@@ -1,4 +1,4 @@
-import { Container } from "../src/container/Container";
+import { Container } from "../src/container/container";
 import { Component } from "../src/decorator/Component";
 
 // 确保IOC容器准备就绪的辅助函数

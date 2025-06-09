@@ -1,6 +1,6 @@
-import { IOC } from "../src/container/Container";
-import { CircularDepError } from "../src/utils/CircularDepDetector";
-import { TAGGED_PROP } from "../src/container/IContainer";
+import { IOC } from "../src/container/container";
+import { CircularDepError } from "../src/utils/circular";
+import { TAGGED_PROP } from "../src/container/icontainer";
 import {
   DatabaseService,
   UserRepository,

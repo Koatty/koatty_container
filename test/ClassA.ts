@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { AfterEach } from "../src/decorator/AOP";
+import { AfterEach } from "../src/decorator/aop";
 import { Autowired } from "../src/decorator/Autowired";
 import { Values } from "../src/decorator/Values";
 import { MyDependency } from "./MyDependency";

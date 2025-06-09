@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { After, Before } from "../src/decorator/AOP";
+import { After, Before } from "../src/decorator/aop";
 import { ClassA } from "./ClassA";
 import { TestAspect } from "./TestAspect";
 

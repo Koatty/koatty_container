@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import * as helper from "koatty_lib";
 import { 
   recursiveGetMetadata,
   overridePrototypeValue,

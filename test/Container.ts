@@ -5,7 +5,7 @@
  * @ version: 2020-07-06 11:19:30
  */
 
-import { IOC } from "../src/container/Container";
+import { IOC } from "../src/container/container";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
 import { ClassC } from "./ClassC";

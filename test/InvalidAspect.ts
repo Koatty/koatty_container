@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { Aspect } from "../src/decorator/AOP";
+import { Aspect } from "../src/decorator/aop";
 
 // 无效的切面类：没有 "Aspect" 后缀
 export class InvalidName {

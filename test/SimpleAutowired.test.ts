@@ -1,7 +1,7 @@
-import { IOC } from "../src/container/Container";
+import { IOC } from "../src/container/container";
 import { Autowired } from "../src/decorator/Autowired";
 import { Component } from "../src/decorator/Component";
-import { TAGGED_PROP } from "../src/container/IContainer";
+import { TAGGED_PROP } from "../src/container/icontainer";
 
 @Component()
 class SimpleService {

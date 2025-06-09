@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { Before, After, Around, BeforeEach, AfterEach, AroundEach } from "../src/decorator/AOP";
+import { Before, After, Around, BeforeEach, AfterEach, AroundEach } from "../src/decorator/aop";
 import { TestAspect } from "./TestAspect";
 import { Test2Aspect } from "./Test2Aspect";
 import { Test3Aspect } from "./Test3Aspect";

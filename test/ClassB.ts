@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { BeforeEach } from "../src/decorator/AOP";
+import { BeforeEach } from "../src/decorator/aop";
 import { Inject } from "../src/decorator/Autowired";
 import { MyDependency2 } from "./MyDependency2";
 import { Test2Aspect } from "./Test2Aspect";
