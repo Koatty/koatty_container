@@ -13,10 +13,11 @@ import { ClassDecoratorManager } from './class';
 import { PropertyDecoratorManager } from './property';
 
 // Export types
-export type { MethodDecoratorManager, MethodWrapperFunction } from './method';
-export type { ClassDecoratorManager, ClassWrapperFunction } from './class';
-export type { PropertyDecoratorManager, PropertyWrapperFunction } from './property';
-export type { DecoratorMetadata } from './type';
+export { MethodDecoratorManager, MethodWrapperFunction } from './method';
+export { ClassDecoratorManager, ClassWrapperFunction } from './class';
+export { PropertyDecoratorManager } from './property';
+export { PropertyWrapperFunction } from './property';
+export { DecoratorMetadata } from './type';
 
 /**
  * Unified decorator manager that provides access to all decorator types
@@ -24,7 +25,7 @@ export type { DecoratorMetadata } from './type';
  */
 export class DecoratorManagerFacade {
   private static _instance: DecoratorManagerFacade;
-  
+
   // Lazy-loaded manager instances
   private _methodManager?: MethodDecoratorManager;
   private _classManager?: ClassDecoratorManager;
