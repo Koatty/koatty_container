@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github.com/koatty/koatty_container/compare/v1.14.2...v1.15.0) (2025-06-09)
+
+
+### Features
+
+* introduce Application interface and App class for container management ([855e8bf](https://github.com/koatty/koatty_container/commit/855e8bf028ab3edd1b2e1e1d92b444fd953f1741))
+
 ### [1.14.2](https://github.com/koatty/koatty_container/compare/v1.14.1...v1.14.2) (2025-06-09)
 
 ### [1.14.1](https://github.com/koatty/koatty_container/compare/v1.14.0...v1.14.1) (2025-06-09)
