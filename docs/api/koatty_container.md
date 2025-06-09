@@ -8,7 +8,11 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [ClassDecoratorManager](./koatty_container.classdecoratormanager.md) | Class decorator manager for preprocessing and performance optimization Integrated with koatty IOC container |
 |  [Container](./koatty_container.container.md) | <p>Container class implements IContainer interface for dependency injection. Manages class instances, metadata, and dependency injection in an IOC container. Uses singleton pattern to ensure only one container instance exists.</p><p>Thread Safety Considerations: Although JavaScript is single-threaded, race conditions can occur in async scenarios. This implementation uses async-safe singleton pattern with proper synchronization.</p><p>Features: - Thread-safe singleton instance management - Class and instance registration - Metadata management with intelligent caching - Dependency injection - Component lifecycle management - Property injection - AOP support - Circular dependency detection - High-performance metadata caching for real-world scenarios</p><p> Container  {<!-- -->IContainer<!-- -->}</p> |
+|  [DecoratorManagerFacade](./koatty_container.decoratormanagerfacade.md) | Unified decorator manager that provides access to all decorator types This is a convenient facade for accessing all decorator managers |
+|  [MethodDecoratorManager](./koatty_container.methoddecoratormanager.md) | Decorator manager for preprocessing and performance optimization Integrated with koatty IOC container |
+|  [PropertyDecoratorManager](./koatty_container.propertydecoratormanager.md) | <p>Property decorator manager for preprocessing and performance optimization Integrated with koatty IOC container</p><p>Note: When a property has a field initializer (e.g., <code>name: string = '';</code>), the field initializer takes precedence over decorator defaultValue. This is expected TypeScript/JavaScript behavior. To use decorator defaultValue, remove the field initializer or use constructor assignment.</p> |
 
 ## Enumerations
 
@@ -46,6 +50,7 @@
 |  [CircularDepDetector](./koatty_container.circulardepdetector.md) |  |
 |  [Constructor](./koatty_container.constructor.md) | Defined constructor interface |
 |  [Context](./koatty_container.context.md) | <p>Interface representing a context object with metadata management capabilities.</p><p> Context  Provides methods to get and set metadata within a context.</p> |
+|  [DecoratorMetadata](./koatty_container.decoratormetadata.md) | Decorator metadata interface |
 |  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
 |  [IContainer](./koatty_container.icontainer.md) | <p>Interface for IOC container implementation. Provides methods for dependency injection, metadata management, and component registration/retrieval.</p><p> IContainer</p> |
 |  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
@@ -54,6 +59,7 @@
 
 |  Variable | Description |
 |  --- | --- |
+|  [decoratorManager](./koatty_container.decoratormanager.md) |  |
 |  [ensureIOCReady](./koatty_container.ensureiocready.md) | Ensure IOC container is ready for use |
 |  [IOC](./koatty_container.ioc.md) | <p>Global IOC container instance with async-safe initialization. Singleton pattern implementation to ensure only one container instance exists. Handles async scenarios properly to prevent race conditions.</p><p>  {<!-- -->Container<!-- -->}</p> |
 |  [IOCContainer](./koatty_container.ioccontainer.md) | IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->} |
@@ -69,5 +75,8 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [ClassOrString](./koatty_container.classorstring.md) |  |
+|  [ClassWrapperFunction](./koatty_container.classwrapperfunction.md) | Simple class wrapper function type |
+|  [PropertyWrapperFunction](./koatty_container.propertywrapperfunction.md) | Property wrapper function type compatible with tests |
 |  [Scope](./koatty_container.scope.md) | @ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: BSD (3-Clause) @ version: 2020-07-06 11:19:30 |
+|  [WrapperFunction](./koatty_container.wrapperfunction.md) | Simple wrapper function type |
 
