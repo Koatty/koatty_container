@@ -27,15 +27,16 @@ import {
   overridePrototypeValue
 } from "../utils/MetadataOpertor";
 import {
-  Application,
   Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
 } from "./IContainer";
+
 
 // import circular dependency detector
 import { CircularDepDetector, CircularDepError } from "../utils/CircularDepDetector";
 import { MetadataCache, CacheType } from "../utils/MetadataCache";
 import { DefaultLogger as logger } from "koatty_logger";
+import { App, Application } from "./App";
 
 /**
  * Container class implements IContainer interface for dependency injection.
@@ -160,7 +161,7 @@ export class Container implements IContainer {
    * @private
    */
   private constructor() {
-    this.app = Object.create(null);
+    this.app = new App();
     this.classMap = new Map();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
@@ -1220,6 +1221,7 @@ export class Container implements IContainer {
    */
   public clear(): void {
     this.classMap.clear();
+    this.app = new App();
     this.instanceMap = new WeakMap();
     this.metadataMap = new WeakMap();
     this.circularDependencyDetector.clear();

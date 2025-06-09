@@ -4,6 +4,8 @@
  * @ license: BSD (3-Clause)
  * @ version: 2020-07-06 11:19:30
  */
+import { Application } from "./App";
+
 export type Scope = 'Singleton' | 'Prototype';
 
 // used to store class properties aop
@@ -67,58 +69,6 @@ export enum AOPType {
  */
 export interface Constructor<T> {
   new(...args: any[]): T;
-}
-
-/**
- * Application interface for the container.
- * Defines the basic structure and capabilities of an application.
- * 
- * @interface Application
- */
-export interface Application {
-  env?: string;
-  options?: object;
-
-  use?: Function;
-  config?: Function;
-
-  /**
-   * event
-   * @param event 
-   * @param callback 
-   */
-  on?: (event: string, callback: () => void) => any;
-  once?: (event: string, callback: () => void) => any;
-  /**
-  * app metadata
-  *
-  * @memberof Application
-  */
-  getMetaData: (key: string) => unknown;
-  setMetaData: (key: string, value: unknown) => void;
-}
-
-/**
- * Interface representing a context object with metadata management capabilities.
- * 
- * @interface Context
- * @description Provides methods to get and set metadata within a context.
- * @example
- * ```typescript
- * const ctx: Context = {
- *   getMetaData: (key) => someValue,
- *   setMetaData: (key, value) => void
- * };
- * ```
- */
-export interface Context {
-  /**
-  * context metadata
-  *
-  * @memberof Context
-  */
-  getMetaData: (key: string) => unknown;
-  setMetaData: (key: string, value: unknown) => void;
 }
 
 /**
