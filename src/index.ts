@@ -11,7 +11,7 @@ export * from "./decorator/Autowired";
 export * from "./decorator/Component";
 export * from "./decorator/Values";
 export * from "./utils/MetadataOpertor";
-
+export * from "./manager/index";
 // Export performance optimization and utility classes
 // export { MetadataCache } from "./utils/MetadataCache";
 // export { CircularDepDetector, CircularDepError } from "./utils/CircularDepDetector";
