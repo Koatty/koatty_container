@@ -1,6 +1,6 @@
 import assert from "assert";
-import { IOC } from "../src/container/Container";
-import { Autowired } from "../src/decorator/Autowired";
+import { IOC } from "../src/container/container";
+import { Autowired, Inject } from "../src/decorator/Autowired";
 import { Component } from "../src/decorator/Component";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
@@ -10,6 +10,7 @@ import { MyDependency2 } from "./MyDependency2";
 import { Test2Aspect } from "./Test2Aspect";
 import { Test3Aspect } from "./Test3Aspect";
 import { TestAspect } from "./TestAspect";
+import "reflect-metadata";
 
 describe("Autowired", () => {
   beforeEach(() => {
@@ -129,7 +130,6 @@ describe("Autowired", () => {
     assert.equal(ins.dep.run(), "MyDependency.run");
   });
 
-
   test("Autowired不同作用域实例", async () => {
     @Component()
     class ScopedService {
@@ -153,4 +153,13 @@ describe("Autowired", () => {
     assert.equal(ins3, ins4);
   });
 
-})
+  test("should throw error for Controller injection", () => {
+    expect(() => {
+      @Component()
+      class TestClass {
+        @Autowired("TestController", "CONTROLLER")
+        controller: any;
+      }
+    }).toThrow("Controller bean cannot be injection!");
+  });
+});
