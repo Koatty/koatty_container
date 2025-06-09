@@ -5,7 +5,7 @@
  * @ version: 2025-06-02 11:19:30
  */
 
-import { IOC } from "../container/Container";
+import { IOC } from "../container/container";
 
 
 /**

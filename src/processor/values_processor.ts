@@ -12,8 +12,8 @@ import { DefaultLogger as logger } from "koatty_logger";
 import {
   IContainer, ObjectDefinitionOptions,
   TAGGED_ARGS
-} from "../container/IContainer";
-import { recursiveGetMetadata } from "../utils/MetadataOpertor";
+} from "../container/icontainer";
+import { recursiveGetMetadata } from "../utils/opertor";
 
 /**
  * Inject values into the target class prototype chain.

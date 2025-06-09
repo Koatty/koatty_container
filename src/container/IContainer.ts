@@ -4,7 +4,7 @@
  * @ license: BSD (3-Clause)
  * @ version: 2020-07-06 11:19:30
  */
-import { Application } from "./App";
+import { Application } from "./app";
 
 export type Scope = 'Singleton' | 'Prototype';
 

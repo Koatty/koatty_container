@@ -7,36 +7,36 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
-import { injectAOP } from "../processor/AOP-processor";
+import { injectAOP } from "../processor/AOP_rocessor";
 import {
   injectAutowired,
   batchPreprocessDependencies,
   clearDependencyCache,
   optimizeDependencyCache,
   getAutowiredCacheStats
-} from "../processor/Autowired-processor";
+} from "../processor/autowired_processor";
 import {
   warmupAOPCache,
   clearAOPCache,
   optimizeAOPCache,
   getAOPCacheStats
-} from "../processor/AOP-processor";
-import { injectValues } from "../processor/Values-processor";
+} from "../processor/AOP_rocessor";
+import { injectValues } from "../processor/values_processor";
 import {
   getComponentTypeByClassName,
   overridePrototypeValue
-} from "../utils/MetadataOpertor";
+} from "../utils/opertor";
 import {
   Constructor, IContainer,
   ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
-} from "./IContainer";
+} from "./icontainer";
 
 
 // import circular dependency detector
-import { CircularDepDetector, CircularDepError } from "../utils/CircularDepDetector";
-import { MetadataCache, CacheType } from "../utils/MetadataCache";
+import { CircularDepDetector, CircularDepError } from "../utils/circular";
+import { MetadataCache, CacheType } from "../utils/cache";
 import { DefaultLogger as logger } from "koatty_logger";
-import { App, Application } from "./App";
+import { App, Application } from "./app";
 
 /**
  * Container class implements IContainer interface for dependency injection.

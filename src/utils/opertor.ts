@@ -5,7 +5,7 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-import { IContainer } from "../container/IContainer";
+import { IContainer } from "../container/icontainer";
 
 // get property of an object
 const functionPrototype = Object.getPrototypeOf(Function);

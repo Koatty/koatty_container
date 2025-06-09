@@ -6,8 +6,8 @@
  */
 
 import { Helper } from "koatty_lib";
-import { IOC } from "../container/Container";
-import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
+import { IOC } from "../container/container";
+import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
 
 // 全局计数器，确保装饰器声明顺序正确性
 let AOPOrderCounter = 0;

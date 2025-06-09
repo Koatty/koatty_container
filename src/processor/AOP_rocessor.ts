@@ -6,9 +6,9 @@
  */
 
 import { DefaultLogger as logger } from "koatty_logger";
-import { IOCContainer } from "../container/Container";
-import { IAspect, TAGGED_AOP, TAGGED_CLS } from "../container/IContainer";
-import { MetadataCache, CacheType } from "../utils/MetadataCache";
+import { IOCContainer } from "../container/container";
+import { IAspect, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
+import { MetadataCache, CacheType } from "../utils/cache";
 
 // Unified cache instance for all AOP operations
 const metadataCache = new MetadataCache({

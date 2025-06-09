@@ -5,8 +5,8 @@
  * @ version: 2020-07-06 11:19:30
  */
 import * as helper from "koatty_lib";
-import { IOC } from "../container/Container";
-import { TAGGED_ARGS } from "../container/IContainer";
+import { IOC } from "../container/container";
+import { TAGGED_ARGS } from "../container/icontainer";
 
 /**
  * Property decorator that assigns a value to a class property.

@@ -9,9 +9,9 @@
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { IContainer, ObjectDefinitionOptions, TAGGED_PROP } from "../container/IContainer";
-import { recursiveGetMetadata } from "../utils/MetadataOpertor";
-import { MetadataCache, CacheType } from "../utils/MetadataCache";
+import { IContainer, ObjectDefinitionOptions, TAGGED_PROP } from "../container/icontainer";
+import { recursiveGetMetadata } from "../utils/opertor";
+import { MetadataCache, CacheType } from "../utils/cache";
 
 /**
  * Interface for dependency preprocessing data

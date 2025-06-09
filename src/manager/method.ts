@@ -9,7 +9,7 @@
  */
 
 import { DefaultLogger as logger } from "koatty_logger";
-import { IOCContainer } from "../container/Container";
+import { IOCContainer } from "../container/container";
 import { DecoratorMetadata } from "./type";
 
 
