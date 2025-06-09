@@ -7,7 +7,7 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
-import { injectAOP } from "../processor/AOP_rocessor";
+import { injectAOP } from "../processor/aop_processor";
 import {
   injectAutowired,
   batchPreprocessDependencies,
@@ -20,7 +20,7 @@ import {
   clearAOPCache,
   optimizeAOPCache,
   getAOPCacheStats
-} from "../processor/AOP_rocessor";
+} from "../processor/aop_processor";
 import { injectValues } from "../processor/values_processor";
 import {
   getComponentTypeByClassName,

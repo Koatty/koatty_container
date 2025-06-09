@@ -6,7 +6,7 @@
  */
 export * from "./container/container";
 export * from "./container/icontainer";
-export * from "./decorator/AOP";
+export * from "./decorator/aop";
 export * from "./decorator/autowired";
 export * from "./decorator/component";
 export * from "./decorator/values";

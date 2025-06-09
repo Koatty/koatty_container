@@ -8,17 +8,14 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-// Import and export all decorator managers
 import { MethodDecoratorManager } from './method';
 import { ClassDecoratorManager } from './class';
 import { PropertyDecoratorManager } from './property';
 
-export { MethodDecoratorManager, ClassDecoratorManager, PropertyDecoratorManager };
-
 // Export types
-export type { WrapperFunction } from './method';
-export type { ClassWrapperFunction } from './class';
-export type { PropertyWrapperFunction } from './property';
+export type { MethodDecoratorManager, MethodWrapperFunction } from './method';
+export type { ClassDecoratorManager, ClassWrapperFunction } from './class';
+export type { PropertyDecoratorManager, PropertyWrapperFunction } from './property';
 export type { DecoratorMetadata } from './type';
 
 /**

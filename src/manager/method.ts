@@ -16,7 +16,7 @@ import { DecoratorMetadata } from "./type";
 /**
  * Simple wrapper function type
  */
-export type WrapperFunction = (
+export type MethodWrapperFunction = (
   originalMethod: Function,
   config: any,
   methodName: string,
@@ -45,7 +45,7 @@ export class MethodDecoratorManager {
   private wrapperCache = new Map<string, Function>();
 
   // Registry of wrapper functions by decorator type
-  private wrapperRegistry = new Map<string, WrapperFunction>();
+  private wrapperRegistry = new Map<string, MethodWrapperFunction>();
 
   // Symbols for marking decorated methods
   private static readonly DECORATED_SYMBOL = Symbol('koatty_method_decorated');
@@ -61,7 +61,7 @@ export class MethodDecoratorManager {
    * @param decoratorType - The decorator type (string)
    * @param wrapperFunction - The wrapper function
    */
-  public registerWrapper(decoratorType: string, wrapperFunction: WrapperFunction): void {
+  public registerWrapper(decoratorType: string, wrapperFunction: MethodWrapperFunction): void {
     this.wrapperRegistry.set(decoratorType, wrapperFunction);
     logger.Debug(`Registered wrapper for decorator type: ${decoratorType}`);
   }
