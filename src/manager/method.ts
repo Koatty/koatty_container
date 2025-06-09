@@ -10,6 +10,7 @@
 
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOCContainer } from "../container/Container";
+import { DecoratorMetadata } from "./type";
 
 
 /**
@@ -21,16 +22,6 @@ export type WrapperFunction = (
   methodName: string,
   target: unknown
 ) => Function;
-
-/**
- * Decorator metadata interface
- */
-export interface DecoratorMetadata {
-  type: string;
-  config: object;
-  applied: boolean;
-  priority: number;
-}
 
 /**
  * Method wrapper information

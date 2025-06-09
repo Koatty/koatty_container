@@ -19,7 +19,7 @@ export { MethodDecoratorManager, ClassDecoratorManager, PropertyDecoratorManager
 export type { WrapperFunction } from './method';
 export type { ClassWrapperFunction } from './class';
 export type { PropertyWrapperFunction } from './property';
-export type { DecoratorMetadata } from './method';
+export type { DecoratorMetadata } from './type';
 
 /**
  * Unified decorator manager that provides access to all decorator types

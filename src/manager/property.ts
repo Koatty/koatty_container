@@ -10,6 +10,7 @@
 
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOCContainer } from "../container/Container";
+import { DecoratorMetadata } from "./type";
 
 /**
  * Property wrapper function type compatible with tests
@@ -20,16 +21,6 @@ export type PropertyWrapperFunction = (
   propertyName: string,
   target: any
 ) => PropertyDescriptor;
-
-/**
- * Decorator metadata interface
- */
-export interface DecoratorMetadata {
-  type: string;
-  config: object;
-  applied: boolean;
-  priority: number;
-}
 
 /**
  * Property decorator metadata interface
