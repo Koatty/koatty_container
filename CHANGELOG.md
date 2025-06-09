@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github.com/koatty/koatty_container/compare/v1.13.0...v1.14.0) (2025-06-09)
+
+
+### Features
+
+* implement class, method and property decorator managers with IOC integration and caching support ([2110dac](https://github.com/koatty/koatty_container/commit/2110dacfb21f3705cc7338a9e8768a7fcd87efb6))
+
 ## [1.13.0](https://github.com/koatty/koatty_container/compare/v1.13.0-1...v1.13.0) (2025-06-07)
 
 
