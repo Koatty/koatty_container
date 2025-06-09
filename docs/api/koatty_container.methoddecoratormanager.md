@@ -14,22 +14,196 @@ export declare class MethodDecoratorManager
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)()](./koatty_container.methoddecoratormanager._constructor_.md) |  | Constructs a new instance of the <code>MethodDecoratorManager</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)()](./koatty_container.methoddecoratormanager._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `MethodDecoratorManager` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [clearCache()](./koatty_container.methoddecoratormanager.clearcache.md) |  | Clear all cached wrappers (useful for testing or hot reloading) |
-|  [getCacheStats()](./koatty_container.methoddecoratormanager.getcachestats.md) |  | Get cache statistics |
-|  [getDecoratorMetadata(method)](./koatty_container.methoddecoratormanager.getdecoratormetadata.md) |  | Get decorator metadata for a method |
-|  [getInstance()](./koatty_container.methoddecoratormanager.getinstance.md) | <code>static</code> | Get MethodDecoratorManager instance from IOC container  |
-|  [getRegisteredTypes()](./koatty_container.methoddecoratormanager.getregisteredtypes.md) |  | Get all registered wrapper types |
-|  [hasWrapper(decoratorType)](./koatty_container.methoddecoratormanager.haswrapper.md) |  | Check if a wrapper is registered for the given type |
-|  [isDecorated(method)](./koatty_container.methoddecoratormanager.isdecorated.md) |  | Check if a method is already decorated |
-|  [registerDecorator(target, propertyKey, decorator, originalDescriptor)](./koatty_container.methoddecoratormanager.registerdecorator.md) |  | Register a decorator for a method |
-|  [registerWrapper(decoratorType, wrapperFunction)](./koatty_container.methoddecoratormanager.registerwrapper.md) |  | Register a wrapper function for a decorator type |
-|  [unregisterWrapper(decoratorType)](./koatty_container.methoddecoratormanager.unregisterwrapper.md) |  | Unregister a wrapper function |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[clearCache()](./koatty_container.methoddecoratormanager.clearcache.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Clear all cached wrappers (useful for testing or hot reloading)
+
+
+</td></tr>
+<tr><td>
+
+[getCacheStats()](./koatty_container.methoddecoratormanager.getcachestats.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get cache statistics
+
+
+</td></tr>
+<tr><td>
+
+[getDecoratorMetadata(method)](./koatty_container.methoddecoratormanager.getdecoratormetadata.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get decorator metadata for a method
+
+
+</td></tr>
+<tr><td>
+
+[getInstance()](./koatty_container.methoddecoratormanager.getinstance.md)
+
+
+</td><td>
+
+`static`
+
+
+</td><td>
+
+Get MethodDecoratorManager instance from IOC container 
+
+
+</td></tr>
+<tr><td>
+
+[getRegisteredTypes()](./koatty_container.methoddecoratormanager.getregisteredtypes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all registered wrapper types
+
+
+</td></tr>
+<tr><td>
+
+[hasWrapper(decoratorType)](./koatty_container.methoddecoratormanager.haswrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a wrapper is registered for the given type
+
+
+</td></tr>
+<tr><td>
+
+[isDecorated(method)](./koatty_container.methoddecoratormanager.isdecorated.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a method is already decorated
+
+
+</td></tr>
+<tr><td>
+
+[registerDecorator(target, propertyKey, decorator, originalDescriptor)](./koatty_container.methoddecoratormanager.registerdecorator.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a decorator for a method
+
+
+</td></tr>
+<tr><td>
+
+[registerWrapper(decoratorType, wrapperFunction)](./koatty_container.methoddecoratormanager.registerwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a wrapper function for a decorator type
+
+
+</td></tr>
+<tr><td>
+
+[unregisterWrapper(decoratorType)](./koatty_container.methoddecoratormanager.unregisterwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Unregister a wrapper function
+
+
+</td></tr>
+</tbody></table>

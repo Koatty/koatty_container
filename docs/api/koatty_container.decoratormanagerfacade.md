@@ -14,19 +14,180 @@ export declare class DecoratorManagerFacade
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [class](./koatty_container.decoratormanagerfacade.class.md) | <code>readonly</code> | [ClassDecoratorManager](./koatty_container.classdecoratormanager.md) | Get class decorator manager instance |
-|  [method](./koatty_container.decoratormanagerfacade.method.md) | <code>readonly</code> | [MethodDecoratorManager](./koatty_container.methoddecoratormanager.md) | Get method decorator manager instance |
-|  [property](./koatty_container.decoratormanagerfacade.property.md) | <code>readonly</code> | [PropertyDecoratorManager](./koatty_container.propertydecoratormanager.md) | Get property decorator manager instance |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[class](./koatty_container.decoratormanagerfacade.class.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+[ClassDecoratorManager](./koatty_container.classdecoratormanager.md)
+
+
+</td><td>
+
+Get class decorator manager instance
+
+
+</td></tr>
+<tr><td>
+
+[method](./koatty_container.decoratormanagerfacade.method.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+[MethodDecoratorManager](./koatty_container.methoddecoratormanager.md)
+
+
+</td><td>
+
+Get method decorator manager instance
+
+
+</td></tr>
+<tr><td>
+
+[property](./koatty_container.decoratormanagerfacade.property.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+[PropertyDecoratorManager](./koatty_container.propertydecoratormanager.md)
+
+
+</td><td>
+
+Get property decorator manager instance
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [clearAllCaches()](./koatty_container.decoratormanagerfacade.clearallcaches.md) |  | Clear all caches across all managers |
-|  [getAllRegisteredTypes()](./koatty_container.decoratormanagerfacade.getallregisteredtypes.md) |  | Get all registered wrapper types across all managers |
-|  [getAllStats()](./koatty_container.decoratormanagerfacade.getallstats.md) |  | Get comprehensive statistics from all managers |
-|  [getInstance()](./koatty_container.decoratormanagerfacade.getinstance.md) | <code>static</code> | Get singleton instance |
-|  [hasAnyWrapper(decoratorType)](./koatty_container.decoratormanagerfacade.hasanywrapper.md) |  | Check if any wrapper is registered for the given decorator type across all managers |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[clearAllCaches()](./koatty_container.decoratormanagerfacade.clearallcaches.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Clear all caches across all managers
+
+
+</td></tr>
+<tr><td>
+
+[getAllRegisteredTypes()](./koatty_container.decoratormanagerfacade.getallregisteredtypes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all registered wrapper types across all managers
+
+
+</td></tr>
+<tr><td>
+
+[getAllStats()](./koatty_container.decoratormanagerfacade.getallstats.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get comprehensive statistics from all managers
+
+
+</td></tr>
+<tr><td>
+
+[getInstance()](./koatty_container.decoratormanagerfacade.getinstance.md)
+
+
+</td><td>
+
+`static`
+
+
+</td><td>
+
+Get singleton instance
+
+
+</td></tr>
+<tr><td>
+
+[hasAnyWrapper(decoratorType)](./koatty_container.decoratormanagerfacade.hasanywrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if any wrapper is registered for the given decorator type across all managers
+
+
+</td></tr>
+</tbody></table>

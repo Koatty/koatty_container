@@ -14,11 +14,55 @@ export declare function Component(identifier?: string, type?: string): ClassDeco
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string | _(Optional)_ Optional identifier for the component. If not provided, will use the class name. |
-|  type | string | _(Optional)_ |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional identifier for the component. If not provided, will use the class name.
+
+
+</td></tr>
+<tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 ClassDecorator

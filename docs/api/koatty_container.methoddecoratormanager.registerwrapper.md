@@ -9,16 +9,60 @@ Register a wrapper function for a decorator type
 **Signature:**
 
 ```typescript
-registerWrapper(decoratorType: string, wrapperFunction: WrapperFunction): void;
+registerWrapper(decoratorType: string, wrapperFunction: MethodWrapperFunction): void;
 ```
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorType | string | The decorator type (string) |
-|  wrapperFunction | [WrapperFunction](./koatty_container.wrapperfunction.md) | The wrapper function |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorType
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The decorator type (string)
+
+
+</td></tr>
+<tr><td>
+
+wrapperFunction
+
+
+</td><td>
+
+[MethodWrapperFunction](./koatty_container.methodwrapperfunction.md)
+
+
+</td><td>
+
+The wrapper function
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

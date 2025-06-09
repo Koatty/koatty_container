@@ -19,11 +19,55 @@ preloadMetadata(types?: string[], options?: {
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  types | string\[\] | _(Optional)_ 组件类型数组，如果为空则处理所有类型 |
-|  options | { optimizePerformance?: boolean; warmupCaches?: boolean; batchPreProcessDependencies?: boolean; clearStaleCache?: boolean; } | _(Optional)_ 预加载选项，默认开启所有优化 |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+types
+
+
+</td><td>
+
+string\[\]
+
+
+</td><td>
+
+_(Optional)_ 组件类型数组，如果为空则处理所有类型
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+{ optimizePerformance?: boolean; warmupCaches?: boolean; batchPreProcessDependencies?: boolean; clearStaleCache?: boolean; }
+
+
+</td><td>
+
+_(Optional)_ 预加载选项，默认开启所有优化
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

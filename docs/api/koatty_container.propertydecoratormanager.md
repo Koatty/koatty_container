@@ -16,25 +16,238 @@ export declare class PropertyDecoratorManager
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)()](./koatty_container.propertydecoratormanager._constructor_.md) |  | Constructs a new instance of the <code>PropertyDecoratorManager</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)()](./koatty_container.propertydecoratormanager._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `PropertyDecoratorManager` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [clearCache()](./koatty_container.propertydecoratormanager.clearcache.md) |  | Clear all cached wrappers (useful for testing) |
-|  [getCacheStats()](./koatty_container.propertydecoratormanager.getcachestats.md) |  | Get cache statistics |
-|  [getDecoratedProperties()](./koatty_container.propertydecoratormanager.getdecoratedproperties.md) |  | Get all decorated properties |
-|  [getDecoratorMetadata(target, propertyKey)](./koatty_container.propertydecoratormanager.getdecoratormetadata.md) |  | Get decorator metadata for a property |
-|  [getInstance()](./koatty_container.propertydecoratormanager.getinstance.md) | <code>static</code> | Get PropertyDecoratorManager instance from IOC container  |
-|  [getPropertyWrapper(target, propertyKey)](./koatty_container.propertydecoratormanager.getpropertywrapper.md) |  | Get property wrapper information |
-|  [getRegisteredTypes()](./koatty_container.propertydecoratormanager.getregisteredtypes.md) |  | Get all registered wrapper types |
-|  [hasWrapper(decoratorType)](./koatty_container.propertydecoratormanager.haswrapper.md) |  | Check if a wrapper is registered for the given type |
-|  [isDecorated(target, propertyKey)](./koatty_container.propertydecoratormanager.isdecorated.md) |  | Check if a property is decorated |
-|  [registerDecorator(target, propertyKey, metadata, originalDescriptor)](./koatty_container.propertydecoratormanager.registerdecorator.md) |  | Register a decorator for a property |
-|  [registerWrapper(decoratorType, wrapperFunction)](./koatty_container.propertydecoratormanager.registerwrapper.md) |  | Register a wrapper function for a decorator type |
-|  [removePropertyWrapper(target, propertyKey)](./koatty_container.propertydecoratormanager.removepropertywrapper.md) |  | Remove a property wrapper |
-|  [unregisterWrapper(decoratorType)](./koatty_container.propertydecoratormanager.unregisterwrapper.md) |  | Unregister a wrapper function |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[clearCache()](./koatty_container.propertydecoratormanager.clearcache.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Clear all cached wrappers (useful for testing)
+
+
+</td></tr>
+<tr><td>
+
+[getCacheStats()](./koatty_container.propertydecoratormanager.getcachestats.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get cache statistics
+
+
+</td></tr>
+<tr><td>
+
+[getDecoratedProperties()](./koatty_container.propertydecoratormanager.getdecoratedproperties.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all decorated properties
+
+
+</td></tr>
+<tr><td>
+
+[getDecoratorMetadata(target, propertyKey)](./koatty_container.propertydecoratormanager.getdecoratormetadata.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get decorator metadata for a property
+
+
+</td></tr>
+<tr><td>
+
+[getInstance()](./koatty_container.propertydecoratormanager.getinstance.md)
+
+
+</td><td>
+
+`static`
+
+
+</td><td>
+
+Get PropertyDecoratorManager instance from IOC container 
+
+
+</td></tr>
+<tr><td>
+
+[getPropertyWrapper(target, propertyKey)](./koatty_container.propertydecoratormanager.getpropertywrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get property wrapper information
+
+
+</td></tr>
+<tr><td>
+
+[getRegisteredTypes()](./koatty_container.propertydecoratormanager.getregisteredtypes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all registered wrapper types
+
+
+</td></tr>
+<tr><td>
+
+[hasWrapper(decoratorType)](./koatty_container.propertydecoratormanager.haswrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a wrapper is registered for the given type
+
+
+</td></tr>
+<tr><td>
+
+[isDecorated(target, propertyKey)](./koatty_container.propertydecoratormanager.isdecorated.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a property is decorated
+
+
+</td></tr>
+<tr><td>
+
+[registerDecorator(target, propertyKey, metadata, originalDescriptor)](./koatty_container.propertydecoratormanager.registerdecorator.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a decorator for a property
+
+
+</td></tr>
+<tr><td>
+
+[registerWrapper(decoratorType, wrapperFunction)](./koatty_container.propertydecoratormanager.registerwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a wrapper function for a decorator type
+
+
+</td></tr>
+<tr><td>
+
+[removePropertyWrapper(target, propertyKey)](./koatty_container.propertydecoratormanager.removepropertywrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Remove a property wrapper
+
+
+</td></tr>
+<tr><td>
+
+[unregisterWrapper(decoratorType)](./koatty_container.propertydecoratormanager.unregisterwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Unregister a wrapper function
+
+
+</td></tr>
+</tbody></table>

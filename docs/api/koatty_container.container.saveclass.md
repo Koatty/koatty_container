@@ -14,12 +14,71 @@ saveClass(type: string, module: Function, identifier: string): void;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  type | string | The component type |
-|  module | Function | The class module to be saved |
-|  identifier | string | The unique identifier for the class |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The component type
+
+
+</td></tr>
+<tr><td>
+
+module
+
+
+</td><td>
+
+Function
+
+
+</td><td>
+
+The class module to be saved
+
+
+</td></tr>
+<tr><td>
+
+identifier
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The unique identifier for the class
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

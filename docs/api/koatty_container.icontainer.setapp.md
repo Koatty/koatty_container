@@ -14,10 +14,39 @@ setApp(app: Application): void;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  app | [Application](./koatty_container.application.md) | Application instance |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+app
+
+
+</td><td>
+
+Application
+
+
+</td><td>
+
+Application instance
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

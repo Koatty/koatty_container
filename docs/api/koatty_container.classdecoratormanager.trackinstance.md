@@ -14,11 +14,55 @@ trackInstance(instance: any, constructor: Function): void;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  instance | any | Instance to track |
-|  constructor | Function | Constructor used to create the instance |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+instance
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+Instance to track
+
+
+</td></tr>
+<tr><td>
+
+constructor
+
+
+</td><td>
+
+Function
+
+
+</td><td>
+
+Constructor used to create the instance
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

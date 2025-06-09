@@ -14,12 +14,71 @@ get<T>(identifier: string | Constructor<T>, type?: string, ...args: any[]): T;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string \| [Constructor](./koatty_container.constructor.md)<!-- -->&lt;T&gt; | Class constructor or class name string |
-|  type | string | _(Optional)_ Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE) |
-|  args | any\[\] | Constructor arguments |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string \| [Constructor](./koatty_container.constructor.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+Class constructor or class name string
+
+
+</td></tr>
+<tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Component type (COMPONENT/CONTROLLER/MIDDLEWARE/SERVICE)
+
+
+</td></tr>
+<tr><td>
+
+args
+
+
+</td><td>
+
+any\[\]
+
+
+</td><td>
+
+Constructor arguments
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 T

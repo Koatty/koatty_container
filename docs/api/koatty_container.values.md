@@ -14,11 +14,55 @@ export declare function Values(value: unknown | Function, defaultValue?: unknown
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  value | unknown \| Function | The value to assign or a function that returns the value |
-|  defaultValue | unknown | _(Optional)_ Optional default value if the main value is empty |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+value
+
+
+</td><td>
+
+unknown \| Function
+
+
+</td><td>
+
+The value to assign or a function that returns the value
+
+
+</td></tr>
+<tr><td>
+
+defaultValue
+
+
+</td><td>
+
+unknown
+
+
+</td><td>
+
+_(Optional)_ Optional default value if the main value is empty
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 PropertyDecorator

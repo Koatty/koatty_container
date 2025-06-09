@@ -14,24 +14,224 @@ export declare class ClassDecoratorManager
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)()](./koatty_container.classdecoratormanager._constructor_.md) |  | Constructs a new instance of the <code>ClassDecoratorManager</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)()](./koatty_container.classdecoratormanager._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `ClassDecoratorManager` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [clearCache()](./koatty_container.classdecoratormanager.clearcache.md) |  | Clear all cached wrappers (useful for testing or hot reloading) |
-|  [getCacheStats()](./koatty_container.classdecoratormanager.getcachestats.md) |  | Get cache statistics |
-|  [getDecoratedClasses()](./koatty_container.classdecoratormanager.getdecoratedclasses.md) |  | Get all decorated classes |
-|  [getDecoratorMetadata(target)](./koatty_container.classdecoratormanager.getdecoratormetadata.md) |  | Get decorator metadata for a class |
-|  [getInstance()](./koatty_container.classdecoratormanager.getinstance.md) | <code>static</code> | Get ClassDecoratorManager instance from IOC container  |
-|  [getRegisteredTypes()](./koatty_container.classdecoratormanager.getregisteredtypes.md) |  | Get all registered wrapper types |
-|  [hasWrapper(decoratorType)](./koatty_container.classdecoratormanager.haswrapper.md) |  | Check if a wrapper is registered for the given type |
-|  [isDecorated(target)](./koatty_container.classdecoratormanager.isdecorated.md) |  | Check if a class is already decorated |
-|  [registerDecorator(target, decorator)](./koatty_container.classdecoratormanager.registerdecorator.md) |  | Register a decorator for a class |
-|  [registerWrapper(decoratorType, wrapperFunction)](./koatty_container.classdecoratormanager.registerwrapper.md) |  | Register a wrapper function for a decorator type |
-|  [trackInstance(instance, constructor)](./koatty_container.classdecoratormanager.trackinstance.md) |  | Track instance creation for cleanup purposes |
-|  [unregisterWrapper(decoratorType)](./koatty_container.classdecoratormanager.unregisterwrapper.md) |  | Unregister a wrapper function |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[clearCache()](./koatty_container.classdecoratormanager.clearcache.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Clear all cached wrappers (useful for testing or hot reloading)
+
+
+</td></tr>
+<tr><td>
+
+[getCacheStats()](./koatty_container.classdecoratormanager.getcachestats.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get cache statistics
+
+
+</td></tr>
+<tr><td>
+
+[getDecoratedClasses()](./koatty_container.classdecoratormanager.getdecoratedclasses.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all decorated classes
+
+
+</td></tr>
+<tr><td>
+
+[getDecoratorMetadata(target)](./koatty_container.classdecoratormanager.getdecoratormetadata.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get decorator metadata for a class
+
+
+</td></tr>
+<tr><td>
+
+[getInstance()](./koatty_container.classdecoratormanager.getinstance.md)
+
+
+</td><td>
+
+`static`
+
+
+</td><td>
+
+Get ClassDecoratorManager instance from IOC container 
+
+
+</td></tr>
+<tr><td>
+
+[getRegisteredTypes()](./koatty_container.classdecoratormanager.getregisteredtypes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Get all registered wrapper types
+
+
+</td></tr>
+<tr><td>
+
+[hasWrapper(decoratorType)](./koatty_container.classdecoratormanager.haswrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a wrapper is registered for the given type
+
+
+</td></tr>
+<tr><td>
+
+[isDecorated(target)](./koatty_container.classdecoratormanager.isdecorated.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Check if a class is already decorated
+
+
+</td></tr>
+<tr><td>
+
+[registerDecorator(target, decorator)](./koatty_container.classdecoratormanager.registerdecorator.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a decorator for a class
+
+
+</td></tr>
+<tr><td>
+
+[registerWrapper(decoratorType, wrapperFunction)](./koatty_container.classdecoratormanager.registerwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Register a wrapper function for a decorator type
+
+
+</td></tr>
+<tr><td>
+
+[trackInstance(instance, constructor)](./koatty_container.classdecoratormanager.trackinstance.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Track instance creation for cleanup purposes
+
+
+</td></tr>
+<tr><td>
+
+[unregisterWrapper(decoratorType)](./koatty_container.classdecoratormanager.unregisterwrapper.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Unregister a wrapper function
+
+
+</td></tr>
+</tbody></table>

@@ -14,10 +14,39 @@ export declare function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorat
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The name of the AOP class or string identifier |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+paramName
+
+
+</td><td>
+
+[ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+The name of the AOP class or string identifier
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 ClassDecorator

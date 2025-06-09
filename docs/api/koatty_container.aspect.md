@@ -14,10 +14,39 @@ export declare function Aspect(identifier?: string): ClassDecorator;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string | _(Optional)_ Optional custom identifier for the Aspect class |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional custom identifier for the Aspect class
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 ClassDecorator

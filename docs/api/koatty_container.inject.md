@@ -14,11 +14,55 @@ export declare function Inject<T>(paramName?: ClassOrString<T>, cType?: string):
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ Optional class or string identifier for the dependency |
-|  cType | string | _(Optional)_ Optional component type for the dependency |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+paramName
+
+
+</td><td>
+
+[ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+_(Optional)_ Optional class or string identifier for the dependency
+
+
+</td></tr>
+<tr><td>
+
+cType
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional component type for the dependency
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 ParameterDecorator

@@ -16,12 +16,104 @@ export declare enum AOPType
 
 ## Enumeration Members
 
-|  Member | Value | Description |
-|  --- | --- | --- |
-|  After | <code>&quot;After&quot;</code> |  |
-|  AfterEach | <code>&quot;AfterEach&quot;</code> |  |
-|  Around | <code>&quot;Around&quot;</code> |  |
-|  AroundEach | <code>&quot;AroundEach&quot;</code> |  |
-|  Before | <code>&quot;Before&quot;</code> |  |
-|  BeforeEach | <code>&quot;BeforeEach&quot;</code> |  |
+<table><thead><tr><th>
 
+Member
+
+
+</th><th>
+
+Value
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+After
+
+
+</td><td>
+
+`"After"`
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+AfterEach
+
+
+</td><td>
+
+`"AfterEach"`
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+Around
+
+
+</td><td>
+
+`"Around"`
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+AroundEach
+
+
+</td><td>
+
+`"AroundEach"`
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+Before
+
+
+</td><td>
+
+`"Before"`
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+BeforeEach
+
+
+</td><td>
+
+`"BeforeEach"`
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>

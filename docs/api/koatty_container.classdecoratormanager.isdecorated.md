@@ -14,10 +14,39 @@ isDecorated(target: Function): boolean;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | Function | Class to check |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+Function
+
+
+</td><td>
+
+Class to check
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 boolean

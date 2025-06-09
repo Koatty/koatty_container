@@ -14,12 +14,71 @@ export declare function getOriginMetadata(metadataKey: string | symbol, target: 
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  metadataKey | string \| symbol | The key to get metadata |
-|  target | any | The target object or class |
-|  propertyKey | string \| symbol | _(Optional)_ Optional property key for property or method metadata |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+metadataKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The key to get metadata
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The target object or class
+
+
+</td></tr>
+<tr><td>
+
+propertyKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+_(Optional)_ Optional property key for property or method metadata
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any

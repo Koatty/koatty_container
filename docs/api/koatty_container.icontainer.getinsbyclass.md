@@ -14,11 +14,55 @@ getInsByClass<T extends object | Function>(target: T, args?: any[]): T;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | T | The class constructor |
-|  args | any\[\] | _(Optional)_ Constructor parameters |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+The class constructor
+
+
+</td></tr>
+<tr><td>
+
+args
+
+
+</td><td>
+
+any\[\]
+
+
+</td><td>
+
+_(Optional)_ Constructor parameters
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 T

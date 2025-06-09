@@ -4,8 +4,6 @@
 
 ## Scope type
 
-@ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: BSD (3-Clause) @ version: 2020-07-06 11:19:30
-
 **Signature:**
 
 ```typescript

@@ -21,11 +21,55 @@ batchRegister(components: {
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  components | { target: Function; identifier?: string; options?: [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)<!-- -->; }\[\] | The components to register |
-|  batchOptions | { preProcessDependencies?: boolean; warmupAOP?: boolean; } | _(Optional)_ The batch options |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+components
+
+
+</td><td>
+
+{ target: Function; identifier?: string; options?: [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)<!-- -->; }\[\]
+
+
+</td><td>
+
+The components to register
+
+
+</td></tr>
+<tr><td>
+
+batchOptions
+
+
+</td><td>
+
+{ preProcessDependencies?: boolean; warmupAOP?: boolean; }
+
+
+</td><td>
+
+_(Optional)_ The batch options
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

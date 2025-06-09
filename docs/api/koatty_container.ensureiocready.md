@@ -2,7 +2,7 @@
 
 [Home](./index.md) &gt; [koatty\_container](./koatty_container.md) &gt; [ensureIOCReady](./koatty_container.ensureiocready.md)
 
-## ensureIOCReady variable
+## ensureIOCReady() function
 
 Ensure IOC container is ready for use
 
@@ -11,3 +11,9 @@ Ensure IOC container is ready for use
 ```typescript
 ensureIOCReady: () => Promise<IContainer>
 ```
+**Returns:**
+
+Promise&lt;[IContainer](./koatty_container.icontainer.md)<!-- -->&gt;
+
+{<!-- -->Promise<IContainer>} Promise that resolves when container is ready
+

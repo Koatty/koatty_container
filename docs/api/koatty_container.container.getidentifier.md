@@ -14,10 +14,39 @@ getIdentifier(target: Function | object): string;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | Function \| object | The target class constructor function or object instance |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class constructor function or object instance
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 string

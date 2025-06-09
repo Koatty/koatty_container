@@ -14,13 +14,87 @@ savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function 
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorNameKey | string \| symbol | The key of the decorator metadata |
-|  data | any | The metadata to be saved |
-|  target | Function \| object | The target class or object |
-|  propertyName | string \| symbol | The name of the property |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The key of the decorator metadata
+
+
+</td></tr>
+<tr><td>
+
+data
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The metadata to be saved
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+<tr><td>
+
+propertyName
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The name of the property
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

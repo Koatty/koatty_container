@@ -14,11 +14,55 @@ registerWrapper(decoratorType: string, wrapperFunction: PropertyWrapperFunction)
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorType | string | The decorator type (string) |
-|  wrapperFunction | [PropertyWrapperFunction](./koatty_container.propertywrapperfunction.md) | The wrapper function |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorType
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The decorator type (string)
+
+
+</td></tr>
+<tr><td>
+
+wrapperFunction
+
+
+</td><td>
+
+[PropertyWrapperFunction](./koatty_container.propertywrapperfunction.md)
+
+
+</td><td>
+
+The wrapper function
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

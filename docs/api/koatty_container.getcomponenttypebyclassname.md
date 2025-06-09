@@ -14,10 +14,39 @@ export declare function getComponentTypeByClassName(identifier: string): "COMPON
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string | The class name string to check |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The class name string to check
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 "COMPONENT" \| "CONTROLLER" \| "MIDDLEWARE" \| "SERVICE"

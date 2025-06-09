@@ -14,10 +14,39 @@ unregisterWrapper(decoratorType: string): boolean;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorType | string | The decorator type to unregister |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorType
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The decorator type to unregister
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 boolean

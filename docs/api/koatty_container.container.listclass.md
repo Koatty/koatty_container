@@ -17,10 +17,39 @@ listClass(type?: string): {
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  type | string | _(Optional)_ The component type to filter |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ The component type to filter
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 { id: string; target: Function; }\[\]

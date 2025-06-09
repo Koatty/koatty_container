@@ -12,18 +12,123 @@ export interface CircularDepDetector
 
 ## Methods
 
-|  Method | Description |
-|  --- | --- |
-|  [addDependency(from, to)](./koatty_container.circulardepdetector.adddependency.md) |  |
-|  [clear()](./koatty_container.circulardepdetector.clear.md) |  |
-|  [detectCircularDependency(identifier)](./koatty_container.circulardepdetector.detectcirculardependency.md) |  |
-|  [finishResolving(identifier)](./koatty_container.circulardepdetector.finishresolving.md) |  |
-|  [generateDependencyReport()](./koatty_container.circulardepdetector.generatedependencyreport.md) |  |
-|  [getAllCircularDependencies()](./koatty_container.circulardepdetector.getallcirculardependencies.md) |  |
-|  [getDependencyGraphVisualization()](./koatty_container.circulardepdetector.getdependencygraphvisualization.md) |  |
-|  [getResolutionSuggestions(circularPath)](./koatty_container.circulardepdetector.getresolutionsuggestions.md) |  |
-|  [getTransitiveDependencies(identifier)](./koatty_container.circulardepdetector.gettransitivedependencies.md) |  |
-|  [hasCircularDependencies()](./koatty_container.circulardepdetector.hascirculardependencies.md) |  |
-|  [registerComponent(identifier, className, dependencies)](./koatty_container.circulardepdetector.registercomponent.md) |  |
-|  [startResolving(identifier)](./koatty_container.circulardepdetector.startresolving.md) |  |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[addDependency(from, to)](./koatty_container.circulardepdetector.adddependency.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[clear()](./koatty_container.circulardepdetector.clear.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[detectCircularDependency(identifier)](./koatty_container.circulardepdetector.detectcirculardependency.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[finishResolving(identifier)](./koatty_container.circulardepdetector.finishresolving.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[generateDependencyReport()](./koatty_container.circulardepdetector.generatedependencyreport.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[getAllCircularDependencies()](./koatty_container.circulardepdetector.getallcirculardependencies.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[getDependencyGraphVisualization()](./koatty_container.circulardepdetector.getdependencygraphvisualization.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[getResolutionSuggestions(circularPath)](./koatty_container.circulardepdetector.getresolutionsuggestions.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[getTransitiveDependencies(identifier)](./koatty_container.circulardepdetector.gettransitivedependencies.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[hasCircularDependencies()](./koatty_container.circulardepdetector.hascirculardependencies.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[registerComponent(identifier, className, dependencies)](./koatty_container.circulardepdetector.registercomponent.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[startResolving(identifier)](./koatty_container.circulardepdetector.startresolving.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>

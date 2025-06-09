@@ -14,12 +14,71 @@ reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefi
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string \| T | The identifier string or class/instance to register |
-|  target | T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ Optional target class/instance or options |
-|  options | [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | _(Optional)_ Optional configuration for the registration |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string \| T
+
+
+</td><td>
+
+The identifier string or class/instance to register
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+T \| [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)
+
+
+</td><td>
+
+_(Optional)_ Optional target class/instance or options
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+[ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the registration
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

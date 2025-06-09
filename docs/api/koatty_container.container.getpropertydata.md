@@ -14,12 +14,71 @@ getPropertyData(decoratorNameKey: string | symbol, target: Function | object, pr
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorNameKey | string \| symbol | The decorator name key |
-|  target | Function \| object | The target class or object |
-|  propertyName | string \| symbol | The property name |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The decorator name key
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+<tr><td>
+
+propertyName
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The property name
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any

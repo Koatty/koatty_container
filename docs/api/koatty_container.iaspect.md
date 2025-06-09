@@ -16,8 +16,59 @@ export interface IAspect
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [app](./koatty_container.iaspect.app.md) |  | [Application](./koatty_container.application.md) |  |
-|  [run](./koatty_container.iaspect.run.md) |  | (args: any\[\], proceed?: Function) =&gt; Promise&lt;any&gt; |  |
+<table><thead><tr><th>
 
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[app](./koatty_container.iaspect.app.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Application
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[run](./koatty_container.iaspect.run.md)
+
+
+</td><td>
+
+
+</td><td>
+
+(args: any\[\], proceed?: Function) =&gt; Promise&lt;any&gt;
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>

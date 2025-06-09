@@ -14,11 +14,55 @@ registerDecorator(target: Function, decorator: DecoratorMetadata): Function;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | Function | Target class constructor |
-|  decorator | [DecoratorMetadata](./koatty_container.decoratormetadata.md) | Decorator metadata |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+Function
+
+
+</td><td>
+
+Target class constructor
+
+
+</td></tr>
+<tr><td>
+
+decorator
+
+
+</td><td>
+
+[DecoratorMetadata](./koatty_container.decoratormetadata_2.md)
+
+
+</td><td>
+
+Decorator metadata
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 Function

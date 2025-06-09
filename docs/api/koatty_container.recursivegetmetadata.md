@@ -14,13 +14,87 @@ export declare function recursiveGetMetadata(container: IContainer, metadataKey:
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  container | [IContainer](./koatty_container.icontainer.md) | The dependency injection container instance |
-|  metadataKey | any | The key to retrieve metadata for |
-|  target | any | The target object to get metadata from |
-|  \_propertyKey | string \| symbol | _(Optional)_ Optional property key |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+container
+
+
+</td><td>
+
+[IContainer](./koatty_container.icontainer.md)
+
+
+</td><td>
+
+The dependency injection container instance
+
+
+</td></tr>
+<tr><td>
+
+metadataKey
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The key to retrieve metadata for
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The target object to get metadata from
+
+
+</td></tr>
+<tr><td>
+
+\_propertyKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+_(Optional)_ Optional property key
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any\[\]

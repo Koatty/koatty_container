@@ -14,11 +14,55 @@ getPropertyWrapper(target: unknown, propertyKey: string): PropertyWrapper | null
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | unknown | Target object |
-|  propertyKey | string | Property name |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+unknown
+
+
+</td><td>
+
+Target object
+
+
+</td></tr>
+<tr><td>
+
+propertyKey
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Property name
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 PropertyWrapper \| null

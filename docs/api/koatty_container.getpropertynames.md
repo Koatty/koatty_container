@@ -14,11 +14,55 @@ export declare function getPropertyNames(target: any, isSelfProperties?: boolean
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | any | The target object to get properties from |
-|  isSelfProperties | boolean | _(Optional)_ If true, only returns own properties. If false, includes prototype chain properties |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The target object to get properties from
+
+
+</td></tr>
+<tr><td>
+
+isSelfProperties
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ If true, only returns own properties. If false, includes prototype chain properties
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 string\[\]

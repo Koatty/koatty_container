@@ -14,13 +14,87 @@ export declare function Autowired<T>(paramName?: ClassOrString<T>, cType?: strin
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | _(Optional)_ The class or string identifier for the dependency |
-|  cType | string | _(Optional)_ The component type of the dependency |
-|  constructArgs | any\[\] | _(Optional)_ Constructor arguments for the dependency instance |
-|  isDelay | boolean | _(Optional)_ Whether to delay the injection (default: false) |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+paramName
+
+
+</td><td>
+
+[ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+_(Optional)_ The class or string identifier for the dependency
+
+
+</td></tr>
+<tr><td>
+
+cType
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ The component type of the dependency
+
+
+</td></tr>
+<tr><td>
+
+constructArgs
+
+
+</td><td>
+
+any\[\]
+
+
+</td><td>
+
+_(Optional)_ Constructor arguments for the dependency instance
+
+
+</td></tr>
+<tr><td>
+
+isDelay
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Whether to delay the injection (default: false)
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 PropertyDecorator

@@ -14,13 +14,87 @@ registerDecorator(target: unknown, propertyKey: string, decorator: DecoratorMeta
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | unknown | Target object |
-|  propertyKey | string | Method name |
-|  decorator | [DecoratorMetadata](./koatty_container.decoratormetadata.md) | Decorator metadata |
-|  originalDescriptor | PropertyDescriptor | Original property descriptor |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+unknown
+
+
+</td><td>
+
+Target object
+
+
+</td></tr>
+<tr><td>
+
+propertyKey
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Method name
+
+
+</td></tr>
+<tr><td>
+
+decorator
+
+
+</td><td>
+
+[DecoratorMetadata](./koatty_container.decoratormetadata_2.md)
+
+
+</td><td>
+
+Decorator metadata
+
+
+</td></tr>
+<tr><td>
+
+originalDescriptor
+
+
+</td><td>
+
+PropertyDescriptor
+
+
+</td><td>
+
+Original property descriptor
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 PropertyDescriptor

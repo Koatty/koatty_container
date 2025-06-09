@@ -15,10 +15,39 @@ export declare function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorato
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The AOP class name or string identifier |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+paramName
+
+
+</td><td>
+
+[ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+The AOP class name or string identifier
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 ClassDecorator

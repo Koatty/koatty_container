@@ -14,14 +14,58 @@ getDecoratorMetadata(target: unknown, propertyKey: string): Map<string, Decorato
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | unknown | Target object |
-|  propertyKey | string | Property name |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+unknown
+
+
+</td><td>
+
+Target object
+
+
+</td></tr>
+<tr><td>
+
+propertyKey
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Property name
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
-Map&lt;string, [DecoratorMetadata](./koatty_container.decoratormetadata.md)<!-- -->&gt; \| null
+Map&lt;string, [DecoratorMetadata](./koatty_container.decoratormetadata_2.md)<!-- -->&gt; \| null
 
 Decorator metadata map
 

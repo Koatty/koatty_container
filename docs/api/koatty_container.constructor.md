@@ -14,7 +14,24 @@ export interface Constructor<T>
 
 ## Methods
 
-|  Method | Description |
-|  --- | --- |
-|  [(new)(args)](./koatty_container.constructor._new_.md) |  |
+<table><thead><tr><th>
 
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(new)(args)](./koatty_container.constructor._new_.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>

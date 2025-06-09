@@ -14,12 +14,71 @@ getMetadataMap(metadataKey: string | symbol, target: Function | object, property
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  metadataKey | string \| symbol | The key of metadata |
-|  target | Function \| object | The target class or object |
-|  propertyKey | string \| symbol | _(Optional)_ Optional property key |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+metadataKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The key of metadata
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+<tr><td>
+
+propertyKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+_(Optional)_ Optional property key
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any

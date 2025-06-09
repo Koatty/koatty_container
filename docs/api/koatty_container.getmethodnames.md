@@ -14,11 +14,55 @@ export declare function getMethodNames(target: any, isSelfProperties?: boolean):
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  target | any | The class target to get method names from |
-|  isSelfProperties | boolean | _(Optional)_ If true, only returns methods defined on the target class itself |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+target
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The class target to get method names from
+
+
+</td></tr>
+<tr><td>
+
+isSelfProperties
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ If true, only returns methods defined on the target class itself
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 string\[\]

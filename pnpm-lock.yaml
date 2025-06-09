@@ -5792,10 +5792,10 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  koatty_container@file:(koatty_container@1.13.0-0)(koatty_lib@1.4.3):
+  koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3):
     dependencies:
       koatty_lib: 1.4.3
-      koatty_logger: koatty_container@file:(koatty_container@1.13.0-0)(koatty_lib@1.4.3)
+      koatty_logger: koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3)
       lru-cache: 11.1.0
       tslib: 2.6.2
 
@@ -5810,7 +5810,7 @@ snapshots:
   koatty_logger@2.1.8(koatty_lib@1.4.3)(tslib@2.6.2):
     dependencies:
       koatty_lib: 1.4.3
-      koatty_logger: koatty_container@file:(koatty_container@1.13.0-0)(koatty_lib@1.4.3)
+      koatty_logger: koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3)
       tslib: 2.6.2
       winston: 3.16.0
       winston-daily-rotate-file: 4.7.1(winston@3.16.0)

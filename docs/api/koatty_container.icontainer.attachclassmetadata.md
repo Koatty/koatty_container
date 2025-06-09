@@ -14,14 +14,103 @@ attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, 
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  type | string | The type of metadata |
-|  decoratorNameKey | string \| symbol | The key of the decorator |
-|  data | any | The metadata to attach |
-|  target | Function \| object | The target class or object |
-|  propertyName | string | _(Optional)_ Optional property name if attaching to a class property |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The type of metadata
+
+
+</td></tr>
+<tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The key of the decorator
+
+
+</td></tr>
+<tr><td>
+
+data
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The metadata to attach
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+<tr><td>
+
+propertyName
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional property name if attaching to a class property
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

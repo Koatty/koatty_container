@@ -14,11 +14,55 @@ listPropertyData(decoratorNameKey: string | symbol, target: Function | object): 
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  decoratorNameKey | string \| symbol | The decorator name key |
-|  target | Function \| object | The target class or object |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The decorator name key
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any

@@ -14,11 +14,55 @@ getClass(identifier: string, type?: string): Function;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  identifier | string | The unique identifier of the class |
-|  type | string | _(Optional)_ The component type |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+identifier
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The unique identifier of the class
+
+
+</td></tr>
+<tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ The component type
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 Function

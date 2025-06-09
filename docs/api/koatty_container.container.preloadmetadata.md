@@ -19,11 +19,59 @@ preloadMetadata(types?: string[], options?: {
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  types | string\[\] | _(Optional)_ Array of component types to preload (e.g. \["CONTROLLER", "SERVICE"\]). Defaults to \["CONTROLLER", "SERVICE", "COMPONENT"\] if empty. |
-|  options | { optimizePerformance?: boolean; warmupCaches?: boolean; batchPreProcessDependencies?: boolean; clearStaleCache?: boolean; } | <p>_(Optional)_ Configuration options for the preload process: - optimizePerformance: Whether to enable performance optimizations (default: true) - warmupCaches: Whether to warm up AOP caches (default: true) - batchPreProcessDependencies: Whether to batch process dependencies (default: true) - clearStaleCache: Whether to clear stale cache before preload (default: false)</p><p>The method executes in 6 phases: 1. Cache optimization and cleanup (if enabled) 2. Type processing sorted by component count 3. Metadata preloading for each component 4. Batch dependency preprocessing (if enabled) 5. AOP cache warmup (if enabled) 6. Post-optimization processing (if enabled)</p><p>Logs detailed performance statistics including processing time, cache hit rates, and total components processed.</p> |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+types
+
+
+</td><td>
+
+string\[\]
+
+
+</td><td>
+
+_(Optional)_ Array of component types to preload (e.g. \["CONTROLLER", "SERVICE"\]). Defaults to \["CONTROLLER", "SERVICE", "COMPONENT"\] if empty.
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+{ optimizePerformance?: boolean; warmupCaches?: boolean; batchPreProcessDependencies?: boolean; clearStaleCache?: boolean; }
+
+
+</td><td>
+
+_(Optional)_ Configuration options for the preload process: - optimizePerformance: Whether to enable performance optimizations (default: true) - warmupCaches: Whether to warm up AOP caches (default: true) - batchPreProcessDependencies: Whether to batch process dependencies (default: true) - clearStaleCache: Whether to clear stale cache before preload (default: false)
+
+The method executes in 6 phases: 1. Cache optimization and cleanup (if enabled) 2. Type processing sorted by component count 3. Metadata preloading for each component 4. Batch dependency preprocessing (if enabled) 5. AOP cache warmup (if enabled) 6. Post-optimization processing (if enabled)
+
+Logs detailed performance statistics including processing time, cache hit rates, and total components processed.
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

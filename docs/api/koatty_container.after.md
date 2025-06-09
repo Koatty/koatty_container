@@ -15,10 +15,39 @@ export declare function After<T>(paramName: ClassOrString<T>): MethodDecorator;
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  paramName | [ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt; | The name or class of the AOP handler |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+paramName
+
+
+</td><td>
+
+[ClassOrString](./koatty_container.classorstring.md)<!-- -->&lt;T&gt;
+
+
+</td><td>
+
+The name or class of the AOP handler
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 MethodDecorator

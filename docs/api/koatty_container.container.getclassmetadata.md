@@ -14,13 +14,87 @@ getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Functi
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  type | string | The metadata type |
-|  decoratorNameKey | string \| symbol | The decorator name or symbol key |
-|  target | Function \| object | The target class or object |
-|  propertyName | string | _(Optional)_ Optional property name |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The metadata type
+
+
+</td></tr>
+<tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The decorator name or symbol key
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The target class or object
+
+
+</td></tr>
+<tr><td>
+
+propertyName
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional property name
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 any

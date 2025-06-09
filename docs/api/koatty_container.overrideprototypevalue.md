@@ -14,10 +14,39 @@ export declare function overridePrototypeValue<T extends object>(instance: T): v
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  instance | T | The object instance to process |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+instance
+
+
+</td><td>
+
+T
+
+
+</td><td>
+
+The object instance to process
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

@@ -14,14 +14,103 @@ saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, ta
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  type | string | The type of metadata |
-|  decoratorNameKey | string \| symbol | The decorator name or symbol key |
-|  data | any | The metadata to be saved |
-|  target | Function \| object | The class constructor function or object instance |
-|  propertyName | string | _(Optional)_ Optional property name if the metadata is for a class member |
+<table><thead><tr><th>
 
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+type
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+The type of metadata
+
+
+</td></tr>
+<tr><td>
+
+decoratorNameKey
+
+
+</td><td>
+
+string \| symbol
+
+
+</td><td>
+
+The decorator name or symbol key
+
+
+</td></tr>
+<tr><td>
+
+data
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+The metadata to be saved
+
+
+</td></tr>
+<tr><td>
+
+target
+
+
+</td><td>
+
+Function \| object
+
+
+</td><td>
+
+The class constructor function or object instance
+
+
+</td></tr>
+<tr><td>
+
+propertyName
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Optional property name if the metadata is for a class member
+
+
+</td></tr>
+</tbody></table>
 **Returns:**
 
 void

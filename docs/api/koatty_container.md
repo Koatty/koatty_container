@@ -6,77 +6,577 @@
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [ClassDecoratorManager](./koatty_container.classdecoratormanager.md) | Class decorator manager for preprocessing and performance optimization Integrated with koatty IOC container |
-|  [Container](./koatty_container.container.md) | <p>Container class implements IContainer interface for dependency injection. Manages class instances, metadata, and dependency injection in an IOC container. Uses singleton pattern to ensure only one container instance exists.</p><p>Thread Safety Considerations: Although JavaScript is single-threaded, race conditions can occur in async scenarios. This implementation uses async-safe singleton pattern with proper synchronization.</p><p>Features: - Thread-safe singleton instance management - Class and instance registration - Metadata management with intelligent caching - Dependency injection - Component lifecycle management - Property injection - AOP support - Circular dependency detection - High-performance metadata caching for real-world scenarios</p><p> Container  {<!-- -->IContainer<!-- -->}</p> |
-|  [DecoratorManagerFacade](./koatty_container.decoratormanagerfacade.md) | Unified decorator manager that provides access to all decorator types This is a convenient facade for accessing all decorator managers |
-|  [MethodDecoratorManager](./koatty_container.methoddecoratormanager.md) | Decorator manager for preprocessing and performance optimization Integrated with koatty IOC container |
-|  [PropertyDecoratorManager](./koatty_container.propertydecoratormanager.md) | <p>Property decorator manager for preprocessing and performance optimization Integrated with koatty IOC container</p><p>Note: When a property has a field initializer (e.g., <code>name: string = '';</code>), the field initializer takes precedence over decorator defaultValue. This is expected TypeScript/JavaScript behavior. To use decorator defaultValue, remove the field initializer or use constructor assignment.</p> |
+<table><thead><tr><th>
+
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ClassDecoratorManager](./koatty_container.classdecoratormanager.md)
+
+
+</td><td>
+
+Class decorator manager for preprocessing and performance optimization Integrated with koatty IOC container
+
+
+</td></tr>
+<tr><td>
+
+[Container](./koatty_container.container.md)
+
+
+</td><td>
+
+Container class implements IContainer interface for dependency injection. Manages class instances, metadata, and dependency injection in an IOC container. Uses singleton pattern to ensure only one container instance exists.
+
+Thread Safety Considerations: Although JavaScript is single-threaded, race conditions can occur in async scenarios. This implementation uses async-safe singleton pattern with proper synchronization.
+
+Features: - Thread-safe singleton instance management - Class and instance registration - Metadata management with intelligent caching - Dependency injection - Component lifecycle management - Property injection - AOP support - Circular dependency detection - High-performance metadata caching for real-world scenarios
+
+ Container  {<!-- -->IContainer<!-- -->}
+
+
+</td></tr>
+<tr><td>
+
+[DecoratorManagerFacade](./koatty_container.decoratormanagerfacade.md)
+
+
+</td><td>
+
+Unified decorator manager that provides access to all decorator types This is a convenient facade for accessing all decorator managers
+
+
+</td></tr>
+<tr><td>
+
+[MethodDecoratorManager](./koatty_container.methoddecoratormanager.md)
+
+
+</td><td>
+
+Decorator manager for preprocessing and performance optimization Integrated with koatty IOC container
+
+
+</td></tr>
+<tr><td>
+
+[PropertyDecoratorManager](./koatty_container.propertydecoratormanager.md)
+
+
+</td><td>
+
+Property decorator manager for preprocessing and performance optimization Integrated with koatty IOC container
+
+Note: When a property has a field initializer (e.g., `name: string = '';`<!-- -->), the field initializer takes precedence over decorator defaultValue. This is expected TypeScript/JavaScript behavior. To use decorator defaultValue, remove the field initializer or use constructor assignment.
+
+
+</td></tr>
+</tbody></table>
 
 ## Enumerations
 
-|  Enumeration | Description |
-|  --- | --- |
-|  [AOPType](./koatty_container.aoptype.md) | <p>defined AOP type</p><p>  {<!-- -->number<!-- -->}</p> |
+<table><thead><tr><th>
+
+Enumeration
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[AOPType](./koatty_container.aoptype.md)
+
+
+</td><td>
+
+defined AOP type
+
+  {<!-- -->number<!-- -->}
+
+
+</td></tr>
+</tbody></table>
 
 ## Functions
 
-|  Function | Description |
-|  --- | --- |
-|  [After(paramName)](./koatty_container.after.md) | <p>After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.</p> |
-|  [AfterEach(paramName)](./koatty_container.aftereach.md) | <p>Decorator that marks a class to execute after each method.</p> |
-|  [Around(paramName)](./koatty_container.around.md) | <p>Around decorator, used to define a method-level AOP interceptor that wraps around the target method. The around aspect can control whether the original method is executed and can modify arguments and return values.</p> |
-|  [AroundEach(paramName)](./koatty_container.aroundeach.md) | <p>Decorator that marks a class to execute around each method. The around aspect wraps around every method in the target class.</p> |
-|  [Aspect(identifier)](./koatty_container.aspect.md) | Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system. |
-|  [Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md) | Decorator that marks a property for dependency injection. |
-|  [Before(paramName)](./koatty_container.before.md) | <p>Before decorator, used to define a method-level AOP interceptor that executes before the target method.</p> |
-|  [BeforeEach(paramName)](./koatty_container.beforeeach.md) | Decorator that marks a class to execute before each method. |
-|  [Component(identifier, type)](./koatty_container.component.md) | Component decorator, used to mark a class as a component and register it to IOC container. |
-|  [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md) | Get component type based on class name identifier |
-|  [getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md) | Gets all method names from a class target and optionally its prototype chain |
-|  [getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md) | Get metadata from target object or class by metadata key. If metadata doesn't exist, create a new Map and define it. |
-|  [getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md) | Gets all property names from a target object and optionally its prototype chain. |
-|  [Inject(paramName, cType)](./koatty_container.inject.md) | Parameter decorator for dependency injection. Used to inject dependencies into constructor parameters. |
-|  [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md) | Override undefined instance properties with values from its prototype. |
-|  [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md) | Recursively retrieves metadata from a container by traversing the prototype chain. |
-|  [Values(value, defaultValue)](./koatty_container.values.md) | Property decorator that assigns a value to a class property. |
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[After(paramName)](./koatty_container.after.md)
+
+
+</td><td>
+
+After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.
+
+
+
+</td></tr>
+<tr><td>
+
+[AfterEach(paramName)](./koatty_container.aftereach.md)
+
+
+</td><td>
+
+Decorator that marks a class to execute after each method.
+
+
+
+</td></tr>
+<tr><td>
+
+[Around(paramName)](./koatty_container.around.md)
+
+
+</td><td>
+
+Around decorator, used to define a method-level AOP interceptor that wraps around the target method. The around aspect can control whether the original method is executed and can modify arguments and return values.
+
+
+
+</td></tr>
+<tr><td>
+
+[AroundEach(paramName)](./koatty_container.aroundeach.md)
+
+
+</td><td>
+
+Decorator that marks a class to execute around each method. The around aspect wraps around every method in the target class.
+
+
+
+</td></tr>
+<tr><td>
+
+[Aspect(identifier)](./koatty_container.aspect.md)
+
+
+</td><td>
+
+Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system.
+
+
+</td></tr>
+<tr><td>
+
+[Autowired(paramName, cType, constructArgs, isDelay)](./koatty_container.autowired.md)
+
+
+</td><td>
+
+Decorator that marks a property for dependency injection.
+
+
+</td></tr>
+<tr><td>
+
+[Before(paramName)](./koatty_container.before.md)
+
+
+</td><td>
+
+Before decorator, used to define a method-level AOP interceptor that executes before the target method.
+
+
+
+</td></tr>
+<tr><td>
+
+[BeforeEach(paramName)](./koatty_container.beforeeach.md)
+
+
+</td><td>
+
+Decorator that marks a class to execute before each method.
+
+
+</td></tr>
+<tr><td>
+
+[Component(identifier, type)](./koatty_container.component.md)
+
+
+</td><td>
+
+Component decorator, used to mark a class as a component and register it to IOC container.
+
+
+</td></tr>
+<tr><td>
+
+[ensureIOCReady()](./koatty_container.ensureiocready.md)
+
+
+</td><td>
+
+Ensure IOC container is ready for use
+
+
+</td></tr>
+<tr><td>
+
+[getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md)
+
+
+</td><td>
+
+Get component type based on class name identifier
+
+
+</td></tr>
+<tr><td>
+
+[getMethodNames(target, isSelfProperties)](./koatty_container.getmethodnames.md)
+
+
+</td><td>
+
+Gets all method names from a class target and optionally its prototype chain
+
+
+</td></tr>
+<tr><td>
+
+[getOriginMetadata(metadataKey, target, propertyKey)](./koatty_container.getoriginmetadata.md)
+
+
+</td><td>
+
+Get metadata from target object or class by metadata key. If metadata doesn't exist, create a new Map and define it.
+
+
+</td></tr>
+<tr><td>
+
+[getPropertyNames(target, isSelfProperties)](./koatty_container.getpropertynames.md)
+
+
+</td><td>
+
+Gets all property names from a target object and optionally its prototype chain.
+
+
+</td></tr>
+<tr><td>
+
+[Inject(paramName, cType)](./koatty_container.inject.md)
+
+
+</td><td>
+
+Parameter decorator for dependency injection. Used to inject dependencies into constructor parameters.
+
+
+</td></tr>
+<tr><td>
+
+[overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md)
+
+
+</td><td>
+
+Override undefined instance properties with values from its prototype.
+
+
+</td></tr>
+<tr><td>
+
+[recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md)
+
+
+</td><td>
+
+Recursively retrieves metadata from a container by traversing the prototype chain.
+
+
+</td></tr>
+<tr><td>
+
+[Values(value, defaultValue)](./koatty_container.values.md)
+
+
+</td><td>
+
+Property decorator that assigns a value to a class property.
+
+
+</td></tr>
+</tbody></table>
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [Application](./koatty_container.application.md) | <p>Application interface for the container. Defines the basic structure and capabilities of an application.</p><p> Application</p> |
-|  [CircularDepDetector](./koatty_container.circulardepdetector.md) |  |
-|  [Constructor](./koatty_container.constructor.md) | Defined constructor interface |
-|  [Context](./koatty_container.context.md) | <p>Interface representing a context object with metadata management capabilities.</p><p> Context  Provides methods to get and set metadata within a context.</p> |
-|  [DecoratorMetadata](./koatty_container.decoratormetadata.md) | Decorator metadata interface |
-|  [IAspect](./koatty_container.iaspect.md) | <p>Aspect interface</p><p>  IAspect</p> |
-|  [IContainer](./koatty_container.icontainer.md) | <p>Interface for IOC container implementation. Provides methods for dependency injection, metadata management, and component registration/retrieval.</p><p> IContainer</p> |
-|  [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md) | <p>BeanFactory Object interface</p><p>  ObjectDefinitionOptions</p> |
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[CircularDepDetector](./koatty_container.circulardepdetector.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[Constructor](./koatty_container.constructor.md)
+
+
+</td><td>
+
+Defined constructor interface
+
+
+</td></tr>
+<tr><td>
+
+[DecoratorMetadata\_2](./koatty_container.decoratormetadata_2.md)
+
+
+</td><td>
+
+Decorator metadata interface
+
+
+</td></tr>
+<tr><td>
+
+[IAspect](./koatty_container.iaspect.md)
+
+
+</td><td>
+
+Aspect interface
+
+  IAspect
+
+
+</td></tr>
+<tr><td>
+
+[IContainer](./koatty_container.icontainer.md)
+
+
+</td><td>
+
+Interface for IOC container implementation. Provides methods for dependency injection, metadata management, and component registration/retrieval.
+
+ IContainer
+
+
+</td></tr>
+<tr><td>
+
+[ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)
+
+
+</td><td>
+
+BeanFactory Object interface
+
+  ObjectDefinitionOptions
+
+
+</td></tr>
+</tbody></table>
 
 ## Variables
 
-|  Variable | Description |
-|  --- | --- |
-|  [decoratorManager](./koatty_container.decoratormanager.md) |  |
-|  [ensureIOCReady](./koatty_container.ensureiocready.md) | Ensure IOC container is ready for use |
-|  [IOC](./koatty_container.ioc.md) | <p>Global IOC container instance with async-safe initialization. Singleton pattern implementation to ensure only one container instance exists. Handles async scenarios properly to prevent race conditions.</p><p>  {<!-- -->Container<!-- -->}</p> |
-|  [IOCContainer](./koatty_container.ioccontainer.md) | IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->} |
-|  [TAGGED\_AOP](./koatty_container.tagged_aop.md) |  |
-|  [TAGGED\_ARGS](./koatty_container.tagged_args.md) |  |
-|  [TAGGED\_CLS](./koatty_container.tagged_cls.md) |  |
-|  [TAGGED\_METHOD](./koatty_container.tagged_method.md) |  |
-|  [TAGGED\_PARAM](./koatty_container.tagged_param.md) |  |
-|  [TAGGED\_PROP](./koatty_container.tagged_prop.md) |  |
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[decoratorManager](./koatty_container.decoratormanager.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[IOC](./koatty_container.ioc.md)
+
+
+</td><td>
+
+Global IOC container instance with async-safe initialization. Singleton pattern implementation to ensure only one container instance exists. Handles async scenarios properly to prevent race conditions.
+
+  {<!-- -->Container<!-- -->}
+
+
+</td></tr>
+<tr><td>
+
+[IOCContainer](./koatty_container.ioccontainer.md)
+
+
+</td><td>
+
+IOC container instance export. Alias for IOC  {<!-- -->Container<!-- -->}
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_AOP](./koatty_container.tagged_aop.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_ARGS](./koatty_container.tagged_args.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_CLS](./koatty_container.tagged_cls.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_METHOD](./koatty_container.tagged_method.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_PARAM](./koatty_container.tagged_param.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[TAGGED\_PROP](./koatty_container.tagged_prop.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 ## Type Aliases
 
-|  Type Alias | Description |
-|  --- | --- |
-|  [ClassOrString](./koatty_container.classorstring.md) |  |
-|  [ClassWrapperFunction](./koatty_container.classwrapperfunction.md) | Simple class wrapper function type |
-|  [PropertyWrapperFunction](./koatty_container.propertywrapperfunction.md) | Property wrapper function type compatible with tests |
-|  [Scope](./koatty_container.scope.md) | @ author: richen @ copyright: Copyright (c) - &lt;<!-- -->richenlin(at)gmail.com<!-- -->&gt; @ license: BSD (3-Clause) @ version: 2020-07-06 11:19:30 |
-|  [WrapperFunction](./koatty_container.wrapperfunction.md) | Simple wrapper function type |
+<table><thead><tr><th>
 
+Type Alias
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ClassOrString](./koatty_container.classorstring.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[ClassWrapperFunction](./koatty_container.classwrapperfunction.md)
+
+
+</td><td>
+
+Simple class wrapper function type
+
+
+</td></tr>
+<tr><td>
+
+[MethodWrapperFunction](./koatty_container.methodwrapperfunction.md)
+
+
+</td><td>
+
+Simple wrapper function type
+
+
+</td></tr>
+<tr><td>
+
+[PropertyWrapperFunction](./koatty_container.propertywrapperfunction.md)
+
+
+</td><td>
+
+Property wrapper function type compatible with tests
+
+
+</td></tr>
+<tr><td>
+
+[Scope](./koatty_container.scope.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
