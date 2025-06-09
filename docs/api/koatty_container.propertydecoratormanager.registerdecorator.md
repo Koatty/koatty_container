@@ -18,7 +18,7 @@ registerDecorator(target: any, propertyKey: string | symbol, metadata: Decorator
 |  --- | --- | --- |
 |  target | any | Target object |
 |  propertyKey | string \| symbol | Property name |
-|  metadata | DecoratorMetadata \| PropertyDecoratorMetadata | Decorator metadata (can be DecoratorMetadata or PropertyDecoratorMetadata) |
+|  metadata | [DecoratorMetadata](./koatty_container.decoratormetadata.md) \| PropertyDecoratorMetadata | Decorator metadata (can be DecoratorMetadata or PropertyDecoratorMetadata) |
 |  originalDescriptor | PropertyDescriptor | _(Optional)_ Original property descriptor |
 
 **Returns:**

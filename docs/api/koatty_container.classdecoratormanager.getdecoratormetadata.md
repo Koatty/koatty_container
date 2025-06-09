@@ -20,7 +20,7 @@ getDecoratorMetadata(target: Function): Map<string, DecoratorMetadata> | null;
 
 **Returns:**
 
-Map&lt;string, DecoratorMetadata&gt; \| null
+Map&lt;string, [DecoratorMetadata](./koatty_container.decoratormetadata.md)<!-- -->&gt; \| null
 
 Decorator metadata map
 
