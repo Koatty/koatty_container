@@ -108,15 +108,15 @@ await initializeApp();
 ```typescript
 @Aspect()
 export class LoggingAspect implements IAspect {
-  async run(args: any[], target?: any, methodName?: string): Promise<any> {
-    console.log(`🔍 调用 ${target?.constructor.name}.${methodName}`, args);
+  async run(args: any[], target?: any, options?: any): Promise<any> {
+    console.log(`🔍 调用 ${options?.targetMethod}`, args);
     return Promise.resolve();
   }
 }
 
 @Component()
 class OrderService {
-  @Before(LoggingAspect)
+  @Before(LoggingAspect, { level: 'info' })
   async createOrder(orderData: any) {
     return { orderId: Date.now(), ...orderData };
   }
@@ -128,19 +128,19 @@ class OrderService {
 ```typescript
 @Aspect()
 class TransactionAspect {
-  async run(target: any, methodName: string, args: any[], proceed: Function): Promise<any> {
-    console.log(`🔄 开始事务: ${target.constructor.name}.${methodName}`);
+  async run(args: any[], proceed: Function, options?: any): Promise<any> {
+    console.log(`🔄 开始事务: ${options?.targetMethod}`);
     
     try {
       const result = await proceed(args);
-      console.log(`✅ 提交事务: ${methodName}`);
+      console.log(`✅ 提交事务: ${options?.targetMethod}`);
       return {
         ...result,
         transactionStatus: 'committed',
         timestamp: new Date().toISOString()
       };
     } catch (error) {
-      console.log(`❌ 回滚事务: ${methodName}`, error);
+      console.log(`❌ 回滚事务: ${options?.targetMethod}`, error);
       throw error;
     }
   }
@@ -148,7 +148,7 @@ class TransactionAspect {
 
 @Component()
 class UserService {
-  @Around(TransactionAspect)
+  @Around(TransactionAspect, { timeout: 5000 })
   async createUser(userData: any) {
     return { id: Date.now(), ...userData };
   }
@@ -538,8 +538,8 @@ class UserService {
     return await this.database.findUser(userId);
   }
   
-  @Transaction()
-  @Audit('USER_CREATION')
+  @Transaction({ isolationLevel: 'READ_COMMITTED' })
+  @Audit('USER_CREATION', { includeDetails: true })
   async createUser(@Validate('object') userData: UserData) {
     return await this.database.createUser(userData);
   }
