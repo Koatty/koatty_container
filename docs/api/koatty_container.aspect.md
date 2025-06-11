@@ -9,7 +9,7 @@ Aspect decorator for AOP implementation. Used to mark a class as an Aspect Point
 **Signature:**
 
 ```typescript
-export declare function Aspect(identifier?: string): ClassDecorator;
+Aspect: (identifier?: string) => ClassDecorator
 ```
 
 ## Parameters
@@ -65,8 +65,11 @@ ClassDecorator
 ```typescript
 @Aspect()
 class LoggingAspect {
-  run() {
-    // aspect implementation
+  run(args: any[], proceed?: Function): Promise<any> {
+    console.log('Before method execution');
+    const result = await proceed?.(args);
+    console.log('After method execution');
+    return result;
   }
 }
 ```

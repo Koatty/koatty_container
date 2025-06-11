@@ -4,12 +4,12 @@
 
 ## BeforeEach() function
 
-Decorator that marks a class to execute before each method.
+BeforeEach decorator for AOP implementation. Executes the specified aspect before each method in the target class.
 
 **Signature:**
 
 ```typescript
-export declare function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator;
+BeforeEach: <T>(aopName: ClassOrString<T>, options?: any) => ClassDecorator
 ```
 
 ## Parameters
@@ -32,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -42,7 +42,23 @@ paramName
 
 </td><td>
 
-The name of the AOP class or string identifier
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -51,17 +67,16 @@ The name of the AOP class or string identifier
 
 ClassDecorator
 
-ClassDecorator function that attaches AOP metadata to the target class
-
-## Exceptions
-
-Error if AOP name is not provided
+{<!-- -->ClassDecorator<!-- -->} Class decorator function
 
 ## Example
 
 
 ```typescript
-@BeforeEach(LoggerAspect)
-class UserService {}
+@BeforeEach(LoggingAspect)
+class UserService {
+  async getUser(id: string) { ... }
+  async updateUser(id: string, data: any) { ... }
+}
 ```
 

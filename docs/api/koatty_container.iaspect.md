@@ -64,7 +64,7 @@ Application
 
 </td><td>
 
-(args: any\[\], proceed?: Function) =&gt; Promise&lt;any&gt;
+(args: any\[\], proceed?: Function, options?: any) =&gt; Promise&lt;any&gt;
 
 
 </td><td>
