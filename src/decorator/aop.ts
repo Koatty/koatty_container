@@ -9,10 +9,6 @@ import { Helper } from "koatty_lib";
 import { IOC } from "../container/container";
 import { AOPType, ClassOrString, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
 
-// 全局计数器，确保装饰器声明顺序正确性
-let AOPOrderCounter = 0;
-
-
 /**
  * Aspect decorator for AOP implementation.
  * Used to mark a class as an Aspect PointCut in the AOP system.
@@ -26,213 +22,223 @@ let AOPOrderCounter = 0;
  * ```typescript
  * @Aspect()
  * class LoggingAspect {
- *   run() {
- *     // aspect implementation
+ *   run(args: any[], proceed?: Function): Promise<any> {
+ *     console.log('Before method execution');
+ *     const result = await proceed?.(args);
+ *     console.log('After method execution');
+ *     return result;
  *   }
  * }
  * ```
  */
-export function Aspect(identifier?: string): ClassDecorator {
-  return (target: Function) => {
-    identifier = identifier || IOC.getIdentifier(target);
-    if (!identifier.endsWith("Aspect")) {
-      throw Error("Aspect class names must use a suffix `Aspect`.");
+export const Aspect = (identifier?: string): ClassDecorator => {
+  return (target: any) => {
+    // Validate class name ends with 'Aspect'
+    if (!target.name.endsWith('Aspect')) {
+      throw new Error("Aspect class names must use a suffix `Aspect`.");
     }
-    if (!Reflect.has(target.prototype, "run")) {
-      throw Error("The aspect class must implement the `run` method.");
+
+    // Validate class has 'run' method
+    if (!target.prototype.run || typeof target.prototype.run !== 'function') {
+      throw new Error("The aspect class must implement the `run` method.");
     }
     IOC.saveClass("COMPONENT", target, identifier);
   };
-}
+};
 
 /**
- * Before decorator, used to define a method-level AOP interceptor that executes before the target method.
+ * Before decorator for AOP implementation.
+ * Executes the specified aspect before the target method.
  * 
- * @export
- * @param {ClassOrString<T>} paramName - The name or class of the AOP interceptor
- * @returns {MethodDecorator} A method decorator that attaches AOP metadata
- * @throws {Error} When AOP name is not provided
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
+ * @returns {MethodDecorator} Method decorator function
  * 
  * @example
  * ```typescript
- * @Before('LogInterceptor')
- * someMethod() {}
+ * class UserService {
+ *   @Before(LoggingAspect)
+ *   async getUser(id: string) {
+ *     return await this.userRepository.findById(id);
+ *   }
+ * }
  * ```
  */
-export function Before<T>(paramName: ClassOrString<T>): MethodDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
+export const Before = <T>(aopName: ClassOrString<T>, options?: any): MethodDecorator => {
+
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
+  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
       method: methodName,
-      order
+      options
     }, target);
   };
-}
+};
 
 /**
- * Decorator that marks a class to execute before each method.
+ * After decorator for AOP implementation.
+ * Executes the specified aspect after the target method.
  * 
- * @param paramName - The name of the AOP class or string identifier
- * @returns ClassDecorator function that attaches AOP metadata to the target class
- * @throws Error if AOP name is not provided
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
+ * @returns {MethodDecorator} Method decorator function
  * 
  * @example
  * ```typescript
- * @BeforeEach(LoggerAspect)
- * class UserService {}
+ * class UserService {
+ *   @After(AuditAspect)
+ *   async updateUser(id: string, data: any) {
+ *     return await this.userRepository.update(id, data);
+ *   }
+ * }
  * ```
  */
-export function BeforeEach<T>(paramName: ClassOrString<T>): ClassDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
+export const After = <T>(aopName: ClassOrString<T>, options?: any): MethodDecorator => {
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
-    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
-      type: AOPType.BeforeEach,
-      name: aopName,
-      order
-    }, target);
-  };
-}
-
-/**
- * After decorator, used to define an after aspect for a method.
- * The aspect will be executed after the decorated method.
- * 
- * @export
- * @param {ClassOrString<T>} paramName - The name or class of the AOP handler
- * @returns {MethodDecorator} Method decorator
- * @throws {Error} When AopName is not provided
- * 
- * @example
- * ```typescript
- * @After('LogAspect')
- * someMethod() {}
- * ```
- */
-export function After<T>(paramName: ClassOrString<T>): MethodDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
-  }
-  if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: symbol | string, _descriptor: PropertyDescriptor) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
+  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
       method: methodName,
-      order
+      options
     }, target);
   };
-}
+};
 
 /**
- * Decorator that marks a class to execute after each method.
+ * Around decorator for AOP implementation.
+ * Wraps the target method execution with the specified aspect.
  * 
- * @export
- * @param {ClassOrString<T>} paramName The AOP class name or string identifier
- * @returns {ClassDecorator} Class decorator function
- * @throws {Error} When AopName is not provided
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
+ * @returns {MethodDecorator} Method decorator function
  * 
  * @example
  * ```typescript
- * @AfterEach(LoggerAspect)
- * class UserService {}
+ * class UserService {
+ *   @Around(TransactionAspect)
+ *   async createUser(userData: any) {
+ *     return await this.userRepository.create(userData);
+ *   }
+ * }
  * ```
  */
-export function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
+export const Around = <T>(aopName: ClassOrString<T>, options?: any): MethodDecorator => {
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
-    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
-      type: AOPType.AfterEach,
-      name: aopName,
-      order
-    }, target);
-  };
-}
-
-/**
- * Around decorator, used to define a method-level AOP interceptor that wraps around the target method.
- * The around aspect can control whether the original method is executed and can modify arguments and return values.
- * 
- * @export
- * @param {ClassOrString<T>} paramName - The name or class of the AOP interceptor
- * @returns {MethodDecorator} A method decorator that attaches AOP metadata
- * @throws {Error} When AOP name is not provided
- * 
- * @example
- * ```typescript
- * @Around('TransactionAspect')
- * someMethod() {}
- * ```
- */
-export function Around<T>(paramName: ClassOrString<T>): MethodDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
-  }
-  if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: string, _descriptor: PropertyDescriptor) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
+  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Around,
       name: aopName,
       method: methodName,
-      order
+      options
     }, target);
   };
-}
+};
 
 /**
- * Decorator that marks a class to execute around each method.
- * The around aspect wraps around every method in the target class.
+ * BeforeEach decorator for AOP implementation.
+ * Executes the specified aspect before each method in the target class.
  * 
- * @export
- * @param {ClassOrString<T>} paramName The AOP class name or string identifier
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
  * @returns {ClassDecorator} Class decorator function
- * @throws {Error} When AOP name is not provided
+ * 
+ * @example
+ * ```typescript
+ * @BeforeEach(LoggingAspect)
+ * class UserService {
+ *   async getUser(id: string) { ... }
+ *   async updateUser(id: string, data: any) { ... }
+ * }
+ * ```
+ */
+export const BeforeEach = <T>(aopName: ClassOrString<T>, options?: any): ClassDecorator => {
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
+  }
+  if (!aopName) throw Error("AopName is required.");
+  return (target: Function) => {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+      type: AOPType.BeforeEach,
+      name: aopName,
+      method: "*",
+      options
+    }, target);
+  };
+};
+
+/**
+ * AfterEach decorator for AOP implementation.
+ * Executes the specified aspect after each method in the target class.
+ * 
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
+ * @returns {ClassDecorator} Class decorator function
+ * 
+ * @example
+ * ```typescript
+ * @AfterEach(AuditAspect)
+ * class UserService {
+ *   async getUser(id: string) { ... }
+ *   async updateUser(id: string, data: any) { ... }
+ * }
+ * ```
+ */
+export const AfterEach = <T>(aopName: ClassOrString<T>, options?: any): ClassDecorator => {
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
+  }
+  if (!aopName) throw Error("AopName is required.");
+  return (target: Function) => {
+    IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
+      type: AOPType.AfterEach,
+      name: aopName,
+      method: "*",
+      options
+    }, target);
+  };
+};
+
+/**
+ * AroundEach decorator for AOP implementation.
+ * Wraps each method execution in the target class with the specified aspect.
+ * 
+ * @param aopName The name or class of the aspect to execute
+ * @param options Optional configuration for the aspect
+ * @returns {ClassDecorator} Class decorator function
  * 
  * @example
  * ```typescript
  * @AroundEach(TransactionAspect)
- * class UserService {}
+ * class UserService {
+ *   async getUser(id: string) { ... }
+ *   async updateUser(id: string, data: any) { ... }
+ * }
  * ```
  */
-export function AroundEach<T>(paramName: ClassOrString<T>): ClassDecorator {
-  let aopName = paramName;
-  if (!Helper.isString(paramName)) {
-    aopName = (paramName as any)?.name;
+export const AroundEach = <T>(aopName: ClassOrString<T>, options?: any): ClassDecorator => {
+  if (!Helper.isString(aopName)) {
+    aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
   return (target: Function) => {
-    // 使用递增计数器确保装饰器声明顺序，后声明的具有更大的order值
-    const order = ++AOPOrderCounter;
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.AroundEach,
       name: aopName,
-      order
+      method: "*",
+      options
     }, target);
   };
-}
+};
 
