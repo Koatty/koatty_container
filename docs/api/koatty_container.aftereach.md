@@ -4,13 +4,12 @@
 
 ## AfterEach() function
 
-Decorator that marks a class to execute after each method.
-
+AfterEach decorator for AOP implementation. Executes the specified aspect after each method in the target class.
 
 **Signature:**
 
 ```typescript
-export declare function AfterEach<T>(paramName: ClassOrString<T>): ClassDecorator;
+AfterEach: <T>(aopName: ClassOrString<T>, options?: any) => ClassDecorator
 ```
 
 ## Parameters
@@ -33,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -43,7 +42,23 @@ paramName
 
 </td><td>
 
-The AOP class name or string identifier
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -54,15 +69,14 @@ ClassDecorator
 
 {<!-- -->ClassDecorator<!-- -->} Class decorator function
 
-## Exceptions
-
-{<!-- -->Error<!-- -->} When AopName is not provided
-
 ## Example
 
 
 ```typescript
-@AfterEach(LoggerAspect)
-class UserService {}
+@AfterEach(AuditAspect)
+class UserService {
+  async getUser(id: string) { ... }
+  async updateUser(id: string, data: any) { ... }
+}
 ```
 

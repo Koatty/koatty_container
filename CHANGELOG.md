@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.0](https://github.com/koatty/koatty_container/compare/v1.15.0...v1.16.0) (2025-06-11)
+
+
+### Features
+
+* enhance AOP aspect interface and decorator functionality with options support ([596442d](https://github.com/koatty/koatty_container/commit/596442d7f068d7540784bdde5322475b2d2dc0ed))
+
 ## [1.15.0](https://github.com/koatty/koatty_container/compare/v1.14.2...v1.15.0) (2025-06-09)
 
 

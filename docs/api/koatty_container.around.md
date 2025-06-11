@@ -4,13 +4,12 @@
 
 ## Around() function
 
-Around decorator, used to define a method-level AOP interceptor that wraps around the target method. The around aspect can control whether the original method is executed and can modify arguments and return values.
-
+Around decorator for AOP implementation. Wraps the target method execution with the specified aspect.
 
 **Signature:**
 
 ```typescript
-export declare function Around<T>(paramName: ClassOrString<T>): MethodDecorator;
+Around: <T>(aopName: ClassOrString<T>, options?: any) => MethodDecorator
 ```
 
 ## Parameters
@@ -33,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -43,7 +42,23 @@ paramName
 
 </td><td>
 
-The name or class of the AOP interceptor
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -52,17 +67,17 @@ The name or class of the AOP interceptor
 
 MethodDecorator
 
-{<!-- -->MethodDecorator<!-- -->} A method decorator that attaches AOP metadata
-
-## Exceptions
-
-{<!-- -->Error<!-- -->} When AOP name is not provided
+{<!-- -->MethodDecorator<!-- -->} Method decorator function
 
 ## Example
 
 
 ```typescript
-@Around('TransactionAspect')
-someMethod() {}
+class UserService {
+  @Around(TransactionAspect)
+  async createUser(userData: any) {
+    return await this.userRepository.create(userData);
+  }
+}
 ```
 

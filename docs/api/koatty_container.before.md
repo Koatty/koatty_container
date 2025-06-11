@@ -4,13 +4,12 @@
 
 ## Before() function
 
-Before decorator, used to define a method-level AOP interceptor that executes before the target method.
-
+Before decorator for AOP implementation. Executes the specified aspect before the target method.
 
 **Signature:**
 
 ```typescript
-export declare function Before<T>(paramName: ClassOrString<T>): MethodDecorator;
+Before: <T>(aopName: ClassOrString<T>, options?: any) => MethodDecorator
 ```
 
 ## Parameters
@@ -33,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -43,7 +42,23 @@ paramName
 
 </td><td>
 
-The name or class of the AOP interceptor
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -52,17 +67,17 @@ The name or class of the AOP interceptor
 
 MethodDecorator
 
-{<!-- -->MethodDecorator<!-- -->} A method decorator that attaches AOP metadata
-
-## Exceptions
-
-{<!-- -->Error<!-- -->} When AOP name is not provided
+{<!-- -->MethodDecorator<!-- -->} Method decorator function
 
 ## Example
 
 
 ```typescript
-@Before('LogInterceptor')
-someMethod() {}
+class UserService {
+  @Before(LoggingAspect)
+  async getUser(id: string) {
+    return await this.userRepository.findById(id);
+  }
+}
 ```
 

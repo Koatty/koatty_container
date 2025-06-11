@@ -125,49 +125,45 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-[After(paramName)](./koatty_container.after.md)
+[After(aopName, options)](./koatty_container.after.md)
 
 
 </td><td>
 
-After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.
-
+After decorator for AOP implementation. Executes the specified aspect after the target method.
 
 
 </td></tr>
 <tr><td>
 
-[AfterEach(paramName)](./koatty_container.aftereach.md)
+[AfterEach(aopName, options)](./koatty_container.aftereach.md)
 
 
 </td><td>
 
-Decorator that marks a class to execute after each method.
-
+AfterEach decorator for AOP implementation. Executes the specified aspect after each method in the target class.
 
 
 </td></tr>
 <tr><td>
 
-[Around(paramName)](./koatty_container.around.md)
+[Around(aopName, options)](./koatty_container.around.md)
 
 
 </td><td>
 
-Around decorator, used to define a method-level AOP interceptor that wraps around the target method. The around aspect can control whether the original method is executed and can modify arguments and return values.
-
+Around decorator for AOP implementation. Wraps the target method execution with the specified aspect.
 
 
 </td></tr>
 <tr><td>
 
-[AroundEach(paramName)](./koatty_container.aroundeach.md)
+[AroundEach(aopName, options)](./koatty_container.aroundeach.md)
 
 
 </td><td>
 
-Decorator that marks a class to execute around each method. The around aspect wraps around every method in the target class.
-
+AroundEach decorator for AOP implementation. Wraps each method execution in the target class with the specified aspect.
 
 
 </td></tr>
@@ -195,24 +191,23 @@ Decorator that marks a property for dependency injection.
 </td></tr>
 <tr><td>
 
-[Before(paramName)](./koatty_container.before.md)
+[Before(aopName, options)](./koatty_container.before.md)
 
 
 </td><td>
 
-Before decorator, used to define a method-level AOP interceptor that executes before the target method.
-
+Before decorator for AOP implementation. Executes the specified aspect before the target method.
 
 
 </td></tr>
 <tr><td>
 
-[BeforeEach(paramName)](./koatty_container.beforeeach.md)
+[BeforeEach(aopName, options)](./koatty_container.beforeeach.md)
 
 
 </td><td>
 
-Decorator that marks a class to execute before each method.
+BeforeEach decorator for AOP implementation. Executes the specified aspect before each method in the target class.
 
 
 </td></tr>

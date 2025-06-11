@@ -4,13 +4,12 @@
 
 ## After() function
 
-After decorator, used to define an after aspect for a method. The aspect will be executed after the decorated method.
-
+After decorator for AOP implementation. Executes the specified aspect after the target method.
 
 **Signature:**
 
 ```typescript
-export declare function After<T>(paramName: ClassOrString<T>): MethodDecorator;
+After: <T>(aopName: ClassOrString<T>, options?: any) => MethodDecorator
 ```
 
 ## Parameters
@@ -33,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -43,7 +42,23 @@ paramName
 
 </td><td>
 
-The name or class of the AOP handler
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -52,17 +67,17 @@ The name or class of the AOP handler
 
 MethodDecorator
 
-{<!-- -->MethodDecorator<!-- -->} Method decorator
-
-## Exceptions
-
-{<!-- -->Error<!-- -->} When AopName is not provided
+{<!-- -->MethodDecorator<!-- -->} Method decorator function
 
 ## Example
 
 
 ```typescript
-@After('LogAspect')
-someMethod() {}
+class UserService {
+  @After(AuditAspect)
+  async updateUser(id: string, data: any) {
+    return await this.userRepository.update(id, data);
+  }
+}
 ```
 

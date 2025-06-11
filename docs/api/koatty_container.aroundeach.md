@@ -4,13 +4,12 @@
 
 ## AroundEach() function
 
-Decorator that marks a class to execute around each method. The around aspect wraps around every method in the target class.
-
+AroundEach decorator for AOP implementation. Wraps each method execution in the target class with the specified aspect.
 
 **Signature:**
 
 ```typescript
-export declare function AroundEach<T>(paramName: ClassOrString<T>): ClassDecorator;
+AroundEach: <T>(aopName: ClassOrString<T>, options?: any) => ClassDecorator
 ```
 
 ## Parameters
@@ -33,7 +32,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-paramName
+aopName
 
 
 </td><td>
@@ -43,7 +42,23 @@ paramName
 
 </td><td>
 
-The AOP class name or string identifier
+The name or class of the aspect to execute
+
+
+</td></tr>
+<tr><td>
+
+options
+
+
+</td><td>
+
+any
+
+
+</td><td>
+
+_(Optional)_ Optional configuration for the aspect
 
 
 </td></tr>
@@ -54,15 +69,14 @@ ClassDecorator
 
 {<!-- -->ClassDecorator<!-- -->} Class decorator function
 
-## Exceptions
-
-{<!-- -->Error<!-- -->} When AOP name is not provided
-
 ## Example
 
 
 ```typescript
 @AroundEach(TransactionAspect)
-class UserService {}
+class UserService {
+  async getUser(id: string) { ... }
+  async updateUser(id: string, data: any) { ... }
+}
 ```
 

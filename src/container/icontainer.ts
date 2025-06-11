@@ -403,5 +403,5 @@ export interface ObjectDefinitionOptions {
 export interface IAspect {
   app: Application;
 
-  run: (args: any[], proceed?: Function) => Promise<any>;
+  run: (args: any[], proceed?: Function, options?: any) => Promise<any>;
 }
