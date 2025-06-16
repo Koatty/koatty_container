@@ -1,8 +1,8 @@
 # koatty_container [![Version npm](https://img.shields.io/npm/v/koatty_container.svg?style=flat-square)](https://www.npmjs.com/package/koatty_container) [![npm Downloads](https://img.shields.io/npm/dm/koatty_container.svg?style=flat-square)](https://npmcharts.com/compare/koatty_container?minimal) [![GitHub stars](https://img.shields.io/github/stars/koatty/koatty_container.svg?style=social)](https://github.com/koatty/koatty_container)
 
-🏆 **企业级 TypeScript IOC 容器 + 强大的装饰器管理系统** 
+🏆 **TypeScript IOC 容器 + 装饰器管理系统** 
 
-专为现代 Node.js 应用设计的完整解决方案，提供智能循环依赖处理、高性能缓存优化、完整的 AOP 支持，以及**革命性的自定义装饰器管理能力**。
+专为现代 Node.js 应用设计的完整解决方案，提供智能循环依赖处理、高性能缓存优化、完整的 AOP 支持，以及**自定义装饰器管理能力**。
 
 ## 🌟 核心亮点
 
