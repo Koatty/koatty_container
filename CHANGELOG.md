@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/koatty/koatty_container/compare/v1.16.0...v1.17.0) (2025-10-12)
+
+
+### Features
+
+* export app module from container for better accessibility ([4f86973](https://github.com/koatty/koatty_container/commit/4f869738e6b294fbb577d2a9ab23a528ec486d71))
+
 ## [1.16.0](https://github.com/koatty/koatty_container/compare/v1.15.0...v1.16.0) (2025-06-11)
 
 
