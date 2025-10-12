@@ -11,8 +11,8 @@ import {
 } from "../src/processor/autowired_processor";
 import { Container } from "../src/container/container";
 import { TAGGED_PROP } from "../src/container/icontainer";
-import { Autowired } from "../src/decorator/Autowired";
-import { Component } from "../src/decorator/Component";
+import { Autowired } from "../src/decorator/autowired";
+import { Component } from "../src/decorator/component";
 
 // Mock the event system for delayed injection tests
 class MockEventEmitter {

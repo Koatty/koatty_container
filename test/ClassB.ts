@@ -9,7 +9,7 @@
  */
 
 import { BeforeEach } from "../src/decorator/aop";
-import { Inject } from "../src/decorator/Autowired";
+import { Inject } from "../src/decorator/autowired";
 import { MyDependency2 } from "./MyDependency2";
 import { Test2Aspect } from "./Test2Aspect";
 

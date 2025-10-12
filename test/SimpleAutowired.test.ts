@@ -1,6 +1,6 @@
 import { IOC } from "../src/container/container";
-import { Autowired } from "../src/decorator/Autowired";
-import { Component } from "../src/decorator/Component";
+import { Autowired } from "../src/decorator/autowired";
+import { Component } from "../src/decorator/component";
 import { TAGGED_PROP } from "../src/container/icontainer";
 
 @Component()
