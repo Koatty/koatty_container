@@ -15,8 +15,8 @@ importers:
         specifier: ^2.x.x
         version: 2.1.8(koatty_lib@1.4.3)(tslib@2.6.2)
       lru-cache:
-        specifier: ^11.1.0
-        version: 11.1.0
+        specifier: ^11.2.2
+        version: 11.2.2
       tslib:
         specifier: ^2.x.x
         version: 2.6.2
@@ -2314,8 +2314,8 @@ packages:
     resolution: {integrity: sha512-/1clY/ui8CzjKFyjdvwPWJUYKiFVXG2I2cY0ssG7h4+hwk+XOIX7ZSG9Q7TW8TW3Kp3BUSqgFWBLgL4PJ+Blag==}
     engines: {node: 14 || >=16.14}
 
-  lru-cache@11.1.0:
-    resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
+  lru-cache@11.2.2:
+    resolution: {integrity: sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -5792,11 +5792,11 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3):
+  koatty_container@file:(koatty_container@1.16.0)(koatty_lib@1.4.3):
     dependencies:
       koatty_lib: 1.4.3
-      koatty_logger: koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3)
-      lru-cache: 11.1.0
+      koatty_logger: koatty_container@file:(koatty_container@1.16.0)(koatty_lib@1.4.3)
+      lru-cache: 11.2.2
       tslib: 2.6.2
 
   koatty_lib@1.4.3:
@@ -5810,7 +5810,7 @@ snapshots:
   koatty_logger@2.1.8(koatty_lib@1.4.3)(tslib@2.6.2):
     dependencies:
       koatty_lib: 1.4.3
-      koatty_logger: koatty_container@file:(koatty_container@1.14.2)(koatty_lib@1.4.3)
+      koatty_logger: koatty_container@file:(koatty_container@1.16.0)(koatty_lib@1.4.3)
       tslib: 2.6.2
       winston: 3.16.0
       winston-daily-rotate-file: 4.7.1(winston@3.16.0)
@@ -5894,7 +5894,7 @@ snapshots:
 
   lru-cache@10.1.0: {}
 
-  lru-cache@11.1.0: {}
+  lru-cache@11.2.2: {}
 
   lru-cache@5.1.1:
     dependencies:

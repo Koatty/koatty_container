@@ -81,7 +81,7 @@
   "dependencies": {
     "koatty_lib": "^1.x.x",
     "koatty_logger": "^2.x.x",
-    "lru-cache": "^11.1.0",
+    "lru-cache": "^11.2.2",
     "tslib": "^2.x.x"
   },
   "peerDependencies": {
