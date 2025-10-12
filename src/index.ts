@@ -4,6 +4,7 @@
  * @ license: BSD (3-Clause)
  * @ version: 2020-07-06 11:19:30
  */
+export * from "./container/app";
 export * from "./container/container";
 export * from "./container/icontainer";
 export * from "./decorator/aop";
