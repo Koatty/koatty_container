@@ -9,8 +9,8 @@
  */
 
 import { AfterEach } from "../src/decorator/aop";
-import { Autowired } from "../src/decorator/Autowired";
-import { Values } from "../src/decorator/Values";
+import { Autowired } from "../src/decorator/autowired";
+import { Values } from "../src/decorator/values";
 import { MyDependency } from "./MyDependency";
 import { MyDependency2 } from "./MyDependency2";
 import { Test3Aspect } from "./Test3Aspect";
