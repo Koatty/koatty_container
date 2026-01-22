@@ -15,17 +15,17 @@ import { Aspect } from "../src/decorator/aop";
 export class ErrorAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log("Error Before");
     
     try {
       let result;
-      if (proceed) {
+      if (joinPoint.hasProceed()) {
         // Around 类型
-        result = await proceed();
+        result = await joinPoint.executeProceed();
       } else {
         // Before/After 类型
-        result = args;
+        result = joinPoint.getArgs();
       }
       
       console.log("Error After");

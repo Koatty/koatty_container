@@ -18,20 +18,20 @@ const IOC = Container.getInstanceSync();
 export class ContextBeforeAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log('=== Context Before Aspect ===');
-    console.log('Method:', context.getMethodName());
-    console.log('Original args:', context.getOriginalArgs());
-    console.log('Current args:', context.getArgs());
+    console.log('Method:', joinPoint.getMethodName());
+    console.log('Original args:', joinPoint.getOriginalArgs());
+    console.log('Current args:', joinPoint.getArgs());
     
     // 修改参数
-    const args = context.getArgs();
+    const args = joinPoint.getArgs();
     if (args.length > 0 && typeof args[0] === 'string') {
       args[0] = `[MODIFIED]${args[0]}`;
-      context.setArgs(args);
+      joinPoint.setArgs(args);
     }
     
-    console.log('Args after modification:', context.getArgs());
+    console.log('Args after modification:', joinPoint.getArgs());
     return Promise.resolve();
   }
 }
@@ -43,26 +43,26 @@ export class ContextBeforeAspect implements IAspect {
 export class ContextAroundAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log('=== Context Around Aspect - Before ===');
-    console.log('Method:', context.getMethodName());
-    console.log('Target:', context.getTarget().constructor.name);
-    console.log('Current args:', context.getArgs());
-    console.log('Original args (immutable):', context.getOriginalArgs());
+    console.log('Method:', joinPoint.getMethodName());
+    console.log('Target:', joinPoint.getTarget().constructor.name);
+    console.log('Current args:', joinPoint.getArgs());
+    console.log('Original args (immutable):', joinPoint.getOriginalArgs());
     
     // 进一步修改参数
-    const args = context.getArgs();
+    const args = joinPoint.getArgs();
     if (args.length > 0 && typeof args[0] === 'string') {
       args[0] = args[0].toUpperCase();
-      context.setArgs(args);
+      joinPoint.setArgs(args);
     }
     
-    console.log('Args modified in Around:', context.getArgs());
+    console.log('Args modified in Around:', joinPoint.getArgs());
     
     const startTime = Date.now();
     
-    if (proceed) {
-      const result = await proceed();
+    if (joinPoint.hasProceed()) {
+      const result = await joinPoint.executeProceed();
       const duration = Date.now() - startTime;
       console.log(`=== Context Around Aspect - After (${duration}ms) ===`);
       console.log('Result:', result);
@@ -80,17 +80,17 @@ export class ContextAroundAspect implements IAspect {
 export class ContextAfterAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log('=== Context After Aspect ===');
-    console.log('Method:', context.getMethodName());
+    console.log('Method:', joinPoint.getMethodName());
     // After 切面可以看到所有前置切面修改后的参数
-    console.log('Final args used:', context.getArgs());
+    console.log('Final args used:', joinPoint.getArgs());
     // 也可以访问原始参数
-    console.log('Original args were:', context.getOriginalArgs());
+    console.log('Original args were:', joinPoint.getOriginalArgs());
     
     // 验证参数一致性
-    const currentArgs = context.getArgs();
-    const originalArgs = context.getOriginalArgs();
+    const currentArgs = joinPoint.getArgs();
+    const originalArgs = joinPoint.getOriginalArgs();
     console.log('Args were modified:', JSON.stringify(currentArgs) !== JSON.stringify(originalArgs));
     
     return Promise.resolve();
@@ -170,7 +170,7 @@ describe("AspectContext V2 Interface", () => {
 
     const logs = logSpy.mock.calls.map(call => call.join(' '));
     
-    // 验证 context.getArgs() 返回完整的参数数组
+    // 验证 joinPoint.getArgs() 返回完整的参数数组
     const argsLogs = logs.filter(log => log.includes('Current args'));
     expect(argsLogs.length).toBeGreaterThan(0);
 
@@ -181,16 +181,16 @@ describe("AspectContext V2 Interface", () => {
     @Aspect()
     class MetadataAspect implements IAspect {
       app: any;
-      async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+      async run(joinPoint: AspectContext): Promise<any> {
         // 访问各种元信息
-        expect(context.getMethodName()).toBe('metadataTest');
-        expect(context.getTarget()).toBeDefined();
-        expect(context.getTarget().constructor.name).toBe('MetadataTestClass');
-        expect(context.getArgs()).toEqual(['test']);
-        expect(context.getOriginalArgs()).toEqual(['test']);
+        expect(joinPoint.getMethodName()).toBe('metadataTest');
+        expect(joinPoint.getTarget()).toBeDefined();
+        expect(joinPoint.getTarget().constructor.name).toBe('MetadataTestClass');
+        expect(joinPoint.getArgs()).toEqual(['test']);
+        expect(joinPoint.getOriginalArgs()).toEqual(['test']);
         
-        if (proceed) {
-          return await proceed();
+        if (joinPoint.hasProceed()) {
+          return await joinPoint.executeProceed();
         }
       }
     }
@@ -216,14 +216,14 @@ describe("AspectContext V2 Interface", () => {
     @Aspect()
     class OptionsAspect implements IAspect {
       app: any;
-      async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
-        const options = context.getOptions();
+      async run(joinPoint: AspectContext): Promise<any> {
+        const options = joinPoint.getOptions();
         expect(options).toBeDefined();
         expect(options.timeout).toBe(3000);
         expect(options.retry).toBe(true);
         
-        if (proceed) {
-          return await proceed();
+        if (joinPoint.hasProceed()) {
+          return await joinPoint.executeProceed();
         }
       }
     }

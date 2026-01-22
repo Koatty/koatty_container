@@ -21,18 +21,18 @@ let parameterHistory: string[] = [];
 export class ParameterModifyBeforeAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     // 记录 Before 切面接收到的参数
-    parameterHistory.push(`Before received: ${JSON.stringify(context.getArgs())}`);
+    parameterHistory.push(`Before received: ${JSON.stringify(joinPoint.getArgs())}`);
     
     // 修改参数
-    const args = context.getArgs();
+    const args = joinPoint.getArgs();
     if (args.length > 0 && typeof args[0] === 'string') {
       args[0] = `Modified_${args[0]}`;
-      context.setArgs(args);
+      joinPoint.setArgs(args);
     }
     
-    parameterHistory.push(`Before modified: ${JSON.stringify(context.getArgs())}`);
+    parameterHistory.push(`Before modified: ${JSON.stringify(joinPoint.getArgs())}`);
     return Promise.resolve();
   }
 }
@@ -44,18 +44,18 @@ export class ParameterModifyBeforeAspect implements IAspect {
 export class ParameterCheckAroundAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     // 记录 Around 切面接收到的参数
-    parameterHistory.push(`Around received: ${JSON.stringify(context.getArgs())}`);
+    parameterHistory.push(`Around received: ${JSON.stringify(joinPoint.getArgs())}`);
     
     // 验证参数已被 Before 修改
-    if (proceed) {
-      const result = await proceed();
-      parameterHistory.push(`Around after proceed: ${JSON.stringify(context.getArgs())}`);
+    if (joinPoint.hasProceed()) {
+      const result = await joinPoint.executeProceed();
+      parameterHistory.push(`Around after proceed: ${JSON.stringify(joinPoint.getArgs())}`);
       return result;
     }
     
-    return context.getArgs();
+    return joinPoint.getArgs();
   }
 }
 
@@ -66,9 +66,9 @@ export class ParameterCheckAroundAspect implements IAspect {
 export class ParameterCheckAfterAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     // 记录 After 切面接收到的参数
-    parameterHistory.push(`After received: ${JSON.stringify(context.getArgs())}`);
+    parameterHistory.push(`After received: ${JSON.stringify(joinPoint.getArgs())}`);
     
     return Promise.resolve();
   }
@@ -137,18 +137,18 @@ describe("AOP Parameter Consistency", () => {
     class AroundModifyAspect implements IAspect {
       app: any;
       
-      async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+      async run(joinPoint: AspectContext): Promise<any> {
         // Around 切面修改参数
-        const args = context.getArgs();
+        const args = joinPoint.getArgs();
         if (args.length > 0) {
           args[0] = `AroundModified_${args[0]}`;
-          context.setArgs(args);
+          joinPoint.setArgs(args);
         }
         
-        if (proceed) {
-          return await proceed();
+        if (joinPoint.hasProceed()) {
+          return await joinPoint.executeProceed();
         }
-        return context.getArgs();
+        return joinPoint.getArgs();
       }
     }
     
@@ -174,10 +174,10 @@ describe("AOP Parameter Consistency", () => {
     @Aspect()
     class FirstModifyAspect implements IAspect {
       app: any;
-      async run(context: AspectContext): Promise<any> {
-        const args = context.getArgs();
+      async run(joinPoint: AspectContext): Promise<any> {
+        const args = joinPoint.getArgs();
         args[0] = `First_${args[0]}`;
-        context.setArgs(args);
+        joinPoint.setArgs(args);
         return Promise.resolve();
       }
     }
@@ -185,10 +185,10 @@ describe("AOP Parameter Consistency", () => {
     @Aspect()
     class SecondModifyAspect implements IAspect {
       app: any;
-      async run(context: AspectContext): Promise<any> {
-        const args = context.getArgs();
+      async run(joinPoint: AspectContext): Promise<any> {
+        const args = joinPoint.getArgs();
         args[0] = `Second_${args[0]}`;
-        context.setArgs(args);
+        joinPoint.setArgs(args);
         return Promise.resolve();
       }
     }

@@ -14,7 +14,7 @@ import { Aspect } from "../src/decorator/aop";
 export class Test2Aspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log("Test2Aspect");
     return Promise.resolve("Test2Aspect");
   }

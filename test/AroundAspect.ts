@@ -15,14 +15,14 @@ import { Aspect } from "../src/decorator/aop";
 export class AroundAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log("Around Before");
-    if (proceed) {
-      const result = await proceed();
+    if (joinPoint.hasProceed()) {
+      const result = await joinPoint.executeProceed();
       console.log("Around After");
       return result;
     }
     console.log("Around After");
-    return context.getArgs();
+    return joinPoint.getArgs();
   }
 } 

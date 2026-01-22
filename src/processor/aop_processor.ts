@@ -24,10 +24,14 @@ const metadataCache = new MetadataCache({
 /**
  * Implementation of AspectContext interface.
  * Provides a unified context for aspect execution with parameter management.
+ * 
+ * Enhanced version with proceed function support built-in.
  */
 class AspectContextImpl implements AspectContext {
   private currentArgs: any[];
   private readonly originalArgs: readonly any[];
+  private proceedFn?: () => Promise<any>;
+  private readonly aspectType: 'Around/AroundEach' | 'Before/After/BeforeEach/AfterEach';
 
   constructor(
     private target: any,
@@ -35,12 +39,17 @@ class AspectContextImpl implements AspectContext {
     args: any[],
     private options: any,
     private app: any,
-    originalArgs?: readonly any[]
+    originalArgs?: readonly any[],
+    proceedFn?: () => Promise<any>
   ) {
     // Store original arguments as readonly (passed from outside to ensure immutability)
     this.originalArgs = originalArgs || Object.freeze([...args]);
     // Store current arguments as mutable
     this.currentArgs = args;
+    // Store proceed function (for Around/AroundEach aspects)
+    this.proceedFn = proceedFn;
+    // Determine aspect type based on whether proceed is provided
+    this.aspectType = proceedFn ? 'Around/AroundEach' : 'Before/After/BeforeEach/AfterEach';
   }
 
   getTarget(): any {
@@ -69,6 +78,91 @@ class AspectContextImpl implements AspectContext {
 
   getApp(): any {
     return this.app;
+  }
+
+  /**
+   * Execute the proceed function (for Around aspects).
+   * This method provides a convenient way to execute the original method or next aspect in the chain.
+   * 
+   * **IMPORTANT**: This method can ONLY be called in Around aspects.
+   * Calling it in Before or After aspects will throw an error.
+   * 
+   * @param errorHandler - Optional error handler function
+   * @returns Promise resolving to the result of the proceed function
+   * @throws Error if proceed function is not available (Before/After aspects)
+   * 
+   * @example Basic usage in Around aspect
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   console.log('Before method execution');
+   *   const result = await joinPoint.executeProceed();
+   *   console.log('After method execution');
+   *   return result;
+   * }
+   * ```
+   * 
+   * @example With error handling
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   try {
+   *     return await joinPoint.executeProceed();
+   *   } catch (error) {
+   *     console.error('Method failed:', error);
+   *     return fallbackValue;
+   *   }
+   * }
+   * ```
+   * 
+   * @example Safe usage with hasProceed() check
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   if (joinPoint.hasProceed()) {
+   *     // Safe to call in Around aspect
+   *     return await joinPoint.executeProceed();
+   *   } else {
+   *     // This is a Before or After aspect
+   *     console.log('Before/After aspect logic');
+   *   }
+   * }
+   * ```
+   */
+  async executeProceed(errorHandler?: (error: any) => any): Promise<any> {
+    if (!this.proceedFn) {
+      const errorMessage = [
+        `❌ executeProceed() can ONLY be called in Around/AroundEach aspects!`,
+        ``,
+        `Current aspect type: ${this.aspectType}`,
+        `Target method: ${this.target?.constructor?.name || 'Unknown'}.${this.methodName}`,
+        ``,
+        `💡 Solution:`,
+        `  - If you need to execute the method, use @Around or @AroundEach decorator`,
+        `  - Do NOT use @Before, @After, @BeforeEach, or @AfterEach`,
+        `  - Or check with joinPoint.hasProceed() before calling executeProceed()`,
+        ``,
+        `📚 Documentation: See docs/INTERFACE_SIMPLIFICATION.md for more details`
+      ].join('\n');
+      
+      logger.Error(errorMessage);
+      throw new Error(`executeProceed() is only available in Around/AroundEach aspects. Current aspect type: ${this.aspectType}.`);
+    }
+
+    try {
+      return await this.proceedFn();
+    } catch (error) {
+      if (errorHandler) {
+        return errorHandler(error);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Check if proceed function is available (i.e., this is an Around aspect).
+   * 
+   * @returns true if proceed is available, false otherwise
+   */
+  hasProceed(): boolean {
+    return !!this.proceedFn;
   }
 }
 
@@ -565,9 +659,9 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
             targetMethod: data.method || methodName // target method name
           };
           
-          // Create AspectContext and execute
+          // Create AspectContext and execute (no proceed for Before aspects)
           const context = new AspectContextImpl(target, methodName, args, enhancedOptions, app, originalArgs);
-          await aspect.run(context, undefined);
+          await aspect.run(context);
           // Update args from context (may have been modified)
           args = context.getArgs();
         }
@@ -595,9 +689,9 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
             targetMethod: data.method || methodName // target method name
           };
           
-          // Create AspectContext and execute
+          // Create AspectContext and execute (no proceed for After aspects)
           const context = new AspectContextImpl(target, methodName, processedArgs || [], enhancedOptions, app, originalArgs);
-          await aspect.run(context, undefined);
+          await aspect.run(context);
         }
       } catch (error) {
         logger.Error(`After aspect execution failed for ${data.aopName}:`, error);
@@ -631,17 +725,18 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
         targetMethod: selectedAspect.method || methodName // target method name
       };
 
-      // Create AspectContext
-      const context = new AspectContextImpl(target, methodName, args, enhancedOptions, app, originalArgs);
-      
-      // Create proceed function, it uses context's current args
+      // Create proceed function that uses context's current args
       const proceed = async (): Promise<any> => {
+        // This closure will have access to the context created below
         const currentArgs = context.getArgs();
         return await originalMethod.apply(target, currentArgs);
       };
 
-      // Execute aspect
-      return await aspect.run(context, proceed);
+      // Create AspectContext with proceed function (for Around aspects)
+      const context = new AspectContextImpl(target, methodName, args, enhancedOptions, app, originalArgs, proceed);
+
+      // Execute aspect (proceed is now available via joinPoint.executeProceed())
+      return await aspect.run(context);
     }
   } catch (error) {
     logger.Error(`Around aspect execution failed for ${selectedAspect.aopName}:`, error);

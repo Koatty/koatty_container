@@ -15,19 +15,19 @@ import { Aspect } from "../src/decorator/aop";
 export class OrderAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     // 输出传入的args参数，与TestAspect保持一致
-    console.log(context.getArgs());
+    console.log(joinPoint.getArgs());
     
     let result;
-    if (proceed) {
+    if (joinPoint.hasProceed()) {
       // Around 类型 - Around会在前后都执行
-      result = await proceed();
+      result = await joinPoint.executeProceed();
       // Around After阶段也输出args
-      console.log(context.getArgs());
+      console.log(joinPoint.getArgs());
     } else {
       // Before/After 类型 - Before和After分别执行，只输出一次
-      result = context.getArgs();
+      result = joinPoint.getArgs();
     }
     
     return result;

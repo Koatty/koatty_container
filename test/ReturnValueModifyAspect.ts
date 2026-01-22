@@ -15,20 +15,20 @@ import { Aspect } from "../src/decorator/aop";
 export class ReturnValueModifyAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     console.log("ReturnModify Before");
     
     let result;
-    if (proceed) {
+    if (joinPoint.hasProceed()) {
       // Around 类型
-      result = await proceed();
+      result = await joinPoint.executeProceed();
       // 修改返回值：在字符串返回值前添加 "Return_" 前缀
       if (typeof result === 'string') {
         result = `Return_${result}`;
       }
     } else {
       // Before/After 类型，不修改返回值
-      result = args;
+      result = joinPoint.getArgs();
     }
     
     console.log("ReturnModify After");

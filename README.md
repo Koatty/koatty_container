@@ -103,14 +103,20 @@ await initializeApp();
 
 ## 🎯 AOP 面向切面编程
 
-### 方法拦截
+### Before 切面 - 前置拦截
 
 ```typescript
+import { Aspect, IAspect, AspectContext, Before } from "koatty_container";
+
 @Aspect()
 export class LoggingAspect implements IAspect {
-  async run(args: any[], target?: any, options?: any): Promise<any> {
+  app: any;
+  
+  async run(joinPoint: AspectContext): Promise<any> {
+    const args = joinPoint.getArgs();
+    const options = joinPoint.getOptions();
     console.log(`🔍 调用 ${options?.targetMethod}`, args);
-    return Promise.resolve();
+    // Before 切面自动继续执行，不需要调用 executeProceed()
   }
 }
 
@@ -123,16 +129,20 @@ class OrderService {
 }
 ```
 
-### 环绕通知 (Around)
+### Around 切面 - 环绕通知
 
 ```typescript
 @Aspect()
-class TransactionAspect {
-  async run(args: any[], proceed: Function, options?: any): Promise<any> {
+class TransactionAspect implements IAspect {
+  app: any;
+  
+  async run(joinPoint: AspectContext): Promise<any> {
+    const options = joinPoint.getOptions();
     console.log(`🔄 开始事务: ${options?.targetMethod}`);
     
     try {
-      const result = await proceed(args);
+      // ⚠️ Around 切面必须调用 executeProceed() 来执行原方法
+      const result = await joinPoint.executeProceed();
       console.log(`✅ 提交事务: ${options?.targetMethod}`);
       return {
         ...result,
@@ -154,6 +164,103 @@ class UserService {
   }
 }
 ```
+
+### After 切面 - 后置拦截
+
+```typescript
+@Aspect()
+class AuditAspect implements IAspect {
+  app: any;
+  
+  async run(joinPoint: AspectContext): Promise<any> {
+    // After 切面中，方法结果在 args[0] 中
+    const result = joinPoint.getArgs()[0];
+    const options = joinPoint.getOptions();
+    console.log(`📝 审计日志 ${options?.targetMethod}:`, result);
+    // After 切面不需要调用 executeProceed()
+  }
+}
+
+@Component()
+class PaymentService {
+  @After(AuditAspect)
+  async processPayment(amount: number) {
+    return { success: true, amount, transactionId: Date.now() };
+  }
+}
+```
+
+### ⚠️ 重要：executeProceed() 安全保护
+
+为防止误用，`executeProceed()` 只能在 Around/AroundEach 切面中调用：
+
+| 切面类型 | 可否调用 executeProceed() | 说明 |
+|---------|-------------------------|------|
+| **Before** | ❌ 不可以 | 自动执行原方法，会抛出错误 |
+| **BeforeEach** | ❌ 不可以 | 应用于所有方法，会抛出错误 |
+| **After** | ❌ 不可以 | 在方法执行后运行，会抛出错误 |
+| **AfterEach** | ❌ 不可以 | 应用于所有方法，会抛出错误 |
+| **Around** | ✅ **必须调用** | 完全控制单个方法执行 |
+| **AroundEach** | ✅ **必须调用** | 完全控制所有方法执行 |
+
+```typescript
+// ❌ 错误示例：在 Before 中调用 executeProceed()
+@Before(WrongAspect)
+class WrongAspect implements IAspect {
+  app: any;
+  async run(joinPoint: AspectContext): Promise<any> {
+    // 这会抛出错误！
+    return await joinPoint.executeProceed();
+  }
+}
+
+// ✅ 正确示例：使用 hasProceed() 检查
+@Aspect()
+class SafeAspect implements IAspect {
+  app: any;
+  async run(joinPoint: AspectContext): Promise<any> {
+    if (joinPoint.hasProceed()) {
+      // Around 切面
+      return await joinPoint.executeProceed();
+    } else {
+      // Before/After 切面
+      console.log('Before/After logic');
+    }
+  }
+}
+```
+
+### 切面叠加使用
+
+多种切面可以叠加使用，形成强大的处理链：
+
+```typescript
+@Component()
+@BeforeEach(LoggingAspect)   // 类级：所有方法前记录日志
+@AfterEach(MetricsAspect)    // 类级：所有方法后收集指标
+class OrderService {
+  @Before(ValidationAspect)   // 方法级：参数验证
+  @Around(TransactionAspect)  // 方法级：事务控制
+  @After(NotificationAspect)  // 方法级：发送通知
+  async createOrder(orderData: any) {
+    return { orderId: Date.now(), ...orderData };
+  }
+}
+```
+
+**执行顺序：**
+```
+LoggingAspect (BeforeEach) → ValidationAspect (Before) → 
+TransactionAspect (Around - 前) → 原方法 → TransactionAspect (Around - 后) →
+NotificationAspect (After) → MetricsAspect (AfterEach)
+```
+
+**关键规则：**
+- ✅ Before 修改的参数会传递给 Around 和原方法
+- ✅ 每个切面的保护机制独立生效
+- ✅ Around 必须调用 `executeProceed()` 来继续执行链
+
+详细文档：[保护机制说明](./docs/PROTECTION_MECHANISM.md) | [接口简化说明](./docs/INTERFACE_SIMPLIFICATION.md)
 
 ## 🎨 自定义装饰器详解
 

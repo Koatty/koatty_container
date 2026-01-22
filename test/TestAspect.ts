@@ -14,13 +14,13 @@ import { Aspect } from "../src/decorator/aop";
 export class TestAspect implements IAspect {
   app: any;
   
-  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+  async run(joinPoint: AspectContext): Promise<any> {
     // TestAspect输出接收的参数数组
-    console.log(context.getArgs());
+    console.log(joinPoint.getArgs());
     
     // 如果有proceed函数（Around类型），需要调用它来继续执行链
-    if (proceed) {
-      return await proceed();
+    if (joinPoint.hasProceed()) {
+      return await joinPoint.executeProceed();
     }
     
     // 对于Before/After类型，不需要返回值

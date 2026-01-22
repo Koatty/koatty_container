@@ -395,7 +395,7 @@ export interface ObjectDefinitionOptions {
 }
 
 /**
- * AOP Aspect execution context.
+ * AOP Aspect execution context (Join Point).
  * Provides a unified interface to access and modify method execution context.
  * 
  * Inspired by Spring's ProceedingJoinPoint, this context object:
@@ -403,6 +403,9 @@ export interface ObjectDefinitionOptions {
  * - Provides immutable access to original parameters
  * - Allows controlled parameter modification
  * - Includes method and target metadata
+ * 
+ * Note: In aspect implementations, this is typically named "joinPoint" to align
+ * with AOP terminology and avoid confusion with Koa's context in the koatty framework.
  * 
  * @export
  * @interface AspectContext
@@ -412,14 +415,14 @@ export interface ObjectDefinitionOptions {
  * export class LoggingAspect implements IAspect {
  *   app: any;
  *   
- *   async run(context: AspectContext, proceed?: Function): Promise<any> {
- *     console.log('Method:', context.getMethodName());
- *     console.log('Args:', context.getArgs());
+ *   async run(joinPoint: AspectContext, proceed?: Function): Promise<any> {
+ *     console.log('Method:', joinPoint.getMethodName());
+ *     console.log('Args:', joinPoint.getArgs());
  *     
  *     // Modify arguments
- *     const args = context.getArgs();
+ *     const args = joinPoint.getArgs();
  *     args[0] = args[0].trim();
- *     context.setArgs(args);
+ *     joinPoint.setArgs(args);
  *     
  *     if (proceed) {
  *       return await proceed();
@@ -499,6 +502,105 @@ export interface AspectContext {
    * @returns Application instance or undefined
    */
   getApp(): Application | undefined;
+
+  /**
+   * Execute the proceed function to continue the execution chain.
+   * 
+   * ⚠️ **IMPORTANT**: This method can ONLY be called in Around/AroundEach aspects!
+   * Calling it in Before, After, BeforeEach, or AfterEach aspects will throw an error at runtime.
+   * 
+   * This method automatically uses the current arguments from the context,
+   * so any modifications made via setArgs() will be reflected in the method execution.
+   * 
+   * @param errorHandler - Optional error handler function
+   * @returns Promise resolving to the result of the method execution
+   * @throws Error if called from Before/After/BeforeEach/AfterEach aspects (where proceed is not available)
+   * 
+   * @example ✅ Correct usage in Around/AroundEach aspect
+   * ```typescript
+   * @Around(MyAspect)
+   * class MyAspect implements IAspect {
+   *   async run(joinPoint: AspectContext): Promise<any> {
+   *     console.log('Before execution');
+   *     const result = await joinPoint.executeProceed(); // ✅ OK
+   *     console.log('After execution');
+   *     return result;
+   *   }
+   * }
+   * 
+   * @AroundEach(MyAspect)
+   * class MyAspect implements IAspect {
+   *   async run(joinPoint: AspectContext): Promise<any> {
+   *     console.log('Around each method');
+   *     const result = await joinPoint.executeProceed(); // ✅ OK
+   *     return result;
+   *   }
+   * }
+   * ```
+   * 
+   * @example ❌ Incorrect usage in Before aspect (will throw error)
+   * ```typescript
+   * @Before(MyAspect)
+   * class MyAspect implements IAspect {
+   *   async run(joinPoint: AspectContext): Promise<any> {
+   *     const result = await joinPoint.executeProceed(); // ❌ ERROR!
+   *     return result;
+   *   }
+   * }
+   * 
+   * @BeforeEach(MyAspect)
+   * class MyAspect implements IAspect {
+   *   async run(joinPoint: AspectContext): Promise<any> {
+   *     const result = await joinPoint.executeProceed(); // ❌ ERROR!
+   *     return result;
+   *   }
+   * }
+   * ```
+   * 
+   * @example ✅ Safe usage with hasProceed() check
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   if (joinPoint.hasProceed()) {
+   *     // Safe to call - this is an Around aspect
+   *     return await joinPoint.executeProceed();
+   *   } else {
+   *     // This is a Before or After aspect
+   *     console.log('Before/After logic');
+   *   }
+   * }
+   * ```
+   * 
+   * @example With error handling
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   const result = await joinPoint.executeProceed((error) => {
+   *     console.error('Error:', error);
+   *     return fallbackValue;
+   *   });
+   *   return result;
+   * }
+   * ```
+   */
+  executeProceed(errorHandler?: (error: any) => any): Promise<any>;
+
+  /**
+   * Check if proceed is available (i.e., this is an Around aspect).
+   * 
+   * @returns true if this is an Around aspect, false for Before/After
+   * @example
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   if (joinPoint.hasProceed()) {
+   *     // This is an Around aspect
+   *     return await joinPoint.executeProceed();
+   *   } else {
+   *     // This is a Before or After aspect
+   *     console.log('No proceed available');
+   *   }
+   * }
+   * ```
+   */
+  hasProceed(): boolean;
 }
 
 /**
@@ -507,8 +609,11 @@ export interface AspectContext {
  * Aspects are used to add cross-cutting concerns (logging, security, transactions, etc.)
  * to methods without modifying their core business logic.
  * 
- * This interface uses AspectContext to provide a unified and type-safe way to access
+ * This interface uses AspectContext (join point) to provide a unified and type-safe way to access
  * method metadata, arguments, and execution context.
+ * 
+ * Note: The parameter is named "joinPoint" (instead of "context") to align with AOP terminology
+ * and avoid confusion with Koa's context object in the koatty framework.
  *
  * @export
  * @interface IAspect
@@ -518,9 +623,9 @@ export interface AspectContext {
  * export class LoggingAspect implements IAspect {
  *   app: any;
  *   
- *   async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
- *     console.log('Method:', context.getMethodName());
- *     console.log('Args:', context.getArgs());
+ *   async run(joinPoint: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+ *     console.log('Method:', joinPoint.getMethodName());
+ *     console.log('Args:', joinPoint.getArgs());
  *     
  *     if (proceed) {
  *       const result = await proceed();
@@ -539,30 +644,26 @@ export interface IAspect {
   app: Application;
 
   /**
-   * Main execution method for the aspect with AspectContext support.
+   * Main execution method for the aspect with unified AspectContext support.
    * 
-   * @param context - Aspect execution context providing:
-   *                  - Method metadata (name, target object)
-   *                  - Current arguments (mutable via setArgs)
-   *                  - Original arguments (immutable)
-   *                  - Custom options from decorator
-   *                  - Application instance
-   * 
-   * @param proceed - Optional function to execute the original method or next aspect.
-   *                  - For **Before/After** aspects: This is `undefined`
-   *                  - For **Around** aspects: Must be called to execute the original method
-   *                    * Automatically uses current args from context
-   *                    * Can be wrapped for error handling, timing, etc.
+   * @param joinPoint - Aspect join point context providing:
+   *                    - Method metadata (name, target object)
+   *                    - Current arguments (mutable via setArgs)
+   *                    - Original arguments (immutable)
+   *                    - Custom options from decorator
+   *                    - Application instance
+   *                    - executeProceed() method (for Around aspects)
+   *                    Named "joinPoint" to avoid confusion with Koa's context
    * 
    * @returns Promise resolving to:
-   *          - For **Around** aspects: The result from `proceed()` (possibly modified)
+   *          - For **Around** aspects: The result from `joinPoint.executeProceed()` (possibly modified)
    *          - For **Before** aspects: Return value is ignored
    *          - For **After** aspects: Return value is ignored
    * 
    * @example Before aspect - validation
    * ```typescript
-   * async run(context: AspectContext): Promise<any> {
-   *   const args = context.getArgs();
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   const args = joinPoint.getArgs();
    *   if (!args[0]) {
    *     throw new Error('First argument is required');
    *   }
@@ -571,42 +672,50 @@ export interface IAspect {
    * 
    * @example Around aspect - parameter modification
    * ```typescript
-   * async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+   * async run(joinPoint: AspectContext): Promise<any> {
    *   // Modify arguments
-   *   const args = context.getArgs();
+   *   const args = joinPoint.getArgs();
    *   args[0] = args[0].trim().toUpperCase();
-   *   context.setArgs(args);
+   *   joinPoint.setArgs(args);
    *   
    *   // Execute with modified args
-   *   if (proceed) {
-   *     return await proceed();
-   *   }
+   *   return await joinPoint.executeProceed();
    * }
    * ```
    * 
    * @example Around aspect - error handling and timing
    * ```typescript
-   * async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+   * async run(joinPoint: AspectContext): Promise<any> {
    *   const startTime = Date.now();
    *   try {
-   *     const result = await proceed?.();
-   *     console.log(`${context.getMethodName()} took ${Date.now() - startTime}ms`);
+   *     const result = await joinPoint.executeProceed();
+   *     console.log(`${joinPoint.getMethodName()} took ${Date.now() - startTime}ms`);
    *     return result;
    *   } catch (error) {
-   *     console.error(`${context.getMethodName()} failed:`, error);
+   *     console.error(`${joinPoint.getMethodName()} failed:`, error);
    *     throw error;
    *   }
    * }
    * ```
    * 
+   * @example Around aspect - conditional execution
+   * ```typescript
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   if (someCondition) {
+   *     return 'bypassed'; // Don't execute original method
+   *   }
+   *   return await joinPoint.executeProceed();
+   * }
+   * ```
+   * 
    * @example After aspect - accessing execution context
    * ```typescript
-   * async run(context: AspectContext): Promise<any> {
-   *   console.log('Method executed:', context.getMethodName());
-   *   console.log('Final args:', context.getArgs());
-   *   console.log('Original args:', context.getOriginalArgs());
+   * async run(joinPoint: AspectContext): Promise<any> {
+   *   console.log('Method executed:', joinPoint.getMethodName());
+   *   console.log('Final args:', joinPoint.getArgs());
+   *   console.log('Original args:', joinPoint.getOriginalArgs());
    * }
    * ```
    */
-  run(context: AspectContext, proceed?: () => Promise<any>): Promise<any>;
+  run(joinPoint: AspectContext): Promise<any>;
 }
