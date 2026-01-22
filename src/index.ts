@@ -16,3 +16,5 @@ export * from "./manager/index";
 // export { MetadataCache } from "./utils/cache";
 // export { CircularDepDetector, CircularDepError } from "./utils/circular";
 
+// Export enhanced AOP types (interfaces with AspectContext support)
+export type { AspectContext, IAspect } from "./container/icontainer";

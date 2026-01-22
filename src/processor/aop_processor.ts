@@ -7,7 +7,7 @@
 
 import { DefaultLogger as logger } from "koatty_logger";
 import { IOCContainer } from "../container/container";
-import { IAspect, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
+import { IAspect, AspectContext, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
 import { MetadataCache, CacheType } from "../utils/cache";
 
 // Unified cache instance for all AOP operations
@@ -20,6 +20,58 @@ const metadataCache = new MetadataCache({
     [CacheType.ASPECT_INSTANCES]: { capacity: 200, ttl: 30 * 60 * 1000 }
   }
 });
+
+/**
+ * Implementation of AspectContext interface.
+ * Provides a unified context for aspect execution with parameter management.
+ */
+class AspectContextImpl implements AspectContext {
+  private currentArgs: any[];
+  private readonly originalArgs: readonly any[];
+
+  constructor(
+    private target: any,
+    private methodName: string,
+    args: any[],
+    private options: any,
+    private app: any,
+    originalArgs?: readonly any[]
+  ) {
+    // Store original arguments as readonly (passed from outside to ensure immutability)
+    this.originalArgs = originalArgs || Object.freeze([...args]);
+    // Store current arguments as mutable
+    this.currentArgs = args;
+  }
+
+  getTarget(): any {
+    return this.target;
+  }
+
+  getMethodName(): string {
+    return this.methodName;
+  }
+
+  getArgs(): any[] {
+    return this.currentArgs;
+  }
+
+  setArgs(args: any[]): void {
+    this.currentArgs = args;
+  }
+
+  getOriginalArgs(): readonly any[] {
+    return this.originalArgs;
+  }
+
+  getOptions(): any {
+    return this.options;
+  }
+
+  getApp(): any {
+    return this.app;
+  }
+}
+
 
 // AOP statistics tracking
 let aopCacheStats = {
@@ -204,6 +256,143 @@ async function get(aopName: string): Promise<IAspect> {
 }
 
 /**
+ * Get the parameter count of the aspect's run method
+ * @param aspect The aspect instance
+ * @returns The number of parameters in the run method
+ */
+function getAspectRunParamCount(aspect: IAspect): number {
+  if (!aspect || typeof aspect.run !== 'function') {
+    return 0;
+  }
+  // Function.length returns the number of declared parameters
+  return aspect.run.length;
+}
+
+/**
+ * Get the parameter names of a function
+ * @param fn The function to analyze
+ * @returns Array of parameter names
+ */
+function getFunctionParamNames(fn: Function): string[] {
+  const fnStr = fn.toString();
+  // Match parameters in function declaration
+  const result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g);
+  return result || [];
+}
+
+/**
+ * Prepare arguments for aspect run method based on its parameter definition
+ * 
+ * Rules:
+ * 1. If run method has 0 params declared -> pass original args array (backward compatible)
+ * 2. If run method has 1 param declared:
+ *    - Check if param type is 'object' -> pack all method params into object with param names as keys
+ *    - Otherwise -> pass only the first argument (auto-destructure single value)
+ * 3. If run method has 2+ params declared -> destructure and pass multiple arguments
+ * 
+ * @param aspect The aspect instance
+ * @param methodArgs The original method arguments
+ * @param methodParamNames Optional parameter names from the decorated method (for object packing)
+ * @returns Prepared arguments for aspect.run()
+ * 
+ * @internal Reserved for future use
+ */
+function _prepareAspectArgs(
+  aspect: IAspect,
+  methodArgs: any[],
+  methodParamNames?: string[]
+): { args: any[], useSpread: boolean } {
+  const paramCount = getAspectRunParamCount(aspect);
+  const aspectParamNames = getFunctionParamNames(aspect.run);
+  
+  // Backward compatible: if aspect.run declares standard signature (args, proceed?, options?)
+  // or uses array type, keep passing args as array
+  if (paramCount === 0 || paramCount >= 2) {
+    // Check if first param looks like array/args parameter (common patterns)
+    if (aspectParamNames.length > 0) {
+      const firstParam = aspectParamNames[0].toLowerCase();
+      if (firstParam === 'args' || firstParam.includes('args') || firstParam.includes('array')) {
+        return { args: [methodArgs], useSpread: false };
+      }
+    }
+    
+    // For 2+ params without 'args' pattern, try to match method params to aspect params
+    if (paramCount >= 2 && methodArgs.length > 0) {
+      // Destructure: pass individual arguments
+      return { args: methodArgs.slice(0, paramCount), useSpread: true };
+    }
+    
+    // Default: pass args as array (backward compatible)
+    return { args: [methodArgs], useSpread: false };
+  }
+  
+  // paramCount === 1: single parameter scenario
+  const firstParamName = aspectParamNames[0]?.toLowerCase() || '';
+  
+  // Check if it's the standard array pattern
+  if (firstParamName === 'args' || firstParamName.includes('args') || firstParamName.includes('array')) {
+    return { args: [methodArgs], useSpread: false };
+  }
+  
+  // Check if first param is typed as object by looking at the parameter pattern
+  // This is a heuristic - we check if the aspect expects an object by its parameter name
+  // Common object parameter patterns: obj, data, params, options, payload, etc.
+  const objectPatterns = ['obj', 'object', 'data', 'params', 'payload', 'request', 'req', 'body'];
+  const isObjectParam = objectPatterns.some(pattern => 
+    firstParamName === pattern || firstParamName.includes(pattern)
+  );
+  
+  if (isObjectParam && methodParamNames && methodParamNames.length > 0) {
+    // Pack all method parameters into an object using method parameter names as keys
+    const packedObj: Record<string, any> = {};
+    methodParamNames.forEach((name, index) => {
+      if (index < methodArgs.length) {
+        packedObj[name] = methodArgs[index];
+      }
+    });
+    return { args: [packedObj], useSpread: true };
+  }
+  
+  // Single primitive parameter: pass only the first argument
+  if (methodArgs.length > 0) {
+    return { args: [methodArgs[0]], useSpread: true };
+  }
+  
+  // No arguments to pass
+  return { args: [undefined], useSpread: true };
+}
+
+/**
+ * Get method parameter names using reflect-metadata or function parsing
+ * @param target The target class
+ * @param methodName The method name
+ * @returns Array of parameter names
+ * 
+ * @internal Reserved for future use
+ */
+function _getMethodParamNames(target: any, methodName: string): string[] {
+  try {
+    // Try to get from reflect-metadata first
+    const _paramTypes = Reflect.getMetadata('design:paramtypes', target.prototype || target, methodName);
+    const paramNames = Reflect.getMetadata('design:paramnames', target.prototype || target, methodName);
+    
+    if (paramNames && Array.isArray(paramNames)) {
+      return paramNames;
+    }
+    
+    // Fallback: parse function to extract parameter names
+    const method = (target.prototype || target)[methodName];
+    if (typeof method === 'function') {
+      return getFunctionParamNames(method);
+    }
+  } catch (error) {
+    logger.Debug(`Failed to get parameter names for ${methodName}:`, error);
+  }
+  
+  return [];
+}
+
+/**
  * Get all methods of a target class/object with caching
  * Excludes constructor, init, __before, __after methods for BeforeEach/AfterEach/AroundEach decorators
  */
@@ -364,7 +553,7 @@ export function getAOPMethodMetadata(target: any, methodName: string): any[] {
 /**
  * Execute before aspects
  */
-async function executeBefore(target: any, methodName: string, args: any[], aspectData: any[]): Promise<any[]> {
+async function executeBefore(target: any, methodName: string, args: any[], aspectData: any[], app?: any, originalArgs?: readonly any[]): Promise<any[]> {
   for (const data of aspectData) {
     if (data.type === 'Before' || data.type === 'BeforeEach') {
       try {
@@ -375,7 +564,12 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
             ...data.options,
             targetMethod: data.method || methodName // target method name
           };
-          await aspect.run(args, undefined, enhancedOptions);
+          
+          // Create AspectContext and execute
+          const context = new AspectContextImpl(target, methodName, args, enhancedOptions, app, originalArgs);
+          await aspect.run(context, undefined);
+          // Update args from context (may have been modified)
+          args = context.getArgs();
         }
       } catch (error) {
         logger.Error(`Before aspect execution failed for ${data.aopName}:`, error);
@@ -389,7 +583,7 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
 /**
  * Execute after aspects
  */
-async function executeAfter(target: any, methodName: string, result: any, aspectData: any[], originalArgs?: any[]): Promise<any> {
+async function executeAfter(target: any, methodName: string, result: any, aspectData: any[], processedArgs?: any[], app?: any, originalArgs?: readonly any[]): Promise<any> {
   for (const data of aspectData) {
     if (data.type === 'After' || data.type === 'AfterEach') {
       try {
@@ -400,7 +594,10 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
             ...data.options,
             targetMethod: data.method || methodName // target method name
           };
-          await aspect.run(originalArgs || [], undefined, enhancedOptions);
+          
+          // Create AspectContext and execute
+          const context = new AspectContextImpl(target, methodName, processedArgs || [], enhancedOptions, app, originalArgs);
+          await aspect.run(context, undefined);
         }
       } catch (error) {
         logger.Error(`After aspect execution failed for ${data.aopName}:`, error);
@@ -414,7 +611,7 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
 /**
  * Execute around aspects
  */
-async function executeAround(target: any, methodName: string, args: any[], aspectData: any[], originalMethod: Function): Promise<any> {
+async function executeAround(target: any, methodName: string, args: any[], aspectData: any[], originalMethod: Function, app?: any, originalArgs?: readonly any[]): Promise<any> {
   const aroundAspects = aspectData.filter(data => data.type === 'Around' || data.type === 'AroundEach');
 
   if (aroundAspects.length === 0) {
@@ -428,20 +625,23 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
   try {
     const aspect = await get(selectedAspect.aopName);
     if (aspect && typeof aspect.run === 'function') {
-      // create proceed function, it represents the execution of the original method
-      const proceed = async (modifiedArgs?: any[]): Promise<any> => {
-        const finalArgs = modifiedArgs || args;
-        return await originalMethod.apply(target, finalArgs);
-      };
-
       // pass the target method name through options to the aspect, let the aspect know which method is being intercepted
       const enhancedOptions = {
         ...selectedAspect.options,
         targetMethod: selectedAspect.method || methodName // target method name
       };
 
-      // call
-      return await aspect.run(args, proceed, enhancedOptions);
+      // Create AspectContext
+      const context = new AspectContextImpl(target, methodName, args, enhancedOptions, app, originalArgs);
+      
+      // Create proceed function, it uses context's current args
+      const proceed = async (): Promise<any> => {
+        const currentArgs = context.getArgs();
+        return await originalMethod.apply(target, currentArgs);
+      };
+
+      // Execute aspect
+      return await aspect.run(context, proceed);
     }
   } catch (error) {
     logger.Error(`Around aspect execution failed for ${selectedAspect.aopName}:`, error);
@@ -525,7 +725,13 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
   descriptor.value = async function (...args: any[]) {
     const aspectData = getAOPMethodMetadata(target, methodName);
 
+    // Save original arguments BEFORE any modifications (for AspectContext)
+    const originalArgs = Object.freeze([...args]);
+
     try {
+      // Get app instance if available
+      const app = (this as any).app;
+
       // Check for __before method - highest priority, mutually exclusive with @BeforeEach
       const hasDefaultBefore = typeof this.__before === 'function';
       const hasBeforeEach = aspectData.some(data => data.type === 'BeforeEach');
@@ -552,32 +758,32 @@ function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDe
       let processedArgs = args;
       const beforeAspects = aspectData.filter(data => data.type === 'Before');
       if (beforeAspects.length > 0) {
-        processedArgs = await executeBefore(this, methodName, args, beforeAspects);
+        processedArgs = await executeBefore(this, methodName, args, beforeAspects, app, originalArgs);
       }
 
       // 3. Execute BeforeEach aspects only if __before doesn't exist (mutually exclusive)
       if (!hasDefaultBefore) {
         const beforeEachAspects = aspectData.filter(data => data.type === 'BeforeEach');
         if (beforeEachAspects.length > 0) {
-          processedArgs = await executeBefore(this, methodName, processedArgs, beforeEachAspects);
+          processedArgs = await executeBefore(this, methodName, processedArgs, beforeEachAspects, app, originalArgs);
         }
       }
 
       // 4. Execute Around aspects or original method
-      let result = await executeAround(this, methodName, processedArgs, aspectData, originalMethod);
+      let result = await executeAround(this, methodName, processedArgs, aspectData, originalMethod, app, originalArgs);
 
       // 5. Execute AfterEach aspects only if __after doesn't exist (mutually exclusive)
       if (!hasDefaultAfter) {
         const afterEachAspects = aspectData.filter(data => data.type === 'AfterEach');
         if (afterEachAspects.length > 0) {
-          result = await executeAfter(this, methodName, result, afterEachAspects, args);
+          result = await executeAfter(this, methodName, result, afterEachAspects, processedArgs, app, originalArgs);
         }
       }
 
       // 6. Execute @After aspects
       const afterAspects = aspectData.filter(data => data.type === 'After');
       if (afterAspects.length > 0) {
-        result = await executeAfter(this, methodName, result, afterAspects, args);
+        result = await executeAfter(this, methodName, result, afterAspects, processedArgs, app, originalArgs);
       }
 
       // 7. Execute __after if exists (highest priority, always last)

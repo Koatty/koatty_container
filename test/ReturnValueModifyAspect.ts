@@ -8,20 +8,20 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { IAspect } from "../src/container/icontainer";
+import { IAspect, AspectContext } from "../src/container/icontainer";
 import { Aspect } from "../src/decorator/aop";
 
 @Aspect()
 export class ReturnValueModifyAspect implements IAspect {
   app: any;
   
-  async run(args: any[], proceed?: Function): Promise<any> {
+  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
     console.log("ReturnModify Before");
     
     let result;
     if (proceed) {
       // Around 类型
-      result = await proceed(args);
+      result = await proceed();
       // 修改返回值：在字符串返回值前添加 "Return_" 前缀
       if (typeof result === 'string') {
         result = `Return_${result}`;

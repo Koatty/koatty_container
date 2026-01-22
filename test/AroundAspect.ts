@@ -8,21 +8,21 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { IAspect } from "../src/container/icontainer";
+import { IAspect, AspectContext } from "../src/container/icontainer";
 import { Aspect } from "../src/decorator/aop";
 
 @Aspect()
 export class AroundAspect implements IAspect {
   app: any;
   
-  async run(args: any[], proceed?: Function): Promise<any> {
+  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
     console.log("Around Before");
     if (proceed) {
-      const result = await proceed(args);
+      const result = await proceed();
       console.log("Around After");
       return result;
     }
     console.log("Around After");
-    return args;
+    return context.getArgs();
   }
 } 

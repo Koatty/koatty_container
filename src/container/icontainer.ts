@@ -395,13 +395,218 @@ export interface ObjectDefinitionOptions {
 }
 
 /**
- * Aspect interface
+ * AOP Aspect execution context.
+ * Provides a unified interface to access and modify method execution context.
+ * 
+ * Inspired by Spring's ProceedingJoinPoint, this context object:
+ * - Ensures parameter consistency across all aspect types (Before, Around, After)
+ * - Provides immutable access to original parameters
+ * - Allows controlled parameter modification
+ * - Includes method and target metadata
+ * 
+ * @export
+ * @interface AspectContext
+ * @example
+ * ```typescript
+ * @Aspect()
+ * export class LoggingAspect implements IAspect {
+ *   app: any;
+ *   
+ *   async run(context: AspectContext, proceed?: Function): Promise<any> {
+ *     console.log('Method:', context.getMethodName());
+ *     console.log('Args:', context.getArgs());
+ *     
+ *     // Modify arguments
+ *     const args = context.getArgs();
+ *     args[0] = args[0].trim();
+ *     context.setArgs(args);
+ *     
+ *     if (proceed) {
+ *       return await proceed();
+ *     }
+ *   }
+ * }
+ * ```
+ */
+export interface AspectContext {
+  /**
+   * Get the target object instance being intercepted.
+   * 
+   * @returns The target object instance
+   */
+  getTarget(): any;
+
+  /**
+   * Get the name of the intercepted method.
+   * 
+   * @returns Method name as string
+   */
+  getMethodName(): string;
+
+  /**
+   * Get the current arguments (may have been modified by previous aspects).
+   * Returns a reference to the mutable arguments array.
+   * 
+   * @returns Current arguments array
+   * @example
+   * ```typescript
+   * const args = context.getArgs();
+   * args[0] = 'modified'; // Modifies the actual arguments
+   * ```
+   */
+  getArgs(): any[];
+
+  /**
+   * Set new arguments for the method execution.
+   * This will affect subsequent aspects and the original method.
+   * 
+   * @param args - New arguments array
+   * @example
+   * ```typescript
+   * context.setArgs(['new', 'arguments']);
+   * ```
+   */
+  setArgs(args: any[]): void;
+
+  /**
+   * Get the original arguments passed to the method (immutable).
+   * This provides access to the arguments before any aspect modifications.
+   * 
+   * @returns Readonly copy of original arguments
+   * @example
+   * ```typescript
+   * const original = context.getOriginalArgs();
+   * // original cannot be modified
+   * ```
+   */
+  getOriginalArgs(): readonly any[];
+
+  /**
+   * Get custom options passed from the decorator.
+   * 
+   * @returns Options object or undefined
+   * @example
+   * ```typescript
+   * // With decorator: @Around(MyAspect, { timeout: 3000 })
+   * const timeout = context.getOptions()?.timeout; // 3000
+   * ```
+   */
+  getOptions(): any;
+
+  /**
+   * Get application instance reference.
+   * 
+   * @returns Application instance or undefined
+   */
+  getApp(): Application | undefined;
+}
+
+/**
+ * Aspect interface for AOP (Aspect-Oriented Programming) implementation.
+ * 
+ * Aspects are used to add cross-cutting concerns (logging, security, transactions, etc.)
+ * to methods without modifying their core business logic.
+ * 
+ * This interface uses AspectContext to provide a unified and type-safe way to access
+ * method metadata, arguments, and execution context.
  *
  * @export
  * @interface IAspect
+ * @example
+ * ```typescript
+ * @Aspect()
+ * export class LoggingAspect implements IAspect {
+ *   app: any;
+ *   
+ *   async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+ *     console.log('Method:', context.getMethodName());
+ *     console.log('Args:', context.getArgs());
+ *     
+ *     if (proceed) {
+ *       const result = await proceed();
+ *       console.log('Result:', result);
+ *       return result;
+ *     }
+ *   }
+ * }
+ * ```
  */
 export interface IAspect {
+  /**
+   * Application instance reference.
+   * Provides access to the application context within the aspect.
+   */
   app: Application;
 
-  run: (args: any[], proceed?: Function, options?: any) => Promise<any>;
+  /**
+   * Main execution method for the aspect with AspectContext support.
+   * 
+   * @param context - Aspect execution context providing:
+   *                  - Method metadata (name, target object)
+   *                  - Current arguments (mutable via setArgs)
+   *                  - Original arguments (immutable)
+   *                  - Custom options from decorator
+   *                  - Application instance
+   * 
+   * @param proceed - Optional function to execute the original method or next aspect.
+   *                  - For **Before/After** aspects: This is `undefined`
+   *                  - For **Around** aspects: Must be called to execute the original method
+   *                    * Automatically uses current args from context
+   *                    * Can be wrapped for error handling, timing, etc.
+   * 
+   * @returns Promise resolving to:
+   *          - For **Around** aspects: The result from `proceed()` (possibly modified)
+   *          - For **Before** aspects: Return value is ignored
+   *          - For **After** aspects: Return value is ignored
+   * 
+   * @example Before aspect - validation
+   * ```typescript
+   * async run(context: AspectContext): Promise<any> {
+   *   const args = context.getArgs();
+   *   if (!args[0]) {
+   *     throw new Error('First argument is required');
+   *   }
+   * }
+   * ```
+   * 
+   * @example Around aspect - parameter modification
+   * ```typescript
+   * async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+   *   // Modify arguments
+   *   const args = context.getArgs();
+   *   args[0] = args[0].trim().toUpperCase();
+   *   context.setArgs(args);
+   *   
+   *   // Execute with modified args
+   *   if (proceed) {
+   *     return await proceed();
+   *   }
+   * }
+   * ```
+   * 
+   * @example Around aspect - error handling and timing
+   * ```typescript
+   * async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+   *   const startTime = Date.now();
+   *   try {
+   *     const result = await proceed?.();
+   *     console.log(`${context.getMethodName()} took ${Date.now() - startTime}ms`);
+   *     return result;
+   *   } catch (error) {
+   *     console.error(`${context.getMethodName()} failed:`, error);
+   *     throw error;
+   *   }
+   * }
+   * ```
+   * 
+   * @example After aspect - accessing execution context
+   * ```typescript
+   * async run(context: AspectContext): Promise<any> {
+   *   console.log('Method executed:', context.getMethodName());
+   *   console.log('Final args:', context.getArgs());
+   *   console.log('Original args:', context.getOriginalArgs());
+   * }
+   * ```
+   */
+  run(context: AspectContext, proceed?: () => Promise<any>): Promise<any>;
 }

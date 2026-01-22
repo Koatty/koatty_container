@@ -8,21 +8,21 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { IAspect } from "../src/container/icontainer";
+import { IAspect, AspectContext } from "../src/container/icontainer";
 import { Aspect } from "../src/decorator/aop";
 
 @Aspect()
 export class ErrorAspect implements IAspect {
   app: any;
   
-  async run(args: any[], proceed?: Function): Promise<any> {
+  async run(context: AspectContext, proceed?: () => Promise<any>): Promise<any> {
     console.log("Error Before");
     
     try {
       let result;
       if (proceed) {
         // Around 类型
-        result = await proceed(args);
+        result = await proceed();
       } else {
         // Before/After 类型
         result = args;
