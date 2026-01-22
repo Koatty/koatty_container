@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/koatty/koatty_container/compare/v1.16.0...v1.17.0) (2026-01-22)
+
+
+### Features
+
+* enhance AOP with AspectContext interface and improved execution flow ([a95cf4a](https://github.com/koatty/koatty_container/commit/a95cf4aab4c31fec1755307283958e4ecc17b13f))
+* enhance AOP with unified AspectContext and executeProceed safety ([72b5fee](https://github.com/koatty/koatty_container/commit/72b5fee4c3b8554eb12d9a642e00988822268a05))
+
 ## [1.16.0](https://github.com/koatty/koatty_container/compare/v1.15.0...v1.16.0) (2025-06-11)
 
 
