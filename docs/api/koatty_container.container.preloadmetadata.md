@@ -72,7 +72,6 @@ Logs detailed performance statistics including processing time, cache hit rates,
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

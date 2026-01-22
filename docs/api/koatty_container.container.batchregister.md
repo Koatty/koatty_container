@@ -70,7 +70,6 @@ _(Optional)_ The batch options
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

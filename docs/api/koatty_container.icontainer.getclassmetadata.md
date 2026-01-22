@@ -95,7 +95,6 @@ _(Optional)_ Optional property name
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

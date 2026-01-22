@@ -95,7 +95,6 @@ Original property descriptor
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 PropertyDescriptor

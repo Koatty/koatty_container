@@ -63,7 +63,6 @@ _(Optional)_ Optional configuration for the aspect
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 MethodDecorator

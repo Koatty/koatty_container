@@ -111,7 +111,6 @@ _(Optional)_ Optional property name if attaching to a class property
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

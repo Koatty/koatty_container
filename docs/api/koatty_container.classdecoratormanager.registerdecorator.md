@@ -63,7 +63,6 @@ Decorator metadata
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 Function

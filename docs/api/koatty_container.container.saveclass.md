@@ -79,7 +79,6 @@ The unique identifier for the class
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

@@ -63,7 +63,6 @@ _(Optional)_ If true, only returns methods defined on the target class itself
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 string\[\]

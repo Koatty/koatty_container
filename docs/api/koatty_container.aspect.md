@@ -47,7 +47,6 @@ _(Optional)_ Optional custom identifier for the Aspect class
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 ClassDecorator

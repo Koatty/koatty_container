@@ -95,7 +95,6 @@ _(Optional)_ Original property descriptor
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 PropertyDescriptor

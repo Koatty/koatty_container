@@ -95,7 +95,6 @@ _(Optional)_ Whether to delay the injection (default: false)
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 PropertyDecorator

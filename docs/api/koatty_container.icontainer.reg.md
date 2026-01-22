@@ -79,7 +79,6 @@ _(Optional)_ Optional configuration for the registration
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

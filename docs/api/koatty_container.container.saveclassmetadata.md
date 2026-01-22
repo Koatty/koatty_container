@@ -111,7 +111,6 @@ _(Optional)_ Optional property name if the metadata is for a class member
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

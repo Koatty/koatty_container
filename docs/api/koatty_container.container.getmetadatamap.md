@@ -79,7 +79,6 @@ _(Optional)_ Optional property key
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

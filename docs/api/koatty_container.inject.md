@@ -63,7 +63,6 @@ _(Optional)_ Optional component type for the dependency
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 ParameterDecorator

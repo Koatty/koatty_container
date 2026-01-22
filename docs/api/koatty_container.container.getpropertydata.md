@@ -79,7 +79,6 @@ The property name
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

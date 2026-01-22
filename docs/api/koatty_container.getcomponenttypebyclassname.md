@@ -47,7 +47,6 @@ The class name string to check
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 "COMPONENT" \| "CONTROLLER" \| "MIDDLEWARE" \| "SERVICE"

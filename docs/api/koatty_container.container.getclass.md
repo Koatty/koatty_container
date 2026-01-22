@@ -63,7 +63,6 @@ _(Optional)_ The component type
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 Function

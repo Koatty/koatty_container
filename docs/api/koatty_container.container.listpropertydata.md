@@ -63,7 +63,6 @@ The target class or object
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

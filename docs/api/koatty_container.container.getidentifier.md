@@ -47,7 +47,6 @@ The target class constructor function or object instance
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 string

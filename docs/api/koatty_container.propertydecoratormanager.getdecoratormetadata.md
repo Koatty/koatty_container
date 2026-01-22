@@ -63,7 +63,6 @@ Property name
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 Map&lt;string, [DecoratorMetadata](./koatty_container.decoratormetadata_2.md)<!-- -->&gt; \| null

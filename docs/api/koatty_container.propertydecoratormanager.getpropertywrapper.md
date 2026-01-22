@@ -63,7 +63,6 @@ Property name
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 PropertyWrapper \| null

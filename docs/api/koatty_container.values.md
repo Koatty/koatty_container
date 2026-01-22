@@ -63,7 +63,6 @@ _(Optional)_ Optional default value if the main value is empty
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 PropertyDecorator

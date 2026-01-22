@@ -19,6 +19,17 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
+[App](./koatty_container.app.md)
+
+
+</td><td>
+
+Application class  EventEmitter  Application
+
+
+</td></tr>
+<tr><td>
+
 [ClassDecoratorManager](./koatty_container.classdecoratormanager.md)
 
 
@@ -337,6 +348,19 @@ Description
 
 </th></tr></thead>
 <tbody><tr><td>
+
+[Application](./koatty_container.application.md)
+
+
+</td><td>
+
+Application interface for the container. Defines the basic structure and capabilities of an application.
+
+ Application
+
+
+</td></tr>
+<tr><td>
 
 [AspectContext](./koatty_container.aspectcontext.md)
 

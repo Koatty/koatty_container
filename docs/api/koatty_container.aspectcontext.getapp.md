@@ -13,7 +13,7 @@ getApp(): Application | undefined;
 ```
 **Returns:**
 
-Application \| undefined
+[Application](./koatty_container.application.md) \| undefined
 
 Application instance or undefined
 

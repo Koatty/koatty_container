@@ -47,7 +47,6 @@ The target class constructor or object instance
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

@@ -79,7 +79,6 @@ _(Optional)_ Optional property key for property or method metadata
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 any

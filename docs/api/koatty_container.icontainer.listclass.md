@@ -50,7 +50,6 @@ The component type to filter
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 { id: string; target: Function; }\[\]

@@ -95,7 +95,6 @@ The name of the property to attach metadata to
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 void

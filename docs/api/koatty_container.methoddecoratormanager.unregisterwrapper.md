@@ -47,7 +47,6 @@ The decorator type to unregister
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 boolean

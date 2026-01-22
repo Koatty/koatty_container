@@ -63,7 +63,6 @@ _(Optional)_ Constructor parameters
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 T

@@ -49,7 +49,6 @@ string
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 { method: boolean; class: boolean; property: boolean; }

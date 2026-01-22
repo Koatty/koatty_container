@@ -63,7 +63,6 @@ _(Optional)_ If true, only returns own properties. If false, includes prototype 
 
 </td></tr>
 </tbody></table>
-
 **Returns:**
 
 string\[\]
