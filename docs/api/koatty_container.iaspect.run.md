@@ -2,10 +2,126 @@
 
 [Home](./index.md) &gt; [koatty\_container](./koatty_container.md) &gt; [IAspect](./koatty_container.iaspect.md) &gt; [run](./koatty_container.iaspect.run.md)
 
-## IAspect.run property
+## IAspect.run() method
+
+Main execution method for the aspect with unified AspectContext support.
 
 **Signature:**
 
 ```typescript
-run: (args: any[], proceed?: Function, options?: any) => Promise<any>;
+run(joinPoint: AspectContext): Promise<any>;
 ```
+
+## Parameters
+
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+joinPoint
+
+
+</td><td>
+
+[AspectContext](./koatty_container.aspectcontext.md)
+
+
+</td><td>
+
+Aspect join point context providing: - Method metadata (name, target object) - Current arguments (mutable via setArgs) - Original arguments (immutable) - Custom options from decorator - Application instance - executeProceed() method (for Around aspects) Named "joinPoint" to avoid confusion with Koa's context
+
+
+</td></tr>
+</tbody></table>
+**Returns:**
+
+Promise&lt;any&gt;
+
+Promise resolving to: - For \*\*Around\*\* aspects: The result from `joinPoint.executeProceed()` (possibly modified) - For \*\*Before\*\* aspects: Return value is ignored - For \*\*After\*\* aspects: Return value is ignored
+
+## Example 1
+
+Before aspect - validation
+
+```typescript
+async run(joinPoint: AspectContext): Promise<any> {
+  const args = joinPoint.getArgs();
+  if (!args[0]) {
+    throw new Error('First argument is required');
+  }
+}
+```
+
+## Example 2
+
+Around aspect - parameter modification
+
+```typescript
+async run(joinPoint: AspectContext): Promise<any> {
+  // Modify arguments
+  const args = joinPoint.getArgs();
+  args[0] = args[0].trim().toUpperCase();
+  joinPoint.setArgs(args);
+
+  // Execute with modified args
+  return await joinPoint.executeProceed();
+}
+```
+
+## Example 3
+
+Around aspect - error handling and timing
+
+```typescript
+async run(joinPoint: AspectContext): Promise<any> {
+  const startTime = Date.now();
+  try {
+    const result = await joinPoint.executeProceed();
+    console.log(`${joinPoint.getMethodName()} took ${Date.now() - startTime}ms`);
+    return result;
+  } catch (error) {
+    console.error(`${joinPoint.getMethodName()} failed:`, error);
+    throw error;
+  }
+}
+```
+
+## Example 4
+
+Around aspect - conditional execution
+
+```typescript
+async run(joinPoint: AspectContext): Promise<any> {
+  if (someCondition) {
+    return 'bypassed'; // Don't execute original method
+  }
+  return await joinPoint.executeProceed();
+}
+```
+
+## Example 5
+
+After aspect - accessing execution context
+
+```typescript
+async run(joinPoint: AspectContext): Promise<any> {
+  console.log('Method executed:', joinPoint.getMethodName());
+  console.log('Final args:', joinPoint.getArgs());
+  console.log('Original args:', joinPoint.getOriginalArgs());
+}
+```
+

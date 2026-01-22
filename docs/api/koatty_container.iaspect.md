@@ -4,7 +4,13 @@
 
 ## IAspect interface
 
-Aspect interface
+Aspect interface for AOP (Aspect-Oriented Programming) implementation.
+
+Aspects are used to add cross-cutting concerns (logging, security, transactions, etc.) to methods without modifying their core business logic.
+
+This interface uses AspectContext (join point) to provide a unified and type-safe way to access method metadata, arguments, and execution context.
+
+Note: The parameter is named "joinPoint" (instead of "context") to align with AOP terminology and avoid confusion with Koa's context object in the koatty framework.
 
   IAspect
 
@@ -12,6 +18,27 @@ Aspect interface
 
 ```typescript
 export interface IAspect 
+```
+
+## Example
+
+
+```typescript
+@Aspect()
+export class LoggingAspect implements IAspect {
+  app: any;
+
+  async run(joinPoint: AspectContext, proceed?: () => Promise<any>): Promise<any> {
+    console.log('Method:', joinPoint.getMethodName());
+    console.log('Args:', joinPoint.getArgs());
+
+    if (proceed) {
+      const result = await proceed();
+      console.log('Result:', result);
+      return result;
+    }
+  }
+}
 ```
 
 ## Properties
@@ -52,22 +79,33 @@ Application
 
 </td><td>
 
+Application instance reference. Provides access to the application context within the aspect.
+
 
 </td></tr>
-<tr><td>
+</tbody></table>
 
-[run](./koatty_container.iaspect.run.md)
+## Methods
+
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[run(joinPoint)](./koatty_container.iaspect.run.md)
 
 
 </td><td>
 
-
-</td><td>
-
-(args: any\[\], proceed?: Function, options?: any) =&gt; Promise&lt;any&gt;
-
-
-</td><td>
+Main execution method for the aspect with unified AspectContext support.
 
 
 </td></tr>

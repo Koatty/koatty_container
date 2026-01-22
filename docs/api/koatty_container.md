@@ -338,6 +338,23 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
+[AspectContext](./koatty_container.aspectcontext.md)
+
+
+</td><td>
+
+AOP Aspect execution context (Join Point). Provides a unified interface to access and modify method execution context.
+
+Inspired by Spring's ProceedingJoinPoint, this context object: - Ensures parameter consistency across all aspect types (Before, Around, After) - Provides immutable access to original parameters - Allows controlled parameter modification - Includes method and target metadata
+
+Note: In aspect implementations, this is typically named "joinPoint" to align with AOP terminology and avoid confusion with Koa's context in the koatty framework.
+
+  AspectContext
+
+
+</td></tr>
+<tr><td>
+
 [CircularDepDetector](./koatty_container.circulardepdetector.md)
 
 
@@ -374,7 +391,13 @@ Decorator metadata interface
 
 </td><td>
 
-Aspect interface
+Aspect interface for AOP (Aspect-Oriented Programming) implementation.
+
+Aspects are used to add cross-cutting concerns (logging, security, transactions, etc.) to methods without modifying their core business logic.
+
+This interface uses AspectContext (join point) to provide a unified and type-safe way to access method metadata, arguments, and execution context.
+
+Note: The parameter is named "joinPoint" (instead of "context") to align with AOP terminology and avoid confusion with Koa's context object in the koatty framework.
 
   IAspect
 

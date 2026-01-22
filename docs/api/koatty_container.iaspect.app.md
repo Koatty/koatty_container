@@ -4,6 +4,8 @@
 
 ## IAspect.app property
 
+Application instance reference. Provides access to the application context within the aspect.
+
 **Signature:**
 
 ```typescript
