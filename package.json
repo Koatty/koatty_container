@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "1.17.0",
+  "version": "1.17.1",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:clean && npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -12,13 +12,8 @@
     "eslint": "eslint --ext .ts,.js ./",
     "prepublishOnly": "npm test && npm run build && git push --follow-tags origin",
     "prerelease": "npm test && npm run build",
-    "release": "standard-version",
-    "release:pre": "npm run release -- --prerelease",
-    "release:major": "npm run release -- --release-as major",
-    "release:minor": "npm run release -- --release-as minor",
     "test": "npm run eslint && jest --passWithNoTests",
-    "test:cov": "jest --collectCoverage --detectOpenHandles",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s"
+    "test:cov": "jest --collectCoverage --detectOpenHandles"
   },
   "main": "./dist/index.js",
   "exports": {
@@ -81,13 +76,13 @@
     "typescript": "^5.x.x"
   },
   "dependencies": {
-    "koatty_lib": "^1.x.x",
-    "koatty_logger": "^2.x.x",
+    "koatty_lib": "workspace:*",
+    "koatty_logger": "workspace:*",
     "lru-cache": "^11.2.2",
     "tslib": "^2.x.x"
   },
   "peerDependencies": {
-    "koatty_lib": "^1.x.x",
-    "koatty_logger": "^2.x.x"
+    "koatty_lib": "workspace:*",
+    "koatty_logger": "workspace:*"
   }
 }
