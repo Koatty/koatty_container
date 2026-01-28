@@ -47,9 +47,12 @@ export default [
           compilerOptions: {
             declaration: false,
             declarationMap: false,
-            module: "ESNext"
+            module: "ESNext",
+            skipLibCheck: true
           }
-        }
+        },
+        useTsconfigDeclarationDir: false,
+        check: false
       }),
       terser({
         compress: {

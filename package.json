@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "1.17.2",
+  "version": "1.17.4",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:clean && npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -8,7 +8,7 @@
     "build:cp": "node scripts/postBuild && npx -y copyfiles package.json LICENSE README.md dist/",
     "build:js": "npx -y rollup --bundleConfigAsCjs -c .rollup.config.js",
     "build:doc": "npx -y api-documenter markdown --input temp --output docs/api",
-    "build:dts": "npx -y tsc && npx -y api-extractor run --local --verbose",
+    "build:dts": "bash ../../scripts/build-dts.sh",
     "eslint": "eslint --ext .ts,.js ./",
     "prepublishOnly": "npm test && npm run build && git push --follow-tags origin",
     "prerelease": "npm test && npm run build",
@@ -76,13 +76,13 @@
     "typescript": "^5.x.x"
   },
   "dependencies": {
-    "koatty_lib": "workspace:*",
-    "koatty_logger": "workspace:*",
+    "koatty_lib": "^1.4.5",
+    "koatty_logger": "^2.3.4",
     "lru-cache": "^11.2.5",
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "koatty_lib": "workspace:*",
-    "koatty_logger": "workspace:*"
+    "koatty_lib": "^1.4.5",
+    "koatty_logger": "^2.3.4"
   }
 }

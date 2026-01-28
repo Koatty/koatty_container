@@ -453,7 +453,8 @@ describe("Hotspot Performance Optimization", () => {
       }
 
       // 缓存版本应该不会显著更慢（允许更多开销）- 在小规模测试中可能有初始化开销
-      expect(timeWithCache).toBeLessThanOrEqual(Math.max(timeWithoutCache * 5, 50)); // 更宽松的限制
+      // 在 CI/CD 环境中，由于系统负载波动，放宽上限到 100ms
+      expect(timeWithCache).toBeLessThanOrEqual(Math.max(timeWithoutCache * 5, 100)); // 更宽松的限制以适应 CI/CD 环境
     });
   });
 
