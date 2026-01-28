@@ -4,7 +4,7 @@
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:clean && npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
-    "build:clean": "npx -y del-cli dist temp docs/api",
+    "build:clean": "del-cli --force dist temp docs/api",
     "build:cp": "node scripts/postBuild && npx -y copyfiles package.json LICENSE README.md dist/",
     "build:js": "npx -y rollup --bundleConfigAsCjs -c .rollup.config.js",
     "build:doc": "npx -y api-documenter markdown --input temp --output docs/api",
@@ -64,6 +64,8 @@
     "@typescript-eslint/eslint-plugin": "^8.x.x",
     "@typescript-eslint/parser": "^8.x.x",
     "conventional-changelog-cli": "^5.x.x",
+    "copyfiles": "^2.x.x",
+    "del-cli": "^6.x.x",
     "eslint": "^8.x.x",
     "eslint-plugin-jest": "^28.x.x",
     "husky": "^4.x.x",
