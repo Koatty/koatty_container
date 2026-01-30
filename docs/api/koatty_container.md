@@ -224,17 +224,6 @@ BeforeEach decorator for AOP implementation. Executes the specified aspect befor
 </td></tr>
 <tr><td>
 
-[Component(identifier, type)](./koatty_container.component.md)
-
-
-</td><td>
-
-Component decorator, used to mark a class as a component and register it to IOC container.
-
-
-</td></tr>
-<tr><td>
-
 [ensureIOCReady()](./koatty_container.ensureiocready.md)
 
 

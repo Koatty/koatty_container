@@ -6,6 +6,32 @@ A complete solution designed for modern Node.js applications, providing intellig
 
 [中文文档](./README_CN.md) | English
 
+## ⚠️ Important Notice (v2.0.0+)
+
+**Architecture Improvement**: The `@Component` decorator has been moved to `koatty_core` package for better separation of concerns:
+
+- **koatty_container** (IOC Layer): Provides dependency injection infrastructure (`@Autowired`, `@Value`, `@Aspect`, `IOC.saveClass()`)
+- **koatty_core** (Framework Layer): Provides application-level decorators (`@Component`, `@Controller`, `@Service`, `@Middleware`)
+
+**Migration Guide**:
+```typescript
+// ❌ Old (deprecated)
+import { Component } from "koatty_container";
+
+// ✅ New (recommended)
+import { Component } from "koatty_core";
+// or if using koatty framework
+import { Component } from "koatty";
+```
+
+For standalone usage without koatty_core, use `IOC.saveClass()` directly:
+```typescript
+import { IOC } from "koatty_container";
+
+class MyClass {}
+IOC.saveClass("COMPONENT", MyClass, "MyClass");
+```
+
 ## 🌟 Key Features
 
 - 🎯 **Custom Decorator Support** - Powerful decorator manager to easily extend your decorator ecosystem

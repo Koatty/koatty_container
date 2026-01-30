@@ -6,6 +6,32 @@
 
 专为现代 Node.js 应用设计的完整解决方案，提供智能循环依赖处理、高性能缓存优化、完整的 AOP 支持，以及**自定义装饰器管理能力**。
 
+## ⚠️ 重要说明 (v2.0.0+)
+
+**架构优化**: `@Component` 装饰器已迁移至 `koatty_core` 包，实现更清晰的分层设计：
+
+- **koatty_container** (IOC 层): 提供依赖注入基础设施 (`@Autowired`, `@Value`, `@Aspect`, `IOC.saveClass()`)
+- **koatty_core** (框架层): 提供应用层装饰器 (`@Component`, `@Controller`, `@Service`, `@Middleware`)
+
+**迁移指南**:
+```typescript
+// ❌ 旧版本（已废弃）
+import { Component } from "koatty_container";
+
+// ✅ 新版本（推荐）
+import { Component } from "koatty_core";
+// 或者使用 koatty 框架
+import { Component } from "koatty";
+```
+
+如果独立使用而不依赖 koatty_core，可直接使用 `IOC.saveClass()`：
+```typescript
+import { IOC } from "koatty_container";
+
+class MyClass {}
+IOC.saveClass("COMPONENT", MyClass, "MyClass");
+```
+
 ## 🌟 核心亮点
 
 - 🎯 **自定义装饰器支持** - 强大的装饰器管理器，轻松扩展您的装饰器生态
