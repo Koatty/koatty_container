@@ -1,7 +1,7 @@
 import { IOC } from "../src/container/container";
 import { Autowired } from "../src/decorator/autowired";
 import { Values } from "../src/decorator/values";
-import { Component } from "../src/decorator/component";
+import { Component } from "./helpers/decorators";
 import { BeforeEach } from "../src/decorator/aop";
 
 // Test services for performance testing based on real scenarios

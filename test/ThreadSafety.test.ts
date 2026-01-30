@@ -1,5 +1,5 @@
 import { Container } from "../src/container/container";
-import { Component } from "../src/decorator/component";
+import { Component } from "./helpers/decorators";
 
 // 确保IOC容器准备就绪的辅助函数
 async function ensureIOCReady() {
