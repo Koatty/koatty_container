@@ -1,7 +1,7 @@
 import assert from "assert";
 import { IOC } from "../src/container/container";
 import { Autowired, Inject } from "../src/decorator/autowired";
-import { Component } from "../src/decorator/component";
+import { Component } from "./helpers/decorators";
 import { ClassA } from "./ClassA";
 import { ClassB } from "./ClassB";
 import { ClassC } from "./ClassC";

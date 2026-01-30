@@ -1,5 +1,5 @@
 import { Autowired } from "../src/decorator/autowired";
-import { Component } from "../src/decorator/component";
+import { Component } from "./helpers/decorators";
 
 // normal non-circular dependency
 @Component()

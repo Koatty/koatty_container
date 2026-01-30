@@ -9,7 +9,8 @@ export * from "./container/container";
 export * from "./container/icontainer";
 export * from "./decorator/aop";
 export * from "./decorator/autowired";
-export * from "./decorator/component";
+// Component decorator removed - use the one from koatty_core instead
+// export * from "./decorator/component";
 export * from "./decorator/values";
 export * from "./utils/opertor";
 export * from "./manager/index";
