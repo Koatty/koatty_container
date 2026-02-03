@@ -103,8 +103,26 @@ export function recursiveGetMetadata(container: IContainer, metadataKey: any, ta
 }
 
 /**
+ * Get the property descriptor from the first object in the prototype chain that owns the property.
+ */
+function getDescriptorFromPrototypeChain(instance: object, propertyName: string | symbol): PropertyDescriptor | null {
+  let proto: object | null = Object.getPrototypeOf(instance);
+  while (proto !== null) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, propertyName);
+    if (descriptor !== undefined) {
+      return descriptor;
+    }
+    proto = Object.getPrototypeOf(proto);
+  }
+  return null;
+}
+
+/**
  * Override undefined instance properties with values from its prototype.
- * 
+ * Preserves accessor properties (getter/setter) from custom property decorators
+ * (e.g. @Logger() via registerWrapper) by copying the descriptor instead of
+ * assigning a value, so that IOC.get() instances keep decorator behavior.
+ *
  * @param instance - The object instance to process
  * @throws {Error} When instance is null/undefined or not an object
  */
@@ -112,13 +130,36 @@ export function overridePrototypeValue<T extends object>(instance: T): void {
   if (!instance || typeof instance !== 'object') {
     throw new Error("Invalid instance provided.");
   }
-  // get object properties
+  const proto = Object.getPrototypeOf(instance);
+  if (!proto) {
+    return;
+  }
   for (const propertyName in instance) {
-    // check property is undefined
     if (instance[propertyName] === undefined) {
-      const protoValue = Object.getPrototypeOf(instance)[propertyName];
-      if (protoValue !== undefined) {
-        instance[propertyName] = protoValue;
+      const descriptor = getDescriptorFromPrototypeChain(instance, propertyName);
+      if (descriptor && (descriptor.get || descriptor.set)) {
+        // Preserve accessor (getter/setter) from custom property decorators - copy descriptor to instance
+        // so that this.logger etc. keep working after IOC.get() instead of being shadowed by a data property
+        try {
+          const accessorDesc: PropertyDescriptor = {
+            get: descriptor.get,
+            set: descriptor.set,
+            enumerable: descriptor.enumerable !== false,
+            configurable: true
+          };
+          Object.defineProperty(instance, propertyName, accessorDesc);
+        } catch {
+          // Fallback: use prototype value if defineProperty fails (e.g. non-configurable)
+          const protoValue = proto[propertyName];
+          if (protoValue !== undefined) {
+            (instance as any)[propertyName] = protoValue;
+          }
+        }
+      } else {
+        const protoValue = proto[propertyName];
+        if (protoValue !== undefined) {
+          (instance as any)[propertyName] = protoValue;
+        }
       }
     }
   }

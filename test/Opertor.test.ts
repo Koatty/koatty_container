@@ -119,6 +119,35 @@ describe("Opertor Utils", () => {
       const instance = Object.create({});
       expect(() => overridePrototypeValue(instance)).not.toThrow();
     });
+
+    it("should preserve accessor (getter/setter) from prototype instead of shadowing with data property", () => {
+      const injected = { info: (msg: string) => msg };
+      class Controller {
+        get logger() {
+          return injected;
+        }
+      }
+      const instance = new Controller();
+      expect(instance.logger).toBe(injected);
+      overridePrototypeValue(instance);
+      expect(instance.logger).toBe(injected);
+      expect(instance.logger.info("test")).toBe("test");
+    });
+
+    it("should preserve getter when it returns undefined so lazy-init custom decorators work after IOC.get()", () => {
+      const state: { logger: any } = { logger: undefined };
+      class Controller {
+        get logger() {
+          return state.logger;
+        }
+      }
+      const instance = new Controller();
+      expect(instance.logger).toBeUndefined();
+      overridePrototypeValue(instance);
+      state.logger = { info: (msg: string) => msg };
+      expect(instance.logger).toBe(state.logger);
+      expect(instance.logger.info("ok")).toBe("ok");
+    });
   });
 
   describe("getOriginMetadata", () => {
