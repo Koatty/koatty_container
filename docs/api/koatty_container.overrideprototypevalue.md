@@ -4,7 +4,7 @@
 
 ## overridePrototypeValue() function
 
-Override undefined instance properties with values from its prototype.
+Override undefined instance properties with values from its prototype. Preserves accessor properties (getter/setter) from custom property decorators (e.g. @<!-- -->Logger() via registerWrapper) by copying the descriptor instead of assigning a value, so that IOC.get() instances keep decorator behavior.
 
 **Signature:**
 
