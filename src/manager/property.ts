@@ -8,7 +8,7 @@
  * @Copyright (c): <richenlin(at)gmail.com>
  */
 
-import { DefaultLogger as logger } from "koatty_logger";
+import { DefaultLogger as logger, registerLogDecorator } from "koatty_logger";
 import { IOCContainer } from "../container/container";
 import { DecoratorMetadata } from "./type";
 
@@ -89,6 +89,12 @@ export class PropertyDecoratorManager {
   constructor() {
     // Register this instance in IOC container
     this.registerInContainer();
+    // Register "Log" property decorator from koatty_logger so @Log() works out of the box
+    try {
+      registerLogDecorator(this);
+    } catch (_e) {
+      // Ignore if koatty_logger decorator API is unavailable
+    }
   }
 
   /**
