@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "npm run build:clean && npm run build:js && npm run build:dts && npm run build:doc && npm run build:cp",
@@ -10,8 +10,6 @@
     "build:doc": "npx -y api-documenter markdown --input temp --output docs/api",
     "build:dts": "bash ../../scripts/build-dts.sh",
     "eslint": "eslint --ext .ts,.js ./",
-    "prepublishOnly": "npm test && npm run build && git push --follow-tags origin",
-    "prerelease": "npm test && npm run build",
     "test": "npm run eslint && jest --passWithNoTests",
     "test:cov": "jest --collectCoverage --detectOpenHandles"
   },
@@ -83,6 +81,6 @@
   },
   "peerDependencies": {
     "koatty_lib": "^1.4.6",
-    "koatty_logger": "^2.4.2"
+    "koatty_logger": "^2.8.2"
   }
 }
