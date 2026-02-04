@@ -92,6 +92,7 @@ export class PropertyDecoratorManager {
     // Register "Log" property decorator from koatty_logger so @Log() works out of the box
     try {
       registerLogDecorator(this);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_e) {
       // Ignore if koatty_logger decorator API is unavailable
     }
