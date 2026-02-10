@@ -1,6 +1,6 @@
 {
   "name": "koatty_container",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "IOC Container for Koatty.",
   "scripts": {
     "build": "pnpm run build:js && pnpm run build:dts && pnpm run build:doc && pnpm run build:cp",
@@ -67,8 +67,8 @@
     "tslib": "^2.8.1"
   },
   "peerDependencies": {
-    "koatty_lib": "^1.4.6",
-    "koatty_logger": "^2.8.2"
+    "koatty_lib": "^1.4.7",
+    "koatty_logger": "^2.8.3"
   },
   "types": "./dist/index.d.ts"
 }
