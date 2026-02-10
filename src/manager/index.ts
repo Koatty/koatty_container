@@ -12,12 +12,16 @@ import { MethodDecoratorManager } from './method';
 import { ClassDecoratorManager } from './class';
 import { PropertyDecoratorManager } from './property';
 
-// Export types
-export { MethodDecoratorManager, MethodWrapperFunction } from './method';
-export { ClassDecoratorManager, ClassWrapperFunction } from './class';
+// Export classes
+export { MethodDecoratorManager } from './method';
+export { ClassDecoratorManager } from './class';
 export { PropertyDecoratorManager } from './property';
-export { PropertyWrapperFunction } from './property';
-export { DecoratorMetadata } from './type';
+
+// Export types
+export type { MethodWrapperFunction } from './method';
+export type { ClassWrapperFunction } from './class';
+export type { PropertyWrapperFunction } from './property';
+export type { DecoratorMetadata } from './type';
 
 /**
  * Unified decorator manager that provides access to all decorator types
