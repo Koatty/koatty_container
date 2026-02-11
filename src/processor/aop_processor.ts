@@ -370,10 +370,11 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // pass the target method name through options to the aspect, let the aspect know which method is being intercepted
+          // pass the target method name and caller instance through options to the aspect
           const enhancedOptions = {
             ...data.options,
-            targetMethod: data.method || methodName // target method name
+            targetMethod: data.method || methodName, // target method name
+            app: target // caller instance (e.g. Controller), allows aspect to access per-request ctx via options.app.ctx
           };
           await aspect.run(args, undefined, enhancedOptions);
         }
@@ -395,10 +396,11 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
       try {
         const aspect = await get(data.aopName);
         if (aspect && typeof aspect.run === 'function') {
-          // pass the target method name through options to the aspect, let the aspect know which method is being intercepted
+          // pass the target method name and caller instance through options to the aspect
           const enhancedOptions = {
             ...data.options,
-            targetMethod: data.method || methodName // target method name
+            targetMethod: data.method || methodName, // target method name
+            app: target // caller instance (e.g. Controller), allows aspect to access per-request ctx via options.app.ctx
           };
           await aspect.run(originalArgs || [], undefined, enhancedOptions);
         }
@@ -434,10 +436,11 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
         return await originalMethod.apply(target, finalArgs);
       };
 
-      // pass the target method name through options to the aspect, let the aspect know which method is being intercepted
+      // pass the target method name and caller instance through options to the aspect
       const enhancedOptions = {
         ...selectedAspect.options,
-        targetMethod: selectedAspect.method || methodName // target method name
+        targetMethod: selectedAspect.method || methodName, // target method name
+        app: target // caller instance (e.g. Controller), allows aspect to access per-request ctx via options.app.ctx
       };
 
       // call
