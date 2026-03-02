@@ -1,9 +1,11 @@
 import { Container } from "../src/container/container";
 import { Component } from "./helpers/decorators";
 
+const KOATTY_IOC_KEY = Symbol.for('koatty.ioc.v2');
+
 describe("Thread Safety and Race Condition Prevention", () => {
   beforeEach(() => {
-    delete (<any>global).__KOATTY_IOC__;
+    delete (<any>globalThis)[KOATTY_IOC_KEY];
     (<any>Container).instance = null;
   });
 
@@ -50,7 +52,7 @@ describe("Thread Safety and Race Condition Prevention", () => {
 
   describe("Global IOC Thread Safety", () => {
     test("Should return the same instance for concurrent global IOC access", () => {
-      delete (<any>global).__KOATTY_IOC__;
+      delete (<any>globalThis)[KOATTY_IOC_KEY];
 
       const instances: Container[] = [];
 

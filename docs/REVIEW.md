@@ -210,12 +210,15 @@ export class Container implements IContainer {
   }
 }
 // IOC 初始化简化
+const KOATTY_IOC_KEY = Symbol.for('koatty.ioc.v2');
+
 export const IOC: IContainer = (() => {
-  if ((global as any).__KOATTY_IOC__) {
-    return (global as any).__KOATTY_IOC__;
+  const existing = (globalThis as any)[KOATTY_IOC_KEY];
+  if (existing) {
+    return existing;
   }
   const instance = Container.getInstance();
-  (global as any).__KOATTY_IOC__ = instance;
+  (globalThis as any)[KOATTY_IOC_KEY] = instance;
   return instance;
 })();
 删除：createInstanceSafely()、isInitializing、initializationPromise、Proxy 回退、ensureIOCReady()

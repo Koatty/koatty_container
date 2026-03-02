@@ -909,6 +909,8 @@ export class Container implements IContainer, IContainerDiagnostics {
   }
 }
 
+const KOATTY_IOC_KEY = Symbol.for('koatty.ioc.v2');
+
 /**
  * Global IOC container instance.
  * 
@@ -916,11 +918,12 @@ export class Container implements IContainer, IContainerDiagnostics {
  * @type {Container}
  */
 export const IOC: IContainer = (() => {
-  if ((global as any).__KOATTY_IOC__) {
-    return (global as any).__KOATTY_IOC__;
+  const existing = (globalThis as any)[KOATTY_IOC_KEY];
+  if (existing) {
+    return existing;
   }
   const instance = Container.getInstance();
-  (global as any).__KOATTY_IOC__ = instance;
+  (globalThis as any)[KOATTY_IOC_KEY] = instance;
   return instance;
 })();
 
