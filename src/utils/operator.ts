@@ -135,6 +135,7 @@ export function overridePrototypeValue<T extends object>(instance: T): void {
     return;
   }
   for (const propertyName in instance) {
+    if (!Object.prototype.hasOwnProperty.call(instance, propertyName)) continue;
     if (instance[propertyName] === undefined) {
       const descriptor = getDescriptorFromPrototypeChain(instance, propertyName);
       if (descriptor && (descriptor.get || descriptor.set)) {

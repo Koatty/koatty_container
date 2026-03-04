@@ -1,6 +1,7 @@
 import { IOC } from "../src/container/container";
 import { CircularDepError } from "../src/utils/circular";
 import { TAGGED_PROP } from "../src/container/icontainer";
+import { isLazyProxy, isLazyProxyResolved } from "../src/utils/lazy_proxy";
 import {
   DatabaseService,
   UserRepository,
@@ -71,9 +72,7 @@ describe("Circular Dependency Detection", () => {
 
   beforeEach(() => {
     IOC.clearInstances();
-    // Set up mock app
     IOC.setApp(mockApp as any);
-    // Clear event listeners
     mockApp.eventListeners.clear();
     mockApp.onceListeners.clear();
   });
@@ -455,6 +454,39 @@ describe("Circular Dependency Detection", () => {
       // Verify delayed loading was successful - this proves the circular dependency was handled
       expect(userService.orderService).toBeDefined();
       expect(orderService.userService).toBeDefined();
+    });
+  });
+
+  describe("Lazy Proxy Integration", () => {
+    test("Should inject dependency that works before appReady", () => {
+      IOC.reg(UserService);
+      IOC.reg(OrderService);
+      
+      const userService = IOC.get(UserService);
+      
+      expect(userService).toBeDefined();
+      expect(userService.orderService).toBeDefined();
+      expect(userService.orderService.getOrder()).toBe("order");
+    });
+
+    test("Should access methods through injected dependency normally", () => {
+      IOC.reg(UserService);
+      IOC.reg(OrderService);
+      
+      const userService = IOC.get(UserService);
+      
+      expect(userService.orderService.getOrder()).toBe("order");
+    });
+
+    test("Should handle bidirectional circular dependency", () => {
+      IOC.reg(UserService);
+      IOC.reg(OrderService);
+      
+      const userService = IOC.get(UserService);
+      const orderService = IOC.get(OrderService);
+      
+      expect(userService.orderService.getOrder()).toBe("order");
+      expect(orderService.userService.getUser()).toBe("user");
     });
   });
 }); 

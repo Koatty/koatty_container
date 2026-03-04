@@ -1,5 +1,69 @@
 # Changelog
 
+## 2.1.0
+
+### Major Refactoring and Bug Fix Release
+
+This release includes significant bug fixes, performance improvements, and code refactoring to improve maintainability and reliability.
+
+### Bug Fixes
+
+- **T-01**: Fixed circular dependency detection Map key mismatch bug in autowired_processor.ts
+- **T-02**: Fixed circular dependency detection logic - changed OR to AND for accurate cycle detection
+- **T-03**: Fixed event listener memory leak by changing `on` to `once` for appReady events
+- **T-04**: Fixed `getInsByClass` returning null type lie - now throws Error for non-class inputs (fail-fast)
+- **T-05**: Fixed `configurable:false` blocking hot reload and testing by setting `configurable: true`
+- **T-06**: Removed meaningless self-assignment `identifier = identifier` in reg() method
+- **T-07**: Fixed for...in prototype chain pollution risk in operator.ts by adding hasOwnProperty check
+
+### Performance Improvements
+
+- **T-08**: Added circular dependency detection result caching to avoid repeated DFS traversal
+- **T-09**: Eliminated cache key collision by replacing Function.toString() with WeakMap for dependency preprocessing
+- **T-10**: Eliminated high-frequency debug log string concatenation overhead with lazy evaluation
+- **T-17**: Unified three separate MetadataCache instances into shared singleton for better cache utilization
+
+### Refactoring
+
+- **T-11**: Removed dead code `compileAOPInterceptor` function and related unused code
+- **T-12**: Simplified Singleton pattern - removed pseudo-async initialization dead code
+- **T-13**: Resolved module circular dependency between aop_processor and container
+- **T-18**: Fixed Chinese string in code and corrected filename typo (opertor.ts → operator.ts)
+- **T-19**: Removed dead method `getDecoratedClasses` and cleaned up TODO comments
+- **T-20**: Renamed AOP function `get()` to `resolveAspect()` for better readability
+- **T-21**: Removed duplicate metadata reading in `extractDependencies` method
+- **T-27**: Split IContainer interface - separated diagnostic/performance methods into IContainerDiagnostics
+- **T-28**: Extracted MetadataStore from Container class for better Single Responsibility
+- **T-29**: Extracted LifecycleManager from Container class for better Single Responsibility
+
+### Features
+
+- **T-14**: Created Lazy Proxy utility module for circular dependency resolution
+- **T-15**: Integrated Lazy Proxy into autowired injection flow to eliminate undefined time window
+- **T-16**: Integrated Lazy Proxy into container.get() method for honest return types
+
+### Build
+
+- **T-22**: Upgraded engines.node requirement to >=20.0.0
+- **T-32**: Optimized tsup build configuration with target: node20, splitting, and treeshake
+
+### Migration Guide
+
+This release is mostly backward compatible. Notable changes:
+
+1. **getInsByClass now throws Error** for non-class inputs instead of returning null. This is a fail-fast improvement.
+2. **Node.js >=20.0.0** is now required.
+
+### Test Coverage
+
+- 283 tests passing
+- Statement coverage: 83.35%
+- Branch coverage: 71.48%
+- Function coverage: 72.99%
+- Line coverage: 85.86%
+
+---
+
 ## 2.0.6
 
 ### Patch Changes
@@ -145,7 +209,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.0](https://github.com/koatty/koatty_container/compare/v1.13.0...v1.14.0) (2025-01-27)
 
-### ✨ Features
+### Features
 
 - **performance**: add intelligent metadata caching system for real-world scenarios
 
@@ -169,7 +233,7 @@ All notable changes to this project will be documented in this file. See [standa
   - Add thread-safe singleton pattern to prevent race conditions in async scenarios
   - Provide both sync and async container access methods for backward compatibility
 
-### 🚀 Performance Improvements
+### Performance Improvements
 
 - **cache**: metadata access speed improved by 50-80% through intelligent caching during IOC.get() operations in high-frequency business scenarios
 - **startup**: component registration speed improved by 20-40% through targeted metadata preloading during application initialization phases
@@ -178,29 +242,29 @@ All notable changes to this project will be documented in this file. See [standa
 - **real-world**: typical cache hit rates > 80% in production applications with proper preloading configuration
 - **lru-cache**: upgraded to use external `lru-cache@11.x` library for better performance, more reliable TTL handling, and advanced memory management features
 
-### 🔧 API Additions
+### API Additions
 
 - **container**: add `preloadMetadata(type?: ComponentType)` for targeted metadata preloading before registration
 - **container**: enhance `getPerformanceStats()` with detailed cache analytics and hit rate metrics
 - **container**: improve `optimizePerformance()` for real-world performance optimization scenarios
 
-### 🛠️ Infrastructure
+### Infrastructure
 
 - **utils**: enhance `MetadataCache` class with LRU, TTL, and multi-layer caching optimized for IOC scenarios
 - **testing**: add targeted performance tests for metadata caching in realistic application workflows
 
-### 📚 Documentation
+### Documentation
 
 - **readme**: comprehensive documentation focused on real-world application scenarios and performance optimization
 - **examples**: add practical usage examples for metadata preloading in typical project startup workflows
 - **api**: detailed API documentation for metadata caching and performance optimization methods
 
-### 🗑️ Removed
+### Removed
 
 - **batch**: remove batch initialization feature as it doesn't match real-world usage patterns
 - **priority**: remove component priority system that was not applicable to actual application architecture
 
-### 📋 Migration Guide from v1.13.x
+### Migration Guide from v1.13.x
 
 #### New Features You Can Use
 
@@ -401,7 +465,7 @@ None - this release is fully backward compatible.
 
 - **overall**: 整体性能优化 ([1h901ij](https://github.com/koatty/koatty_container/commit/1h901ij4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0))
 
-### 🚀 New Features
+### New Features
 
 - **async-safe**: async-safe container initialization with `ensureIOCReady()` function to prevent race conditions
 - **version-conflict**: automatic version conflict detection and resolution strategies for multi-version dependency scenarios
@@ -409,7 +473,7 @@ None - this release is fully backward compatible.
 - **performance-stats**: comprehensive performance monitoring with detailed cache statistics and optimization recommendations
 - **thread-safety**: enhanced thread safety with proper async initialization patterns and concurrent access protection
 
-### 🔧 Dependencies
+### Dependencies
 
 - **added**: `lru-cache@^11.1.0` - High-performance LRU cache implementation with TTL support
 - **improved**: better TypeScript integration with built-in type definitions from lru-cache

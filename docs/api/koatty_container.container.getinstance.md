@@ -4,16 +4,16 @@
 
 ## Container.getInstance() method
 
-Get singleton instance of Container with async-safe double-checked locking Prevents race conditions in async scenarios where multiple calls might occur simultaneously before the first instance is fully created.
+Get singleton instance of Container
 
 **Signature:**
 
 ```typescript
-static getInstance(): Container | Promise<Container>;
+static getInstance(): Container;
 ```
 **Returns:**
 
-[Container](./koatty_container.container.md) \| Promise&lt;[Container](./koatty_container.container.md)<!-- -->&gt;
+[Container](./koatty_container.container.md)
 
-{<!-- -->Container \| Promise<Container>} The singleton instance  This method implements async-safe singleton pattern: 1. First check if instance already exists (fast path) 2. If not, check if initialization is in progress 3. If already initializing, return the initialization promise 4. Otherwise, start initialization with proper synchronization
+{<!-- -->Container<!-- -->} The singleton instance
 

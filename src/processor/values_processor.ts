@@ -13,7 +13,7 @@ import {
   IContainer, ObjectDefinitionOptions,
   TAGGED_ARGS
 } from "../container/icontainer";
-import { recursiveGetMetadata } from "../utils/opertor";
+import { recursiveGetMetadata } from "../utils/operator";
 
 /**
  * Inject values into the target class prototype chain.
@@ -30,6 +30,9 @@ import { recursiveGetMetadata } from "../utils/opertor";
  */
 export function injectValues(target: Function, prototypeChain: object,
   container?: IContainer, _options?: ObjectDefinitionOptions) {
+  if (!container) {
+    return;
+  }
   const metaData = recursiveGetMetadata(container, TAGGED_ARGS, target);
   
   // Safe iteration over metadata values with proper null/undefined checks

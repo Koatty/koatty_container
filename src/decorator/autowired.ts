@@ -9,7 +9,7 @@ import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { IOC } from "../container/container";
 import { ClassOrString, TAGGED_PROP } from "../container/icontainer";
-import { getComponentTypeByClassName } from "../utils/opertor";
+import { getComponentTypeByClassName } from "../utils/operator";
 
 /**
  * Decorator that marks a property for dependency injection.
@@ -31,7 +31,7 @@ import { getComponentTypeByClassName } from "../utils/opertor";
  */
 export function Autowired<T>(paramName?: ClassOrString<T>, cType: string = "COMPONENT", constructArgs?: any[],
   isDelay = false): PropertyDecorator {
-  return (target: object, propertyKey: string) => {
+  return (target: object, propertyKey: string | symbol) => {
     const designType = Reflect.getMetadata("design:type", target, propertyKey);
     let identifier = designType?.name;
     
@@ -90,12 +90,12 @@ export function Autowired<T>(paramName?: ClassOrString<T>, cType: string = "COMP
  * ```
  */
 export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONENT"): ParameterDecorator {
-  return (target: object, propertyKey: string | symbol, parameterIndex: number) => {
+  return (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) => {
     if (propertyKey) {
       throw new Error("the Inject decorator only used by constructor method");
     }
     // 获取成员参数类型
-    const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey);
+    const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey as string | symbol);
     let identifier = paramTypes[parameterIndex]?.name;
     if (!identifier || identifier === "Object") {
       if (helper.isString(paramName)) {
@@ -103,7 +103,7 @@ export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONE
         identifier = helper.camelCase(paramName, true);
       } else {
         identifier = paramName?.name;
-        propertyKey = helper.camelCase(paramName?.name);
+        propertyKey = helper.camelCase(paramName?.name ?? '');
       }
     } else {
       propertyKey = helper.camelCase(identifier);

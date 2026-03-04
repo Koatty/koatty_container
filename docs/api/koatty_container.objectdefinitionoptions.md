@@ -134,6 +134,25 @@ _(Optional)_
 </td></tr>
 <tr><td>
 
+[strictLifetime?](./koatty_container.objectdefinitionoptions.strictlifetime.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+<tr><td>
+
 [type?](./koatty_container.objectdefinitionoptions.type.md)
 
 

@@ -31,7 +31,7 @@ import { TAGGED_ARGS } from "../container/icontainer";
  * ```
  */
 export function Values(value: unknown | Function, defaultValue?: unknown): PropertyDecorator {
-  return (target: object, propertyKey: string) => {
+  return (target: object, propertyKey: string | symbol) => {
     const paramTypes = Reflect.getMetadata("design:type", target, propertyKey);
     let targetValue = value;
     
@@ -58,7 +58,7 @@ export function Values(value: unknown | Function, defaultValue?: unknown): Prope
         const allowedTypes = typeMapping[expectedType] || [expectedType];
         
         if (expectedType && !allowedTypes.includes(actualType)) {
-          throw new Error(`Type mismatch: expected ${expectedType}, but received ${actualType} for property '${propertyKey}'`);
+          throw new Error(`Type mismatch: expected ${expectedType}, but received ${actualType} for property '${String(propertyKey)}'`);
         }
       }
     }

@@ -28,7 +28,7 @@ import { DuplicateMethodLevelTest, DuplicateClassLevelTest, PriorityTest } from 
 import { Aspect } from "../src/decorator/aop";
 import { injectAOP } from "../src/processor/aop_processor";
 
-const IOC = Container.getInstanceSync();
+const IOC = Container.getInstance();
 
 describe("AOP", () => {
   test("Before", async () => {

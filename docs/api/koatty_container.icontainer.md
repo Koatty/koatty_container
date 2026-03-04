@@ -29,6 +29,17 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
+[\[Symbol.dispose\]()?](./koatty_container.icontainer._symbol.dispose_.md)
+
+
+</td><td>
+
+_(Optional)_ Dispose the container and release all resources. Implements TC39 Explicit Resource Management (using declaration). Available in Node.js 20+ and TypeScript 5.2+
+
+
+</td></tr>
+<tr><td>
+
 [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.icontainer.attachclassmetadata.md)
 
 
@@ -46,17 +57,6 @@ Attach class metadata to the target.
 </td><td>
 
 Attach property metadata to the target object/class.
-
-
-</td></tr>
-<tr><td>
-
-[batchRegister(components, batchOptions)](./koatty_container.icontainer.batchregister.md)
-
-
-</td><td>
-
-Batch register components
 
 
 </td></tr>
@@ -84,28 +84,6 @@ Clear only instances while preserving class registrations and metadata This is u
 </td></tr>
 <tr><td>
 
-[clearPerformanceCache()](./koatty_container.icontainer.clearperformancecache.md)
-
-
-</td><td>
-
-Clear performance cache
-
-
-</td></tr>
-<tr><td>
-
-[generateDependencyReport()](./koatty_container.icontainer.generatedependencyreport.md)
-
-
-</td><td>
-
-Generate and log dependency analysis report
-
-
-</td></tr>
-<tr><td>
-
 [get(identifier, type, args)](./koatty_container.icontainer.get.md)
 
 
@@ -128,28 +106,6 @@ Get the application instance.
 </td></tr>
 <tr><td>
 
-[getCircularDependencies()](./koatty_container.icontainer.getcirculardependencies.md)
-
-
-</td><td>
-
-Get all circular dependencies
-
-
-</td></tr>
-<tr><td>
-
-[getCircularDependencyDetector()](./koatty_container.icontainer.getcirculardependencydetector.md)
-
-
-</td><td>
-
-Get circular dependency detector
-
-
-</td></tr>
-<tr><td>
-
 [getClass(identifier, type)](./koatty_container.icontainer.getclass.md)
 
 
@@ -167,17 +123,6 @@ Get class by identifier and type from container.
 </td><td>
 
 Get metadata value by type and decorator key.
-
-
-</td></tr>
-<tr><td>
-
-[getDetailedPerformanceStats()](./koatty_container.icontainer.getdetailedperformancestats.md)
-
-
-</td><td>
-
-Get detailed performance statistics
 
 
 </td></tr>
@@ -216,17 +161,6 @@ Get metadata map for the specified target and key.
 </td></tr>
 <tr><td>
 
-[getPerformanceStats()](./koatty_container.icontainer.getperformancestats.md)
-
-
-</td><td>
-
-Get performance statistics including cache hit rates and memory usage
-
-
-</td></tr>
-<tr><td>
-
 [getPropertyData(decoratorNameKey, target, propertyName)](./koatty_container.icontainer.getpropertydata.md)
 
 
@@ -249,17 +183,6 @@ Get the component type of target class or object.
 </td></tr>
 <tr><td>
 
-[hasCircularDependencies()](./koatty_container.icontainer.hascirculardependencies.md)
-
-
-</td><td>
-
-Check for circular dependencies in the container
-
-
-</td></tr>
-<tr><td>
-
 [listClass(type)](./koatty_container.icontainer.listclass.md)
 
 
@@ -277,17 +200,6 @@ List all registered classes of specified component type.
 </td><td>
 
 Get property data by decorator name key.
-
-
-</td></tr>
-<tr><td>
-
-[preloadMetadata(types, options)](./koatty_container.icontainer.preloadmetadata.md)
-
-
-</td><td>
-
-🚀 性能优化：统一的元数据预加载和性能优化方法 集成了所有性能优化功能，默认开启优化
 
 
 </td></tr>

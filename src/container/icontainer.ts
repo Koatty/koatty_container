@@ -135,20 +135,21 @@ export interface IContainer {
    * 
    * @param {string} identifier The unique identifier of the class
    * @param {ComponentType} [type="COMPONENT"] The component type
-   * @returns {Function} The class constructor
+   * @returns {Function | undefined} The class constructor or undefined if not found
    * @example
    * ```ts
    * const userServiceClass = container.getClass('UserService');
    * const userServiceClass = container.getClass(UserService, 'Service');
    * ```
    */
-  getClass(identifier: string, type?: string): Function;
+  getClass(identifier: string, type?: string): Function | undefined;
   /**
    * Get instance by class constructor
    * @param target The class constructor
    * @param args Constructor parameters
-   * @returns Instance of the class or null if target is not a class
+   * @returns Instance of the class
    * @template T Type of the class instance or function
+   * @throws {Error} When target is not a class
    * @description Get instance of the class
    * @example
    * ```ts
@@ -312,6 +313,29 @@ export interface IContainer {
   clearInstances(): void;
 
   /**
+   * Dispose the container and release all resources.
+   * Implements TC39 Explicit Resource Management (using declaration).
+   * Available in Node.js 20+ and TypeScript 5.2+
+   * 
+   * @example
+   * ```ts
+   * {
+   *   using container = Container.getInstance();
+   *   // container is automatically disposed when leaving scope
+   * }
+   * ```
+   */
+  [Symbol.dispose]?(): void;
+}
+
+/**
+ * Interface for container diagnostic and performance methods.
+ * Separated from IContainer to maintain clean interface segregation.
+ * 
+ * @interface IContainerDiagnostics
+ */
+export interface IContainerDiagnostics {
+  /**
    * Get circular dependency detector
    * @returns {CircularDepDetector} The circular dependency detector instance
    */
@@ -392,6 +416,7 @@ export interface ObjectDefinitionOptions {
   scope?: Scope;
   type?: string;
   args?: any[];
+  strictLifetime?: boolean;
 }
 
 /**

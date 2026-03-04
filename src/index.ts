@@ -12,7 +12,7 @@ export * from "./decorator/autowired";
 // Component decorator removed - use the one from koatty_core instead
 // export * from "./decorator/component";
 export * from "./decorator/values";
-export * from "./utils/opertor";
+export * from "./utils/operator";
 export * from "./manager/index";
 // Export performance optimization and utility classes
 // export { MetadataCache } from "./utils/cache";

@@ -9,7 +9,7 @@ Get class by identifier and type from container.
 **Signature:**
 
 ```typescript
-getClass(identifier: string, type?: string): Function;
+getClass(identifier: string, type?: string): Function | undefined;
 ```
 
 ## Parameters
@@ -66,9 +66,9 @@ _(Optional)_ The component type
 
 **Returns:**
 
-Function
+Function \| undefined
 
-{<!-- -->Function<!-- -->} The class constructor
+{<!-- -->Function \| undefined<!-- -->} The class constructor or undefined if not found
 
 ## Example
 

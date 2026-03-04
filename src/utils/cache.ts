@@ -56,6 +56,8 @@ interface DetailedCacheStats extends CacheStats {
  * - Batch operations for better performance
  */
 export class MetadataCache {
+  private static _shared: MetadataCache | null = null;
+  
   private caches: Map<CacheType, LRUCache<string, any>>;
   private stats: Record<CacheType, { hits: number; misses: number }>;
   private defaultTTL: number;
@@ -144,10 +146,8 @@ export class MetadataCache {
     if (value !== undefined) {
       this.stats[type].hits++;
       this.trackHotKey(key);
-      logger.Debug(`Cache hit for ${key}`);
     } else {
       this.stats[type].misses++;
-      logger.Debug(`Cache miss for ${key}, processing...`);
     }
 
     return value;
@@ -168,8 +168,6 @@ export class MetadataCache {
     } else {
       cache.set(key, value);
     }
-
-    logger.Debug(`Cached ${key} in ${type} cache`);
   }
 
   /**
@@ -493,6 +491,36 @@ export class MetadataCache {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = undefined;
+    }
+  }
+
+  /**
+   * Get shared singleton instance
+   */
+  static getShared(): MetadataCache {
+    if (!MetadataCache._shared) {
+      MetadataCache._shared = new MetadataCache({
+        capacity: 3000,
+        defaultTTL: 10 * 60 * 1000,
+        maxMemoryUsage: 150 * 1024 * 1024,
+        cacheConfigs: {
+          [CacheType.DEPENDENCY_PREPROCESS]: { capacity: 800, ttl: 12 * 60 * 1000 },
+          [CacheType.AOP_INTERCEPTORS]: { capacity: 500, ttl: 15 * 60 * 1000 },
+          [CacheType.METHOD_NAMES]: { capacity: 800, ttl: 20 * 60 * 1000 },
+          [CacheType.ASPECT_INSTANCES]: { capacity: 200, ttl: 30 * 60 * 1000 }
+        }
+      });
+    }
+    return MetadataCache._shared;
+  }
+
+  /**
+   * Clear shared singleton instance
+   */
+  static clearShared(): void {
+    if (MetadataCache._shared) {
+      MetadataCache._shared.clear();
+      MetadataCache._shared = null;
     }
   }
 

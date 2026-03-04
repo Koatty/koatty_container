@@ -23,7 +23,6 @@ getDetailedPerformanceStats(): {
         hotspots: {
             mostAccessedTypes: string[];
             circularDependencies: number;
-            lazyLoadingCount: number;
         };
         lruCaches: {
             metadata: any;
@@ -34,5 +33,5 @@ getDetailedPerformanceStats(): {
 ```
 **Returns:**
 
-{ cache: any; containers: { totalRegistered: number; byType: Record&lt;string, number&gt;; memoryUsage: { classMap: number; instanceMap: number; metadataMap: number; }; }; hotspots: { mostAccessedTypes: string\[\]; circularDependencies: number; lazyLoadingCount: number; }; lruCaches: { metadata: any; dependencies?: any; aop?: any; }; }
+{ cache: any; containers: { totalRegistered: number; byType: Record&lt;string, number&gt;; memoryUsage: { classMap: number; instanceMap: number; metadataMap: number; }; }; hotspots: { mostAccessedTypes: string\[\]; circularDependencies: number; }; lruCaches: { metadata: any; dependencies?: any; aop?: any; }; }
 

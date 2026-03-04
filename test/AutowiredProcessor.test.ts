@@ -25,6 +25,23 @@ class MockEventEmitter {
     this.handlers.get(event)!.push(handler);
   }
   
+  once(event: string, handler: Function) {
+    const wrappedHandler = (...args: any[]) => {
+      const handlers = this.handlers.get(event);
+      if (handlers) {
+        const index = handlers.indexOf(wrappedHandler);
+        if (index > -1) {
+          handlers.splice(index, 1);
+        }
+      }
+      return handler(...args);
+    };
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, []);
+    }
+    this.handlers.get(event)!.push(wrappedHandler);
+  }
+  
   emit(event: string, ...args: any[]) {
     const handlers = this.handlers.get(event) || [];
     handlers.forEach(handler => handler(...args));
@@ -36,7 +53,7 @@ describe("Autowired Processor Coverage Tests", () => {
   let mockApp: MockEventEmitter;
 
   beforeEach(async () => {
-    container = Container.getInstanceSync();
+    container = Container.getInstance();
     container.clear();
     
     mockApp = new MockEventEmitter();

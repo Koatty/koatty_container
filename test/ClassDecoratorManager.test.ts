@@ -379,15 +379,6 @@ describe("ClassDecoratorManager", () => {
     });
   });
 
-  describe("getDecoratedClasses", () => {
-    it("should return empty array", () => {
-      // This method is currently a placeholder
-      const result = manager.getDecoratedClasses();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(0);
-    });
-  });
-
   describe("generateCacheKey", () => {
     it("should generate consistent cache keys", () => {
       class TestClass1 {}

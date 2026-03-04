@@ -94,20 +94,6 @@ Get cache statistics
 </td></tr>
 <tr><td>
 
-[getDecoratedClasses()](./koatty_container.classdecoratormanager.getdecoratedclasses.md)
-
-
-</td><td>
-
-
-</td><td>
-
-Get all decorated classes
-
-
-</td></tr>
-<tr><td>
-
 [getDecoratorMetadata(target)](./koatty_container.classdecoratormanager.getdecoratormetadata.md)
 
 

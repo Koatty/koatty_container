@@ -4,7 +4,7 @@
 
 ## IOC variable
 
-Global IOC container instance with async-safe initialization. Singleton pattern implementation to ensure only one container instance exists. Handles async scenarios properly to prevent race conditions.
+Global IOC container instance.
 
   {<!-- -->Container<!-- -->}
 

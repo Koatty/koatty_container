@@ -68,7 +68,11 @@ _(Optional)_ Constructor parameters
 
 T
 
-Instance of the class or null if target is not a class  T Type of the class instance or function  Get instance of the class
+Instance of the class  T Type of the class instance or function
+
+## Exceptions
+
+{<!-- -->Error<!-- -->} When target is not a class  Get instance of the class
 
 ## Example
 

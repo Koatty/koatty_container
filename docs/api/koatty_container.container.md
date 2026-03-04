@@ -15,9 +15,9 @@ Features: - Thread-safe singleton instance management - Class and instance regis
 **Signature:**
 
 ```typescript
-export declare class Container implements IContainer 
+export declare class Container implements IContainer, IContainerDiagnostics 
 ```
-**Implements:** [IContainer](./koatty_container.icontainer.md)
+**Implements:** [IContainer](./koatty_container.icontainer.md)<!-- -->, [IContainerDiagnostics](./koatty_container.icontainerdiagnostics.md)
 
 ## Methods
 
@@ -38,6 +38,20 @@ Description
 
 </th></tr></thead>
 <tbody><tr><td>
+
+[\[Symbol.dispose\]()](./koatty_container.container._symbol.dispose_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Dispose the container and release all resources. Implements TC39 Explicit Resource Management (using declaration). Available in Node.js 20+ and TypeScript 5.2+
+
+
+</td></tr>
+<tr><td>
 
 [attachClassMetadata(type, decoratorNameKey, data, target, propertyName)](./koatty_container.container.attachclassmetadata.md)
 
@@ -301,23 +315,7 @@ Get instance by class constructor
 
 </td><td>
 
-Get singleton instance of Container with async-safe double-checked locking Prevents race conditions in async scenarios where multiple calls might occur simultaneously before the first instance is fully created.
-
-
-</td></tr>
-<tr><td>
-
-[getInstanceSync()](./koatty_container.container.getinstancesync.md)
-
-
-</td><td>
-
-`static`
-
-
-</td><td>
-
-Get singleton instance synchronously (for backwards compatibility)
+Get singleton instance of Container
 
 
 </td></tr>

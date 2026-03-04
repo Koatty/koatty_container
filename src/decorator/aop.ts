@@ -42,7 +42,7 @@ export const Aspect = (identifier?: string): ClassDecorator => {
     if (!target.prototype.run || typeof target.prototype.run !== 'function') {
       throw new Error("The aspect class must implement the `run` method.");
     }
-    IOC.saveClass("COMPONENT", target, identifier);
+    IOC.saveClass("COMPONENT", target, identifier ?? target.name);
   };
 };
 
@@ -70,7 +70,7 @@ export const Before = <T>(aopName: ClassOrString<T>, options?: any): MethodDecor
     aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
+  return (target: object, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Before,
       name: aopName,
@@ -103,7 +103,7 @@ export const After = <T>(aopName: ClassOrString<T>, options?: any): MethodDecora
     aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
+  return (target: object, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.After,
       name: aopName,
@@ -136,7 +136,7 @@ export const Around = <T>(aopName: ClassOrString<T>, options?: any): MethodDecor
     aopName = (aopName as any)?.name;
   }
   if (!aopName) throw Error("AopName is required.");
-  return (target: Function, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
+  return (target: object, methodName: string | symbol, _descriptor: PropertyDescriptor) => {
     IOC.attachClassMetadata(TAGGED_CLS, TAGGED_AOP, {
       type: AOPType.Around,
       name: aopName,

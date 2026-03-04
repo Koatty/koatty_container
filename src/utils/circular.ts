@@ -95,6 +95,9 @@ export class CircularDepDetector {
   private dependencyGraph: Map<string, DependencyNode> = new Map();
   private resolutionStack: string[] = [];
   private visitedInCurrentPath: Set<string> = new Set();
+  private _cachedCycles: string[][] | null = null;
+  private _graphVersion: number = 0;
+  private _cachedVersion: number = -1;
 
   /**
    * Register a component and its dependencies
@@ -104,6 +107,7 @@ export class CircularDepDetector {
    * @param dependencies - An array of dependencies for the component
    */
   registerComponent(identifier: string, className: string, dependencies: string[] = []) {
+    this._graphVersion++;
     if (!this.dependencyGraph.has(identifier)) {
       this.dependencyGraph.set(identifier, {
         identifier,
@@ -128,6 +132,7 @@ export class CircularDepDetector {
    * @param to - The identifier of the component that is depended on
    */
   addDependency(from: string, to: string) {
+    this._graphVersion++;
     const node = this.dependencyGraph.get(from);
     if (node) {
       if (!node.dependencies.includes(to)) {
@@ -247,6 +252,9 @@ export class CircularDepDetector {
    * @returns {string[][]} An array of all circular dependencies
    */
   getAllCircularDependencies(): string[][] {
+    if (this._cachedVersion === this._graphVersion && this._cachedCycles !== null) {
+      return this._cachedCycles;
+    }
     const cycles: string[][] = [];
     const visited = new Set<string>();
 
@@ -261,6 +269,8 @@ export class CircularDepDetector {
       }
     }
 
+    this._cachedCycles = cycles;
+    this._cachedVersion = this._graphVersion;
     return cycles;
   }
 
@@ -327,6 +337,9 @@ export class CircularDepDetector {
     this.dependencyGraph.clear();
     this.resolutionStack = [];
     this.visitedInCurrentPath.clear();
+    this._cachedCycles = null;
+    this._graphVersion = 0;
+    this._cachedVersion = -1;
     logger.Debug("Circular dependency detector has been cleared");
   }
 
@@ -339,7 +352,7 @@ export class CircularDepDetector {
     for (const [identifier, node] of this.dependencyGraph) {
       const status = node.isResolved ? '✓' : node.isResolving ? '⌛' : '○';
       const deps = node.dependencies.length > 0 ? 
-        ` -> [${node.dependencies.join(', ')}]` : ' (无依赖)';
+        ` -> [${node.dependencies.join(', ')}]` : ' (no dependencies)';
       lines.push(`  ${status} ${identifier}${deps}`);
     }
 

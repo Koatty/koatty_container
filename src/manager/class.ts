@@ -334,17 +334,4 @@ export class ClassDecoratorManager {
     };
   }
 
-  /**
-   * Get all decorated classes
-   * @returns Array of decorated class information
-   */
-  getDecoratedClasses(): Array<{ class: Function; decorators: string[]; isWrapped: boolean }> {
-    const result: Array<{ class: Function; decorators: string[]; isWrapped: boolean }> = [];
-    
-    // Note: We can't iterate over WeakMap directly, but we can provide this info
-    // when classes are registered. This method serves as a placeholder for
-    // potential future tracking needs.
-    
-    return result;
-  }
 } 

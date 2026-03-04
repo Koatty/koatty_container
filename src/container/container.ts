@@ -25,11 +25,14 @@ import { injectValues } from "../processor/values_processor";
 import {
   getComponentTypeByClassName,
   overridePrototypeValue
-} from "../utils/opertor";
+} from "../utils/operator";
 import {
-  Constructor, IContainer,
+  Constructor, IContainer, IContainerDiagnostics,
   ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
 } from "./icontainer";
+import { createLazyProxy } from "../utils/lazy_proxy";
+import { MetadataStore } from "./metadata_store";
+import { LifecycleManager } from "./lifecycle_manager";
 
 
 // import circular dependency detector
@@ -61,95 +64,27 @@ import { App, Application } from "./app";
  * @class Container
  * @implements {IContainer}
  */
-export class Container implements IContainer {
+export class Container implements IContainer, IContainerDiagnostics {
   private app: Application;
   private classMap: Map<string, Function>;
-  private instanceMap: WeakMap<object | Function, any>;
-  private metadataMap: WeakMap<object | Function, Map<string | symbol, any>>;
+  private lifecycleManager: LifecycleManager;
   private static instance: Container;
-
-  // Thread safety for singleton pattern
-  private static isInitializing: boolean = false;
-  private static initializationPromise: Promise<Container> | null = null;
 
   // circular dependency detector
   private circularDependencyDetector: CircularDepDetector;
 
   // performance optimization components
   private metadataCache: MetadataCache;
+  private metadataStore: MetadataStore;
 
   /**
-   * Get singleton instance of Container with async-safe double-checked locking
-   * Prevents race conditions in async scenarios where multiple calls might occur
-   * simultaneously before the first instance is fully created.
+   * Get singleton instance of Container
    * 
-   * @returns {Container | Promise<Container>} The singleton instance
-   * @description
-   * This method implements async-safe singleton pattern:
-   * 1. First check if instance already exists (fast path)
-   * 2. If not, check if initialization is in progress
-   * 3. If already initializing, return the initialization promise
-   * 4. Otherwise, start initialization with proper synchronization
-   */
-  static getInstance(): Container | Promise<Container> {
-    // Fast path: instance already exists
-    if (this.instance) {
-      return this.instance;
-    }
-
-    // Check if initialization is already in progress
-    if (this.isInitializing && this.initializationPromise) {
-      return this.initializationPromise;
-    }
-
-    // Start initialization
-    this.isInitializing = true;
-    this.initializationPromise = this.createInstanceSafely();
-
-    return this.initializationPromise;
-  }
-
-  /**
-   * Safely create container instance with proper error handling
-   * @private
-   * @returns {Promise<Container>} Promise that resolves to the container instance
-   */
-  private static async createInstanceSafely(): Promise<Container> {
-    try {
-      // Double-check inside the critical section
-      if (this.instance) {
-        return this.instance;
-      }
-
-      // Create new instance
-      const newInstance = new Container();
-
-      // Atomic assignment
-      this.instance = newInstance;
-
-      logger.Debug("Container singleton instance created successfully");
-      return newInstance;
-
-    } catch (error) {
-      logger.Error("Failed to create Container singleton instance:", error);
-      throw error;
-    } finally {
-      // Reset synchronization state
-      this.isInitializing = false;
-      this.initializationPromise = null;
-    }
-  }
-
-  /**
-   * Get singleton instance synchronously (for backwards compatibility)
    * @returns {Container} The singleton instance
-   * @throws {Error} If instance is not yet initialized
    */
-  static getInstanceSync(): Container {
+  static getInstance(): Container {
     if (!this.instance) {
-      // Fallback to immediate initialization for sync access
       this.instance = new Container();
-      logger.Debug("Container singleton instance created synchronously (fallback)");
     }
     return this.instance;
   }
@@ -163,16 +98,11 @@ export class Container implements IContainer {
   private constructor() {
     this.app = new App();
     this.classMap = new Map();
-    this.instanceMap = new WeakMap();
-    this.metadataMap = new WeakMap();
+    this.lifecycleManager = new LifecycleManager();
     this.circularDependencyDetector = new CircularDepDetector();
 
-    // Initialize metadata cache for real-world performance optimization
-    this.metadataCache = new MetadataCache({
-      capacity: 2000,
-      defaultTTL: 10 * 60 * 1000, // 10 minutes
-      maxMemoryUsage: 100 * 1024 * 1024 // 100MB
-    });
+    this.metadataCache = MetadataCache.getShared();
+    this.metadataStore = new MetadataStore(this.metadataCache);
 
     logger.Debug("Container initialized with metadata cache");
   }
@@ -324,6 +254,7 @@ export class Container implements IContainer {
           const parts = key.split(':');
           const [cacheType, metadataKey, targetName, propertyKey] = parts;
 
+          if (!targetName) return undefined;
           const target = this.findTargetByName(targetName);
           if (!target) return undefined;
 
@@ -364,7 +295,7 @@ export class Container implements IContainer {
     // phase 5: aop cache warmup (if enabled)
     if (warmupCaches && optimizePerformance && allTargets.length > 0) {
       try {
-        warmupAOPCache(allTargets);
+        warmupAOPCache(allTargets, this);
         logger.Debug(`AOP cache warmup completed for ${allTargets.length} targets`);
       } catch (error) {
         logger.Debug("AOP cache warmup failed:", error);
@@ -487,7 +418,6 @@ export class Container implements IContainer {
   public reg<T extends object | Function>(identifier: string | T, target?: T | ObjectDefinitionOptions,
     options?: ObjectDefinitionOptions): void {
     if (helper.isString(identifier)) {
-      identifier = identifier;
       if (target !== undefined) {
         target = target as T;
       }
@@ -499,31 +429,38 @@ export class Container implements IContainer {
       identifier = this.getIdentifier(target);
     }
 
-    if (!helper.isClass(target)) {
+    if (!target || !helper.isClass(target)) {
       throw new Error("target is not a class");
     }
 
     // Check if this specific identifier is already registered, not the target class
-    const hasExistingInstance = this.instanceMap.get(target);
+    const hasExistingInstance = this.lifecycleManager.getInstance(target);
 
+    const defaultType = getComponentTypeByClassName(identifier);
     options = {
       isAsync: false,
       initMethod: "constructor",
       destroyMethod: "destructor",
       scope: "Singleton",
-      type: "COMPONENT",
+      type: defaultType,
       args: [],
-      ...{ ...{ type: getComponentTypeByClassName(identifier) }, ...options }
+      ...options
     };
 
     // Always try to save class to metadata with the new identifier
-    if (!this.getClass(<string>identifier, options.type)) {
-      this.saveClass(options.type, <Function>target, <string>identifier);
+    const type = options.type ?? "COMPONENT";
+    if (!this.getClass(<string>identifier, type)) {
+      this.saveClass(type, <Function>target, <string>identifier);
     }
 
     // Only do the heavy initialization if instance doesn't exist
     if (!hasExistingInstance) {
       const dependencies = this.extractDependencies(target);
+
+      // Strict Lifetime check: Singleton cannot depend on Prototype
+      if (options.strictLifetime === true && options.scope === 'Singleton') {
+        this.checkStrictLifetime(identifier as string, dependencies, options.type ?? 'COMPONENT');
+      }
 
       try {
         // register component to circular dependency detector
@@ -535,7 +472,7 @@ export class Container implements IContainer {
 
         // define app
         Reflect.defineProperty((<Function>target).prototype, "app", {
-          configurable: false,
+          configurable: true,
           enumerable: true,
           writable: true,
           value: this.app
@@ -546,17 +483,17 @@ export class Container implements IContainer {
         // inject options once
         Reflect.defineProperty((<Function>target).prototype, "_options", {
           enumerable: false,
-          configurable: false,
+          configurable: true,
           writable: true,
           value: options
         });
 
         // async instance
         if (options.isAsync) {
-          if (this.app && typeof this.app.on === 'function') {
-            this.app.on("appReady", () => this._setInstance(target, options));
+          if (this.app && typeof this.app.once === 'function') {
+            this.app.once("appReady", () => this._setInstance(target, options));
           } else {
-            logger.Warn(`Cannot register async instance for ${identifier}: app.on is not available`);
+            logger.Warn(`Cannot register async instance for ${identifier}: app.once is not available`);
           }
         }
 
@@ -629,21 +566,6 @@ export class Container implements IContainer {
           }
         }
       }
-
-      // Also try direct Reflect.getMetadata for backward compatibility
-      const taggedPropMetadata = Reflect.getMetadata(TAGGED_PROP, target);
-      if (taggedPropMetadata) {
-        for (const key in taggedPropMetadata) {
-          const propertyMetadata = taggedPropMetadata[key];
-          if (propertyMetadata) {
-            const dependencyId = propertyMetadata.identifier || propertyMetadata.name || key;
-            if (dependencyId && !dependencies.includes(dependencyId)) {
-              dependencies.push(dependencyId);
-            }
-          }
-        }
-      }
-
     } catch (error) {
       logger.Debug(`Failed to extract dependencies of ${target.name}:`, error);
     }
@@ -657,6 +579,27 @@ export class Container implements IContainer {
   }
 
   /**
+   * Check strict lifetime constraint: Singleton cannot depend on Prototype
+   * @param id The identifier of the component being registered
+   * @param dependencies Array of dependency identifiers
+   * @param type The component type
+   * @throws {Error} When Singleton depends on Prototype
+   * @private
+   */
+  private checkStrictLifetime(id: string, dependencies: string[], _type: string): void {
+    for (const dep of dependencies) {
+      const depType = getComponentTypeByClassName(dep);
+      const depClass = this.getClass(dep, depType);
+      if (depClass) {
+        const depOptions = Reflect.get((depClass as Function).prototype, '_options');
+        if (depOptions?.scope === 'Prototype') {
+          throw new Error(`Strict Mode: Singleton '${id}' cannot depend on Prototype '${dep}'`);
+        }
+      }
+    }
+  }
+
+  /**
    * Set instance to container.
    * @private
    * @param target The target class or function to be instantiated
@@ -665,16 +608,7 @@ export class Container implements IContainer {
    * If scope is Singleton, the instance will be sealed to prevent modifications.
    */
   private _setInstance<T extends object | Function>(target: T, options: ObjectDefinitionOptions): void {
-    // Ensure options and args are properly defined
-    const constructorArgs = options?.args || [];
-    const instance = Reflect.construct(<Function>target, constructorArgs);
-    overridePrototypeValue(instance);
-    if (options?.scope === "Singleton") {
-      Object.seal(instance);
-    }
-
-    // registration
-    this.instanceMap.set(target, instance);
+    this.lifecycleManager.setInstance(target, options);
   }
 
   /**
@@ -694,8 +628,7 @@ export class Container implements IContainer {
       injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
       // inject properties values
       injectValues(<Function>target, (<Function>target).prototype, IOC, options);
-      // inject AOP
-      injectAOP(<Function>target);
+      injectAOP(<Function>target, this);
 
     } catch (error) {
       // if it is a circular dependency error, throw it again
@@ -750,7 +683,8 @@ export class Container implements IContainer {
       throw new Error(`Bean ${className} not found`);
     }
 
-    const options = Reflect.get((<Function>target).prototype, "_options");
+    const targetFunc = target as unknown as Function;
+    const options = Reflect.get(targetFunc.prototype, "_options");
     const isPrototype = options?.scope === "Prototype";
 
     // Create new instance when:
@@ -762,17 +696,18 @@ export class Container implements IContainer {
         if (isPrototype) {
           const cycle = this.circularDependencyDetector.detectCircularDependency(className);
           if (cycle) {
-            const circularError = new CircularDepError(
-              `Prototype scope component has circular dependency: ${className}`,
-              [className],
-              cycle
-            );
-            logger.Error("Circular dependency detection failed:", circularError.toJSON());
-            throw circularError;
+            logger.Warn(`Prototype scope component ${className} has circular dependency, using Lazy Proxy`);
+            // NOTE: For Prototype scope, each property access triggers a NEW instance construction.
+            // This is intentional behavior - Prototype beans should NOT be cached.
+            // The resolver below creates a fresh instance every time it's accessed.
+            return createLazyProxy(
+              () => Reflect.construct(targetFunc, args, targetFunc) as object,
+              className
+            ) as unknown as T;
           }
         }
 
-        const instance = Reflect.construct(<Function>target, args, <Function>target);
+        const instance = Reflect.construct(targetFunc, args, targetFunc);
         overridePrototypeValue(<Function>instance);
         return instance as T;
       } catch (error) {
@@ -788,30 +723,27 @@ export class Container implements IContainer {
     }
 
     // Return cached instance for Singleton
-    let instance = this.instanceMap.get(<Function>target) as T;
+    let instance = this.lifecycleManager.getInstance(targetFunc) as T;
     if (!instance) {
       // Check if this component is part of a circular dependency
+      // Use precise detection instead of broad "includes" check
       const detector = this.circularDependencyDetector;
-      const hasCircularDeps = detector.hasCircularDependencies();
+      const cycle = detector.detectCircularDependency(className);
 
-      if (hasCircularDeps) {
-        const allCircularDeps = detector.getAllCircularDependencies();
-        const isPartOfCircularDependency = allCircularDeps.some(cycle =>
-          cycle.includes(className)
-        );
-
-        if (isPartOfCircularDependency) {
-          // For circular dependencies, return undefined - delayed loading is expected
-          logger.Debug(`Component ${className} is part of circular dependency, returning undefined (delayed loading expected)`);
-          return undefined as T;
-        }
+      if (cycle) {
+        // For circular dependencies, return Lazy Proxy
+        logger.Debug(`Component ${className} is in circular dependency cycle [${cycle.join(' -> ')}], returning Lazy Proxy`);
+        return createLazyProxy(
+          () => this.lifecycleManager.getInstance(targetFunc) as object,
+          className
+        ) as unknown as T;
       }
 
       // Check if this is a case where instances were cleared but class registration exists
       // AND we are not in a circular dependency scenario
       const wasInstanceCleared = this.classMap.has(`${type}:${className}`);
 
-      if (wasInstanceCleared && !hasCircularDeps) {
+      if (wasInstanceCleared && !cycle) {
         // Instance was cleared for non-circular dependency, safe to recreate
         logger.Debug(`Instance was cleared for ${className}, recreating with proper dependency injection flow`);
 
@@ -819,11 +751,11 @@ export class Container implements IContainer {
           // Re-run the full registration process to ensure proper dependency injection
           // Ensure options is defined with default values
           const safeOptions = options || { scope: "Singleton", args: [] };
-          this._injection(<Function>target, safeOptions, className);
-          this._setInstance(<Function>target, safeOptions);
+          this._injection(targetFunc, safeOptions, className);
+          this._setInstance(targetFunc, safeOptions);
 
           // Get the newly created instance
-          instance = this.instanceMap.get(<Function>target) as T;
+          instance = this.lifecycleManager.getInstance(targetFunc) as T;
           if (!instance) {
             throw new Error(`Failed to recreate instance for ${className}`);
           }
@@ -831,9 +763,12 @@ export class Container implements IContainer {
           logger.Debug(`Successfully recreated singleton instance for ${className}`);
         } catch (error) {
           if (error instanceof CircularDepError) {
-            // If circular dependency is detected during recreation, return undefined
-            logger.Debug(`Circular dependency detected for ${className} during recreation, returning undefined (delayed loading)`);
-            return undefined as T;
+            // If circular dependency is detected during recreation, return Lazy Proxy
+            logger.Debug(`Circular dependency detected for ${className} during recreation, returning Lazy Proxy`);
+            return createLazyProxy(
+              () => this.lifecycleManager.getInstance(targetFunc) as object,
+              className
+            ) as unknown as T;
           } else {
             // Safely handle error message extraction
             const errorMessage = error && typeof error === 'object' && 'message' in error 
@@ -844,9 +779,12 @@ export class Container implements IContainer {
         }
       } else {
         // Either bean not found or in circular dependency mode - don't try to recreate
-        if (hasCircularDeps) {
-          logger.Debug(`${className} not found and circular dependencies exist, returning undefined for delayed loading`);
-          return undefined as T;
+        if (cycle) {
+          logger.Debug(`${className} not found and circular dependency detected, returning Lazy Proxy for delayed loading`);
+          return createLazyProxy(
+            () => this.lifecycleManager.getInstance(targetFunc) as object,
+            className
+          ) as unknown as T;
         } else {
           throw new Error(`Bean ${className} not found`);
         }
@@ -867,7 +805,7 @@ export class Container implements IContainer {
    * const userServiceClass = container.getClass(UserService, 'Service');
    * ```
    */
-  public getClass(identifier: string, type: string = "COMPONENT"): Function {
+  public getClass(identifier: string, type: string = "COMPONENT"): Function | undefined {
     return this.classMap.get(`${type}:${identifier}`);
   }
 
@@ -885,18 +823,7 @@ export class Container implements IContainer {
    * ```
    */
   public getInsByClass<T extends object | Function>(target: T, args: any[] = []): T {
-    if (!helper.isClass(target)) {
-      return null;
-    }
-    // get instance from the Container
-    const instance: any = this.instanceMap.get(target);
-    // require Prototype instance
-    if (args.length > 0) {
-      // instantiation
-      return Reflect.construct(<Function><unknown>target, args);
-    } else {
-      return instance;
-    }
+    return this.lifecycleManager.getInsByClass(target, args);
   }
 
   /**
@@ -913,19 +840,7 @@ export class Container implements IContainer {
    * ```
    */
   public getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol) {
-    // filter Object.create(null)
-    if (typeof target === "object" && target.constructor) {
-      target = target.constructor;
-    }
-    if (!this.metadataMap.has(target)) {
-      this.metadataMap.set(target, new Map());
-    }
-    const key = propertyKey ? `${helper.toString(metadataKey)}:${helper.toString(propertyKey)}` : metadataKey;
-    const map = this.metadataMap.get(target);
-    if (!map.has(key)) {
-      map.set(key, new Map());
-    }
-    return map.get(key);
+    return this.metadataStore.getMetadataMap(metadataKey, target, propertyKey);
   }
 
   /**
@@ -999,11 +914,7 @@ export class Container implements IContainer {
    */
   public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName?: string) {
-    const originMap = this.getMetadataMap(type, target, propertyName);
-    originMap.set(decoratorNameKey, data);
-
-    // Cache the metadata for faster access
-    this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, data, propertyName);
+    this.metadataStore.saveClassMetadata(type, decoratorNameKey, data, target, propertyName);
   }
 
   /**
@@ -1022,22 +933,7 @@ export class Container implements IContainer {
    */
   public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object,
     propertyName?: string) {
-    // Try cache first
-    const cachedValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName);
-    if (cachedValue !== undefined) {
-      return cachedValue;
-    }
-
-    // Fallback to original method
-    const originMap = this.getMetadataMap(type, target, propertyName);
-    const value = originMap.get(decoratorNameKey);
-
-    // Cache the result for next time
-    if (value !== undefined) {
-      this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, value, propertyName);
-    }
-
-    return value;
+    return this.metadataStore.getClassMetadata(type, decoratorNameKey, target, propertyName);
   }
 
   /**
@@ -1055,16 +951,7 @@ export class Container implements IContainer {
    */
   public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName?: string) {
-    const originMap = this.getMetadataMap(type, target, propertyName);
-    if (!originMap.has(decoratorNameKey)) {
-      originMap.set(decoratorNameKey, []);
-    }
-    originMap.get(decoratorNameKey).push(data);
-
-    // Update cache
-    const currentValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName) || [];
-    currentValue.push(data);
-    this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, currentValue, propertyName);
+    this.metadataStore.attachClassMetadata(type, decoratorNameKey, data, target, propertyName);
   }
 
   /**
@@ -1081,11 +968,7 @@ export class Container implements IContainer {
    */
   public savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName: string | symbol) {
-    const originMap = this.getMetadataMap(decoratorNameKey, target);
-    originMap.set(propertyName, data);
-
-    // Cache the property metadata
-    this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, data);
+    this.metadataStore.savePropertyData(decoratorNameKey, data, target, propertyName);
   }
 
   /**
@@ -1102,16 +985,7 @@ export class Container implements IContainer {
    */
   public attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName: string | symbol) {
-    const originMap = this.getMetadataMap(decoratorNameKey, target);
-    if (!originMap.has(propertyName)) {
-      originMap.set(propertyName, []);
-    }
-    originMap.get(propertyName).push(data);
-
-    // Update cache
-    const currentValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName) || [];
-    currentValue.push(data);
-    this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, currentValue);
+    this.metadataStore.attachPropertyData(decoratorNameKey, data, target, propertyName);
   }
 
   /**
@@ -1128,22 +1002,7 @@ export class Container implements IContainer {
    */
   public getPropertyData(decoratorNameKey: string | symbol, target: Function | object,
     propertyName: string | symbol) {
-    // Try cache first
-    const cachedValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName);
-    if (cachedValue !== undefined) {
-      return cachedValue;
-    }
-
-    // Fallback to original method
-    const originMap = this.getMetadataMap(decoratorNameKey, target);
-    const value = originMap.get(propertyName);
-
-    // Cache the result
-    if (value !== undefined) {
-      this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, value);
-    }
-
-    return value;
+    return this.metadataStore.getPropertyData(decoratorNameKey, target, propertyName);
   }
 
   /**
@@ -1158,12 +1017,7 @@ export class Container implements IContainer {
    * ```
    */
   public listPropertyData(decoratorNameKey: string | symbol, target: Function | object) {
-    const originMap = this.getMetadataMap(decoratorNameKey, target);
-    const data: any = {};
-    for (const [key, value] of originMap) {
-      data[key] = value;
-    }
-    return data;
+    return this.metadataStore.listPropertyData(decoratorNameKey, target);
   }
 
   /**
@@ -1222,12 +1076,10 @@ export class Container implements IContainer {
   public clear(): void {
     this.classMap.clear();
     this.app = new App();
-    this.instanceMap = new WeakMap();
-    this.metadataMap = new WeakMap();
+    this.lifecycleManager.clear();
     this.circularDependencyDetector.clear();
 
-    // Clear performance optimization components
-    this.metadataCache.clear();
+    this.metadataStore.clear();
 
     logger.Debug("Container cleared including performance optimization components");
   }
@@ -1238,8 +1090,7 @@ export class Container implements IContainer {
    * @memberof Container
    */
   public clearMetadata(): void {
-    this.metadataMap = new WeakMap();
-    this.metadataCache.clear();
+    this.metadataStore.clear();
 
     logger.Debug("Container metadata cleared");
   }
@@ -1261,10 +1112,29 @@ export class Container implements IContainer {
    */
 
   public clearInstances(): void {
-    this.instanceMap = new WeakMap();
+    this.lifecycleManager.clear();
     this.circularDependencyDetector.clear();
 
     logger.Debug("Container instances cleared, class registrations and metadata preserved");
+  }
+
+  /**
+   * Dispose the container and release all resources.
+   * Implements TC39 Explicit Resource Management (using declaration).
+   * Available in Node.js 20+ and TypeScript 5.2+
+   * 
+   * @example
+   * ```ts
+   * {
+   *   using container = Container.getInstance();
+   *   // container is automatically disposed when leaving scope
+   * }
+   * ```
+   */
+  public [Symbol.dispose](): void {
+    this.clear();
+    this.metadataCache.stopCleanupTimer();
+    logger.Debug('Container disposed via Symbol.dispose');
   }
 
   /**
@@ -1284,7 +1154,6 @@ export class Container implements IContainer {
     hotspots: {
       mostAccessedTypes: string[];
       circularDependencies: number;
-      lazyLoadingCount: number;
     };
     lruCaches: {
       metadata: any;
@@ -1340,8 +1209,7 @@ export class Container implements IContainer {
       },
       hotspots: {
         mostAccessedTypes,
-        circularDependencies: circularCount,
-        lazyLoadingCount: 0 // TODO: implement lazy loading count
+        circularDependencies: circularCount
       },
       lruCaches
     };
@@ -1511,111 +1379,19 @@ export class Container implements IContainer {
 }
 
 /**
- * Global IOC container instance with async-safe initialization.
- * Singleton pattern implementation to ensure only one container instance exists.
- * Handles async scenarios properly to prevent race conditions.
+ * Global IOC container instance.
  * 
  * @constant
  * @type {Container}
- * @throws {Error} When multiple container versions conflict
  */
-export const IOC: IContainer = (function () {
-  // Global synchronization state
-  let globalInitialization: Promise<IContainer> | null = null;
-  let isGlobalInitializing = false;
-
-  // Immediate execution function with async safety
-  const initializeGlobalIOC = async (): Promise<IContainer> => {
-    // Check if already exists
-    if ((<any>global).__KOATTY_IOC__) {
-      return (<any>global).__KOATTY_IOC__;
-    }
-
-    // Prevent concurrent initialization
-    if (isGlobalInitializing && globalInitialization) {
-      return globalInitialization;
-    }
-
-    isGlobalInitializing = true;
-
-    try {
-      // Double-check pattern
-      if ((<any>global).__KOATTY_IOC__) {
-        return (<any>global).__KOATTY_IOC__;
-      }
-
-      // Get or create container instance
-      const containerResult = Container.getInstance();
-      const instance = containerResult instanceof Promise ? await containerResult : containerResult;
-
-      // Atomic assignment to global
-      (<any>global).__KOATTY_IOC__ = instance;
-
-      logger.Debug("Global IOC container initialized successfully");
-      return instance;
-
-    } catch (error) {
-      logger.Error("Failed to initialize global IOC container:", error);
-      throw new Error(`IOC container initialization failed: ${error.message}`);
-    } finally {
-      isGlobalInitializing = false;
-      globalInitialization = null;
-    }
-  };
-
-  // Check if we're in a Node.js environment (which we are)
-  if (typeof global !== 'undefined') {
-    // For immediate synchronous access, try sync initialization first
-    try {
-      if ((<any>global).__KOATTY_IOC__) {
-        return (<any>global).__KOATTY_IOC__;
-      }
-
-      // Try synchronous initialization
-      const instance = Container.getInstanceSync();
-      (<any>global).__KOATTY_IOC__ = instance;
-      return instance;
-
-    } catch (error) {
-      logger.Warn("Synchronous IOC initialization failed, falling back to async:", error);
-
-      // Store the promise for later resolution
-      globalInitialization = initializeGlobalIOC();
-
-      // For module loading scenarios, return a proxy that will resolve later
-      return new Proxy({} as IContainer, {
-        get(target, prop) {
-          if ((<any>global).__KOATTY_IOC__) {
-            return (<any>global).__KOATTY_IOC__[prop];
-          }
-          throw new Error(`IOC container not ready. Please await container initialization or use IOC.ready().`);
-        }
-      });
-    }
+export const IOC: IContainer = (() => {
+  if ((global as any).__KOATTY_IOC__) {
+    return (global as any).__KOATTY_IOC__;
   }
-
-  // Fallback for other environments
-  const instance = Container.getInstanceSync();
-  (<any>global).__KOATTY_IOC__ = instance;
+  const instance = Container.getInstance();
+  (global as any).__KOATTY_IOC__ = instance;
   return instance;
 })();
-
-/**
- * Ensure IOC container is ready for use
- * @returns {Promise<IContainer>} Promise that resolves when container is ready
- */
-export const ensureIOCReady = async (): Promise<IContainer> => {
-  if ((<any>global).__KOATTY_IOC__ && typeof (<any>global).__KOATTY_IOC__.reg === 'function') {
-    return (<any>global).__KOATTY_IOC__;
-  }
-
-  // Re-initialize if needed
-  const containerResult = Container.getInstance();
-  const instance = containerResult instanceof Promise ? await containerResult : containerResult;
-  (<any>global).__KOATTY_IOC__ = instance;
-
-  return instance;
-};
 
 /**
  * IOC container instance export.

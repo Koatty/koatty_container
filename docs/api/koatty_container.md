@@ -224,17 +224,6 @@ BeforeEach decorator for AOP implementation. Executes the specified aspect befor
 </td></tr>
 <tr><td>
 
-[ensureIOCReady()](./koatty_container.ensureiocready.md)
-
-
-</td><td>
-
-Ensure IOC container is ready for use
-
-
-</td></tr>
-<tr><td>
-
 [getComponentTypeByClassName(identifier)](./koatty_container.getcomponenttypebyclassname.md)
 
 
@@ -408,6 +397,19 @@ Interface for IOC container implementation. Provides methods for dependency inje
 </td></tr>
 <tr><td>
 
+[IContainerDiagnostics](./koatty_container.icontainerdiagnostics.md)
+
+
+</td><td>
+
+Interface for container diagnostic and performance methods. Separated from IContainer to maintain clean interface segregation.
+
+ IContainerDiagnostics
+
+
+</td></tr>
+<tr><td>
+
 [ObjectDefinitionOptions](./koatty_container.objectdefinitionoptions.md)
 
 
@@ -450,7 +452,7 @@ Description
 
 </td><td>
 
-Global IOC container instance with async-safe initialization. Singleton pattern implementation to ensure only one container instance exists. Handles async scenarios properly to prevent race conditions.
+Global IOC container instance.
 
   {<!-- -->Container<!-- -->}
 

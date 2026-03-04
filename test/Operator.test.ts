@@ -6,7 +6,7 @@ import {
   getMethodNames,
   getPropertyNames,
   getComponentTypeByClassName
-} from "../src/utils/opertor";
+} from "../src/utils/operator";
 import { Container } from "../src/container/container";
 
 describe("Opertor Utils", () => {
