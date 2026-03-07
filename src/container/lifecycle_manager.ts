@@ -43,14 +43,11 @@ export class LifecycleManager {
     if (!helper.isClass(target)) {
       throw new Error(`getInsByClass: target is not a class`);
     }
+    const instance: any = this.instanceMap.get(target);
     if (args.length > 0) {
       return Reflect.construct(<Function><unknown>target, args);
     }
-    const instance = this.instanceMap.get(target);
-    if (instance === undefined) {
-      throw new Error(`getInsByClass: no instance found for ${(target as Function).name || 'unknown'}`);
-    }
-    return instance as T;
+    return instance;
   }
 
   /**
