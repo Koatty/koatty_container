@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- build
+
 ## 2.2.0
 
 ### Architecture Refactoring Release
