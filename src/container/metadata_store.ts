@@ -10,7 +10,7 @@ export class MetadataStore {
     this.metadataCache = metadataCache;
   }
 
-  public getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol) {
+  public getMetadataMap<T = any>(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): T {
     if (typeof target === "object" && target.constructor) {
       target = target.constructor;
     }
@@ -22,7 +22,7 @@ export class MetadataStore {
     if (!map!.has(key)) {
       map!.set(key, new Map());
     }
-    return map!.get(key);
+    return map!.get(key) as T;
   }
 
   public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
@@ -32,18 +32,18 @@ export class MetadataStore {
     this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, data, propertyName);
   }
 
-  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object,
-    propertyName?: string) {
+  public getClassMetadata<T = any>(type: string, decoratorNameKey: string | symbol, target: Function | object,
+    propertyName?: string): T {
     const cachedValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName);
     if (cachedValue !== undefined) {
-      return cachedValue;
+      return cachedValue as T;
     }
     const originMap = this.getMetadataMap(type, target, propertyName);
     const value = originMap.get(decoratorNameKey);
     if (value !== undefined) {
       this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, value, propertyName);
     }
-    return value;
+    return value as T;
   }
 
   public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
@@ -77,27 +77,27 @@ export class MetadataStore {
     this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, currentValue);
   }
 
-  public getPropertyData(decoratorNameKey: string | symbol, target: Function | object,
-    propertyName: string | symbol) {
+  public getPropertyData<T = any>(decoratorNameKey: string | symbol, target: Function | object,
+    propertyName: string | symbol): T {
     const cachedValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName);
     if (cachedValue !== undefined) {
-      return cachedValue;
+      return cachedValue as T;
     }
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     const value = originMap.get(propertyName);
     if (value !== undefined) {
       this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, value);
     }
-    return value;
+    return value as T;
   }
 
-  public listPropertyData(decoratorNameKey: string | symbol, target: Function | object) {
+  public listPropertyData<T = Record<string, any>>(decoratorNameKey: string | symbol, target: Function | object): T {
     const originMap = this.getMetadataMap(decoratorNameKey, target);
     const data: any = {};
     for (const [key, value] of originMap) {
       data[key] = value;
     }
-    return data;
+    return data as T;
   }
 
   public clear(): void {

@@ -171,7 +171,7 @@ export interface IContainer {
    * const metadataMap = container.getMetadataMap('key', UserService, 'method');
    * ```
    */
-  getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
+  getMetadataMap<T = any>(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): T;
   /**
    * Get the identifier for a target class or object.
    * 
@@ -186,7 +186,7 @@ export interface IContainer {
    * @param target The target class constructor or object instance
    * @returns The component type string
    */
-  getType(target: Function | object): any;
+  getType<T = string>(target: Function | object): T;
   /**
    * Save class metadata and store class module in container.
    * 
@@ -246,7 +246,7 @@ export interface IContainer {
    * const value = container.getClassMetadata('key', 'name', UserService, 'method');
    * ```
    */
-  getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
+  getClassMetadata<T = any>(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): T;
   /**
    * Save property metadata to the container.
    * 
@@ -285,7 +285,7 @@ export interface IContainer {
    * const value = container.getPropertyData('key', UserService, 'property');
    * ```
    */
-  getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
+  getPropertyData<T = any>(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): T;
   /**
    * Get property data by decorator name key.
    * 
@@ -297,7 +297,7 @@ export interface IContainer {
    * const data = container.listPropertyData('key', UserService);
    * ```
    */
-  listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
+  listPropertyData<T = Record<string, any>>(decoratorNameKey: string | symbol, target: Function | object): T;
 
   /**
    * clear all resources in container
@@ -376,7 +376,7 @@ export interface IContainerDiagnostics {
    * @returns Performance statistics object
    */
   getPerformanceStats(): {
-    cache: any;
+    cache: Record<string, unknown>;
     totalRegistered: number;
     memoryUsage: {
       classMap: number;
@@ -394,7 +394,7 @@ export interface IContainerDiagnostics {
   /**
    * Get detailed performance statistics
    */
-  getDetailedPerformanceStats(): any;
+  getDetailedPerformanceStats(): Record<string, unknown>;
 
   /**
    * Clear performance cache
@@ -415,7 +415,7 @@ export interface ObjectDefinitionOptions {
   destroyMethod?: string;
   scope?: Scope;
   type?: string;
-  args?: any[];
+  args?: unknown[];
   strictLifetime?: boolean;
 }
 
@@ -428,5 +428,5 @@ export interface ObjectDefinitionOptions {
 export interface IAspect {
   app: Application;
 
-  run: (args: any[], proceed?: Function, options?: any) => Promise<any>;
+  run: (args: unknown[], proceed?: (...args: unknown[]) => Promise<unknown>, options?: Record<string, unknown>) => Promise<unknown>;
 }

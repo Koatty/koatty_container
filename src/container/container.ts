@@ -9,18 +9,8 @@ import * as helper from "koatty_lib";
 import "reflect-metadata";
 import { injectAOP } from "../processor/aop_processor";
 import {
-  injectAutowired,
-  batchPreprocessDependencies,
-  clearDependencyCache,
-  optimizeDependencyCache,
-  getAutowiredCacheStats
+  injectAutowired
 } from "../processor/autowired_processor";
-import {
-  warmupAOPCache,
-  clearAOPCache,
-  optimizeAOPCache,
-  getAOPCacheStats
-} from "../processor/aop_processor";
 import { injectValues } from "../processor/values_processor";
 import {
   getComponentTypeByClassName,
@@ -28,18 +18,22 @@ import {
 } from "../utils/operator";
 import {
   Constructor, IContainer, IContainerDiagnostics,
-  ObjectDefinitionOptions, TAGGED_CLS, TAGGED_PROP, TAGGED_AOP
+  ObjectDefinitionOptions, TAGGED_CLS
 } from "./icontainer";
 import { createLazyProxy } from "../utils/lazy_proxy";
 import { MetadataStore } from "./metadata_store";
 import { LifecycleManager } from "./lifecycle_manager";
+import { DependencyAnalyzer } from "./dependency_analyzer";
+import { PreloadManager } from "./preload_manager";
+import { BatchRegistrar } from "./batch_registrar";
 
 
 // import circular dependency detector
 import { CircularDepDetector, CircularDepError } from "../utils/circular";
-import { MetadataCache, CacheType } from "../utils/cache";
+import { MetadataCache } from "../utils/cache";
 import { DefaultLogger as logger } from "koatty_logger";
 import { App, Application } from "./app";
+import { PerformanceManager } from "./performance_manager";
 
 /**
  * Container class implements IContainer interface for dependency injection.
@@ -76,6 +70,10 @@ export class Container implements IContainer, IContainerDiagnostics {
   // performance optimization components
   private metadataCache: MetadataCache;
   private metadataStore: MetadataStore;
+  private dependencyAnalyzer: DependencyAnalyzer;
+  private performanceManager: PerformanceManager;
+  private preloadManager: PreloadManager;
+  private batchRegistrar: BatchRegistrar;
 
   /**
    * Get singleton instance of Container
@@ -103,6 +101,34 @@ export class Container implements IContainer, IContainerDiagnostics {
 
     this.metadataCache = MetadataCache.getShared();
     this.metadataStore = new MetadataStore(this.metadataCache);
+    this.dependencyAnalyzer = new DependencyAnalyzer(
+      this.circularDependencyDetector,
+      this.metadataCache,
+      (id, type) => this.getClass(id, type),
+      (key, target) => this.listPropertyData(key, target)
+    );
+    this.performanceManager = new PerformanceManager(
+      this.metadataCache,
+      this.classMap,
+      this.circularDependencyDetector,
+      (type) => this.listClass(type)
+    );
+    this.preloadManager = new PreloadManager(
+      this.metadataCache,
+      (type) => this.listClass(type),
+      () => this.getDetailedPerformanceStats(),
+      () => this.clearPerformanceCache(),
+      (lruCaches) => this.performanceManager.calculateTotalCacheSize(lruCaches),
+      this.classMap,
+      this as any
+    );
+    this.batchRegistrar = new BatchRegistrar(
+      (id, target, options) => this.reg(id, target, options),
+      (target) => this.getIdentifier(target),
+      (target) => this.getType(target),
+      (target) => this.extractDependencies(target),
+      (types, options) => this.preloadMetadata(types, options)
+    );
 
     logger.Debug("Container initialized with metadata cache");
   }
@@ -168,201 +194,14 @@ export class Container implements IContainer, IContainerDiagnostics {
     batchPreProcessDependencies?: boolean;
     clearStaleCache?: boolean;
   } = {}): void {
-    const {
-      optimizePerformance = true, // default enable optimization
-      warmupCaches = true, // default enable cache warmup
-      batchPreProcessDependencies = true, // default enable batch pre-process
-      clearStaleCache = false // avoid unexpected cleanup
-    } = options;
-
-    const startTime = Date.now();
-
-    // determine the types to process
-    const targetTypes = types.length > 0 ? types : ["CONTROLLER", "SERVICE", "COMPONENT"];
-
-    logger.Info(`Starting ${optimizePerformance ? 'optimized' : 'standard'} metadata preload for types: [${targetTypes.join(', ')}]...`);
-
-    // phase 1: optional cache cleanup and optimization
-    if (optimizePerformance) {
-      if (clearStaleCache) {
-        this.clearPerformanceCache();
-        logger.Debug("Performance caches cleared before preload");
-      }
-
-      // optimize metadata lru cache
-      this.metadataCache.optimize();
-    }
-
-    // phase 2: sort types by access frequency and process
-    const sortedTypes = targetTypes.sort((a, b) => {
-      const aCount = this.listClass(a).length;
-      const bCount = this.listClass(b).length;
-      return bCount - aCount; // descending, process types with more components first
-    });
-
-    let totalProcessed = 0;
-    const allTargets: Function[] = [];
-
-    for (const type of sortedTypes) {
-      const typeStartTime = Date.now();
-
-      // get all components of this type
-      const componentsToPreload = this.listClass(type);
-
-      if (componentsToPreload.length === 0) {
-        logger.Debug(`No components found for type: ${type}`);
-        continue;
-      }
-
-      // collect all target classes
-      const typeTargets = componentsToPreload.map(c => c.target);
-      allTargets.push(...typeTargets);
-
-      // phase 3: metadata pre-load
-      const preloadKeys: string[] = [];
-
-      componentsToPreload.forEach(({ target, id }) => {
-        const [, identifier] = id.split(':');
-
-        // common metadata keys
-        preloadKeys.push(
-          `reflect:design:paramtypes:${identifier}`,
-          `property:${TAGGED_PROP}:${identifier}`,
-          `class:${TAGGED_CLS}:${TAGGED_AOP}:${identifier}`,
-          `reflect:autowired:${identifier}`,
-          `reflect:values:${identifier}`
-        );
-
-        // property specific metadata
-        const propertyNames = Object.getOwnPropertyNames(target.prototype);
-        propertyNames.forEach(propName => {
-          if (propName !== 'constructor') {
-            preloadKeys.push(
-              `reflect:${propName}:autowired:${identifier}`,
-              `reflect:${propName}:values:${identifier}`
-            );
-          }
-        });
-      });
-
-      this.metadataCache.registerForPreload(preloadKeys);
-
-      // pre-load metadata
-      let preloadedCount = 0;
-      this.metadataCache.preload(CacheType.REFLECT_METADATA, (key: string) => {
-        try {
-          const parts = key.split(':');
-          const [cacheType, metadataKey, targetName, propertyKey] = parts;
-
-          if (!targetName) return undefined;
-          const target = this.findTargetByName(targetName);
-          if (!target) return undefined;
-
-          if (cacheType === 'reflect') {
-            const value = propertyKey && propertyKey !== targetName
-              ? Reflect.getMetadata(metadataKey, target, propertyKey)
-              : Reflect.getMetadata(metadataKey, target);
-
-            if (value !== undefined) {
-              preloadedCount++;
-            }
-            return value;
-          }
-
-          return undefined;
-        } catch (error) {
-          logger.Debug(`Failed to preload metadata for key ${key}:`, error);
-          return undefined;
-        }
-      });
-
-      const typeTime = Date.now() - typeStartTime;
-      totalProcessed += componentsToPreload.length;
-
-      logger.Debug(`Processed ${type}: ${componentsToPreload.length} components, ${preloadedCount} metadata entries in ${typeTime}ms`);
-    }
-
-    // phase 4: batch dependency pre-process (if enabled)
-    if (batchPreProcessDependencies && optimizePerformance && allTargets.length > 0) {
-      try {
-        batchPreprocessDependencies(allTargets, this);
-        logger.Debug(`Batch dependency preprocessing completed for ${allTargets.length} targets`);
-      } catch (error) {
-        logger.Debug("Batch dependency preprocessing failed:", error);
-      }
-    }
-
-    // phase 5: aop cache warmup (if enabled)
-    if (warmupCaches && optimizePerformance && allTargets.length > 0) {
-      try {
-        warmupAOPCache(allTargets, this);
-        logger.Debug(`AOP cache warmup completed for ${allTargets.length} targets`);
-      } catch (error) {
-        logger.Debug("AOP cache warmup failed:", error);
-      }
-    }
-
-    // phase 6: post-optimization processing (if enabled)
-    if (optimizePerformance) {
-      try {
-        optimizeDependencyCache();
-      } catch (error) {
-        logger.Debug("Dependency cache optimization failed:", error);
-      }
-
-      try {
-        optimizeAOPCache();
-      } catch (error) {
-        logger.Debug("AOP cache optimization failed:", error);
-      }
-    }
-
-    const totalTime = Date.now() - startTime;
-    const cacheStats = this.metadataCache.getStats();
-
-    // output statistics information
-    if (optimizePerformance) {
-      const detailedStats = this.getDetailedPerformanceStats();
-
-      logger.Info(`Optimized metadata preload completed in ${totalTime}ms:`);
-      logger.Info(`  - Types processed: [${sortedTypes.join(', ')}]`);
-      logger.Info(`  - Total components: ${totalProcessed}`);
-      logger.Info(`  - Metadata cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
-
-      if (detailedStats.lruCaches.dependencies) {
-        logger.Info(`  - Dependencies cache hit rate: ${(detailedStats.lruCaches.dependencies.hitRate * 100).toFixed(2)}%`);
-      }
-
-      if (detailedStats.lruCaches.aop) {
-        logger.Info(`  - AOP cache hit rate: ${(detailedStats.lruCaches.aop.hitRates.overall * 100).toFixed(2)}%`);
-      }
-
-      logger.Info(`  - Total cache size: ${this.calculateTotalCacheSize(detailedStats.lruCaches)}`);
-    } else {
-      logger.Info(`Standard metadata preload completed in ${totalTime}ms:`);
-      logger.Info(`  - Types processed: [${sortedTypes.join(', ')}]`);
-      logger.Info(`  - Total components: ${totalProcessed}`);
-      logger.Info(`  - Cache hit rate: ${(cacheStats.hitRate * 100).toFixed(2)}%`);
-    }
-  }
-
-  /**
-   * Find target class by name
-   */
-  private findTargetByName(name: string): Function | undefined {
-    for (const [, target] of this.classMap) {
-      if (target.name === name) {
-        return target;
-      }
-    }
-    return undefined;
+    this.preloadManager.preloadMetadata(types, options);
   }
 
   /**
    * Get performance statistics
    */
   public getPerformanceStats(): {
-    cache: any;
+    cache: Record<string, unknown>;
     totalRegistered: number;
     memoryUsage: {
       classMap: number;
@@ -370,33 +209,7 @@ export class Container implements IContainer, IContainerDiagnostics {
       metadataMap: number;
     };
   } {
-    const cacheStats = this.metadataCache.getStats();
-
-    return {
-      cache: cacheStats,
-      totalRegistered: this.classMap.size,
-      memoryUsage: {
-        classMap: this.classMap.size,
-        instanceMap: this.getInstanceMapSize(),
-        metadataMap: this.getMetadataMapSize()
-      }
-    };
-  }
-
-  /**
-   * Estimate instance map size
-   */
-  private getInstanceMapSize(): number {
-    // WeakMap size cannot be directly determined, estimate based on class map
-    return this.classMap.size;
-  }
-
-  /**
-   * Estimate metadata map size
-   */
-  private getMetadataMapSize(): number {
-    // WeakMap size cannot be directly determined, estimate based on class map
-    return this.classMap.size * 3; // Rough estimate
+    return this.performanceManager.getPerformanceStats();
   }
 
   /**
@@ -530,52 +343,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @returns {string[]} An array of dependencies
    */
   private extractDependencies(target: any): string[] {
-    // Check cache first
-    const cachedDependencies = this.metadataCache.getCachedDependencies(target);
-    if (cachedDependencies) {
-      return cachedDependencies;
-    }
-
-    const dependencies: string[] = [];
-
-    try {
-      // get constructor parameter types with caching
-      let paramTypes = this.metadataCache.getReflectMetadata('design:paramtypes', target);
-      if (!paramTypes) {
-        paramTypes = Reflect.getMetadata('design:paramtypes', target) || [];
-        this.metadataCache.setReflectMetadata('design:paramtypes', target, paramTypes);
-      }
-
-      paramTypes.forEach((type: any) => {
-        if (type && type.name) {
-          dependencies.push(type.name);
-        }
-      });
-
-      // Get @Autowired decorated properties using IOC's listPropertyData method
-      const autowiredProperties = this.listPropertyData(TAGGED_PROP, target);
-      if (autowiredProperties && typeof autowiredProperties === 'object') {
-        for (const [propertyKey, metadata] of Object.entries(autowiredProperties)) {
-          if (metadata && typeof metadata === 'object') {
-            const propertyMetadata = metadata as any;
-            // Get the dependency identifier from @Autowired metadata
-            const dependencyId = propertyMetadata.identifier || propertyMetadata.name || propertyKey;
-            if (dependencyId && !dependencies.includes(dependencyId)) {
-              dependencies.push(dependencyId);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      logger.Debug(`Failed to extract dependencies of ${target.name}:`, error);
-    }
-
-    // Cache the extracted dependencies
-    this.metadataCache.setCachedDependencies(target, dependencies);
-
-    logger.Debug(`Register component dependencies: ${target.name} -> [${dependencies.join(', ')}]`);
-
-    return dependencies;
+    return this.dependencyAnalyzer.extractDependencies(target);
   }
 
   /**
@@ -586,17 +354,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @throws {Error} When Singleton depends on Prototype
    * @private
    */
-  private checkStrictLifetime(id: string, dependencies: string[], _type: string): void {
-    for (const dep of dependencies) {
-      const depType = getComponentTypeByClassName(dep);
-      const depClass = this.getClass(dep, depType);
-      if (depClass) {
-        const depOptions = Reflect.get((depClass as Function).prototype, '_options');
-        if (depOptions?.scope === 'Prototype') {
-          throw new Error(`Strict Mode: Singleton '${id}' cannot depend on Prototype '${dep}'`);
-        }
-      }
-    }
+  private checkStrictLifetime(id: string, dependencies: string[], type: string): void {
+    return this.dependencyAnalyzer.checkStrictLifetime(id, dependencies, type);
   }
 
   /**
@@ -740,10 +499,9 @@ export class Container implements IContainer, IContainerDiagnostics {
       }
 
       // Check if this is a case where instances were cleared but class registration exists
-      // AND we are not in a circular dependency scenario
       const wasInstanceCleared = this.classMap.has(`${type}:${className}`);
 
-      if (wasInstanceCleared && !cycle) {
+      if (wasInstanceCleared) {
         // Instance was cleared for non-circular dependency, safe to recreate
         logger.Debug(`Instance was cleared for ${className}, recreating with proper dependency injection flow`);
 
@@ -778,16 +536,7 @@ export class Container implements IContainer, IContainerDiagnostics {
           }
         }
       } else {
-        // Either bean not found or in circular dependency mode - don't try to recreate
-        if (cycle) {
-          logger.Debug(`${className} not found and circular dependency detected, returning Lazy Proxy for delayed loading`);
-          return createLazyProxy(
-            () => this.lifecycleManager.getInstance(targetFunc) as object,
-            className
-          ) as unknown as T;
-        } else {
-          throw new Error(`Bean ${className} not found`);
-        }
+        throw new Error(`Bean ${className} not found`);
       }
     }
     return instance;
@@ -839,8 +588,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    * const metadataMap = container.getMetadataMap('key', UserService, 'method');
    * ```
    */
-  public getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol) {
-    return this.metadataStore.getMetadataMap(metadataKey, target, propertyKey);
+  public getMetadataMap<T = any>(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): T {
+    return this.metadataStore.getMetadataMap<T>(metadataKey, target, propertyKey);
   }
 
   /**
@@ -864,13 +613,13 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @param target The target class constructor or object instance
    * @returns The component type string
    */
-  public getType(target: Function | object) {
+  public getType<T = string>(target: Function | object): T {
     const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
     if (metaData) {
-      return metaData.type;
+      return metaData.type as T;
     }
     const identifier = (<Function>target).name || (target.constructor ? target.constructor.name : "");
-    return getComponentTypeByClassName(identifier);
+    return getComponentTypeByClassName(identifier) as T;
   }
 
   /**
@@ -931,9 +680,9 @@ export class Container implements IContainer, IContainerDiagnostics {
    * const value = container.getClassMetadata('key', 'name', UserService, 'method');
    * ```
    */
-  public getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object,
-    propertyName?: string) {
-    return this.metadataStore.getClassMetadata(type, decoratorNameKey, target, propertyName);
+  public getClassMetadata<T = any>(type: string, decoratorNameKey: string | symbol, target: Function | object,
+    propertyName?: string): T {
+    return this.metadataStore.getClassMetadata<T>(type, decoratorNameKey, target, propertyName);
   }
 
   /**
@@ -1000,9 +749,9 @@ export class Container implements IContainer, IContainerDiagnostics {
    * const value = container.getPropertyData('key', UserService, 'property');
    * ```
    */
-  public getPropertyData(decoratorNameKey: string | symbol, target: Function | object,
-    propertyName: string | symbol) {
-    return this.metadataStore.getPropertyData(decoratorNameKey, target, propertyName);
+  public getPropertyData<T = any>(decoratorNameKey: string | symbol, target: Function | object,
+    propertyName: string | symbol): T {
+    return this.metadataStore.getPropertyData<T>(decoratorNameKey, target, propertyName);
   }
 
   /**
@@ -1016,41 +765,15 @@ export class Container implements IContainer, IContainerDiagnostics {
    * const data = container.listPropertyData('key', UserService);
    * ```
    */
-  public listPropertyData(decoratorNameKey: string | symbol, target: Function | object) {
-    return this.metadataStore.listPropertyData(decoratorNameKey, target);
+  public listPropertyData<T = Record<string, any>>(decoratorNameKey: string | symbol, target: Function | object): T {
+    return this.metadataStore.listPropertyData<T>(decoratorNameKey, target);
   }
 
   /**
    * Generate and log dependency analysis report
    */
   public generateDependencyReport(): void {
-    const report = this.circularDependencyDetector.generateDependencyReport();
-
-    logger.Info("=== Dependency analysis report ===");
-    logger.Info(`Total components: ${report.totalComponents}`);
-    logger.Info(`Resolved components: ${report.resolvedComponents}`);
-    logger.Info(`Unresolved components: ${report.unresolvedComponents.length}`);
-
-    if (report.circularDependencies.length > 0) {
-      logger.Warn(`Found ${report.circularDependencies.length} circular dependencies:`);
-      report.circularDependencies.forEach((cycle, index) => {
-        logger.Warn(`  ${index + 1}. ${cycle.join(' -> ')}`);
-
-        // provide resolution suggestions
-        const suggestions = this.circularDependencyDetector.getResolutionSuggestions(cycle);
-        suggestions.forEach(suggestion => logger.Info(`     ${suggestion}`));
-      });
-    } else {
-      logger.Info("✓ No circular dependencies found");
-    }
-
-    if (report.unresolvedComponents.length > 0) {
-      logger.Warn("Unresolved components:");
-      report.unresolvedComponents.forEach(comp => logger.Warn(`  - ${comp}`));
-    }
-
-    // output dependency graph visualization
-    logger.Debug(this.circularDependencyDetector.getDependencyGraphVisualization());
+    return this.dependencyAnalyzer.generateDependencyReport();
   }
 
   /**
@@ -1058,7 +781,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @returns {boolean} True if circular dependencies exist
    */
   public hasCircularDependencies(): boolean {
-    return this.circularDependencyDetector.hasCircularDependencies();
+    return this.dependencyAnalyzer.hasCircularDependencies();
   }
 
   /**
@@ -1066,7 +789,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @returns {string[][]} Array of circular dependency paths
    */
   public getCircularDependencies(): string[][] {
-    return this.circularDependencyDetector.getAllCircularDependencies();
+    return this.dependencyAnalyzer.getCircularDependencies();
   }
 
   /**
@@ -1161,83 +884,7 @@ export class Container implements IContainer, IContainerDiagnostics {
       aop?: any;
     };
   } {
-    const cacheStats = this.metadataCache.getStats();
-
-    // count the number of components of each type
-    const typeStats: Record<string, number> = {};
-    const typeOrder = ["CONTROLLER", "SERVICE", "COMPONENT", "REPOSITORY"];
-
-    for (const type of typeOrder) {
-      typeStats[type] = this.listClass(type).length;
-    }
-
-    // count the number of circular dependencies
-    const circularCount = this.circularDependencyDetector.getAllCircularDependencies().length;
-    const mostAccessedTypes = Object.entries(typeStats)
-      .sort(([, a], [, b]) => b - a)
-      .map(([type]) => type);
-
-    // get lru cache stats
-    const lruCaches: any = {
-      metadata: cacheStats
-    };
-
-    // get dependency processor lru cache stats
-    try {
-      lruCaches.dependencies = getAutowiredCacheStats();
-    } catch (error) {
-      logger.Debug("Failed to get dependency cache stats:", error);
-    }
-
-    // get aop processor lru cache stats
-    try {
-      lruCaches.aop = getAOPCacheStats();
-    } catch (error) {
-      logger.Debug("Failed to get AOP cache stats:", error);
-    }
-
-    return {
-      cache: cacheStats,
-      containers: {
-        totalRegistered: this.classMap.size,
-        byType: typeStats,
-        memoryUsage: {
-          classMap: this.classMap.size,
-          instanceMap: this.getInstanceMapSize(),
-          metadataMap: this.getMetadataMapSize()
-        }
-      },
-      hotspots: {
-        mostAccessedTypes,
-        circularDependencies: circularCount
-      },
-      lruCaches
-    };
-  }
-
-  /**
-   * calculate total lru cache size
-   */
-  private calculateTotalCacheSize(lruCaches: any): string {
-    let totalSize = 0;
-
-    // metadata cache memory usage
-    if (lruCaches.metadata && lruCaches.metadata.memoryUsage) {
-      totalSize += lruCaches.metadata.memoryUsage;
-    }
-
-    // dependency cache size (estimated)
-    if (lruCaches.dependencies && lruCaches.dependencies.cacheSize) {
-      totalSize += lruCaches.dependencies.cacheSize * 1024; // estimated 1KB per dependency
-    }
-
-    // aop cache size (estimated)
-    if (lruCaches.aop && lruCaches.aop.cacheSize) {
-      const aopSize = lruCaches.aop.cacheSize;
-      totalSize += (aopSize.aspects + aopSize.methodNames + aopSize.interceptors) * 2048; // estimated 2KB per aop item
-    }
-
-    return `${(totalSize / 1024).toFixed(1)}KB`;
+    return this.performanceManager.getDetailedPerformanceStats();
   }
 
   /**
@@ -1251,130 +898,14 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public batchRegister(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[],
     batchOptions: { preProcessDependencies?: boolean, warmupAOP?: boolean } = {}): void {
-    const startTime = Date.now();
-    logger.Info(`Starting batch registration for ${components.length} components...`);
-
-    try {
-      // phase 1: if enabled pre-process, use unified preloadMetadata for optimization
-      if (batchOptions.preProcessDependencies || batchOptions.warmupAOP) {
-        // extract all component types
-        const componentTypes = [...new Set(components.map(c => {
-          const identifier = c.identifier || this.getIdentifier(c.target);
-          return this.getType(c.target) || getComponentTypeByClassName(identifier);
-        }))];
-
-        this.preloadMetadata(componentTypes, {
-          optimizePerformance: true,
-          batchPreProcessDependencies: batchOptions.preProcessDependencies,
-          warmupCaches: batchOptions.warmupAOP,
-          clearStaleCache: false
-        });
-
-        logger.Debug(`Integrated optimization completed for types: [${componentTypes.join(', ')}]`);
-      }
-
-      // phase 2: sort components by dependency order
-      const sortedComponents = this.topologicalSortComponents(components);
-
-      // phase 3: batch registration
-      let successCount = 0;
-      for (const component of sortedComponents) {
-        try {
-          const { target, identifier, options } = component;
-          const id = identifier || this.getIdentifier(target);
-          this.reg(id, target, options);
-          successCount++;
-        } catch (error) {
-          logger.Error(`Failed to register component ${component.identifier || component.target.name}:`, error);
-        }
-      }
-
-      const totalTime = Date.now() - startTime;
-      logger.Info(`Batch registration completed: ${successCount}/${components.length} components registered in ${totalTime}ms`);
-
-    } catch (error) {
-      logger.Error("Batch registration failed:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * topological sort components (by dependency order)
-   */
-  private topologicalSortComponents(components: { target: Function, identifier?: string, options?: ObjectDefinitionOptions }[]): typeof components {
-    const dependencyGraph = new Map<string, string[]>();
-    const componentMap = new Map<string, typeof components[0]>();
-
-    // build dependency graph
-    for (const component of components) {
-      const identifier = component.identifier || this.getIdentifier(component.target);
-      componentMap.set(identifier, component);
-
-      const dependencies = this.extractDependencies(component.target);
-      dependencyGraph.set(identifier, dependencies.filter(dep =>
-        components.some(c => (c.identifier || this.getIdentifier(c.target)) === dep)
-      ));
-    }
-
-    // topological sort
-    const sorted: typeof components = [];
-    const visited = new Set<string>();
-    const visiting = new Set<string>();
-
-    const visit = (identifier: string) => {
-      if (visiting.has(identifier)) {
-        logger.Warn(`Circular dependency detected involving ${identifier}, using registration order`);
-        return;
-      }
-      if (visited.has(identifier)) return;
-
-      visiting.add(identifier);
-      const dependencies = dependencyGraph.get(identifier) || [];
-
-      for (const dep of dependencies) {
-        if (componentMap.has(dep)) {
-          visit(dep);
-        }
-      }
-
-      visiting.delete(identifier);
-      visited.add(identifier);
-
-      const component = componentMap.get(identifier);
-      if (component) {
-        sorted.push(component);
-      }
-    };
-
-    for (const component of components) {
-      const identifier = component.identifier || this.getIdentifier(component.target);
-      visit(identifier);
-    }
-
-    return sorted;
+    this.batchRegistrar.batchRegister(components, batchOptions);
   }
 
   /**
    * Clear performance cache
    */
   public clearPerformanceCache(): void {
-    // clear metadata cache
-    this.metadataCache.clear();
-
-    // clear processor lru cache
-    try {
-      clearDependencyCache();
-    } catch (error) {
-      logger.Debug("Autowired cache cleanup failed:", error);
-    }
-
-    try {
-      clearAOPCache();
-    } catch (error) {
-      logger.Debug("AOP cache cleanup failed:", error);
-    }
-
-    logger.Debug("Performance cache cleared");
+    this.performanceManager.clearPerformanceCache();
   }
 }
 

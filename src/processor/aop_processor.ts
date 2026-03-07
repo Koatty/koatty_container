@@ -370,8 +370,8 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
     if (container) {
       const aspect = await resolveAspect(selectedAspect.aopName, container);
       if (aspect && typeof aspect.run === 'function') {
-        const proceed = async (modifiedArgs?: any[]): Promise<any> => {
-          const finalArgs = modifiedArgs || args;
+        const proceed = async (...modifiedArgs: unknown[]): Promise<unknown> => {
+          const finalArgs = modifiedArgs.length > 0 ? modifiedArgs : args;
           return await originalMethod.apply(target, finalArgs);
         };
 

@@ -170,3 +170,42 @@ describe("Symbol.dispose", () => {
     }
   });
 });
+
+describe("getInsByClass error handling", () => {
+  test("should throw error when instance not found", () => {
+    class UnregisteredService {
+      name = "unregistered";
+    }
+    
+    // Register the class but don't create an instance
+    IOC.reg(UnregisteredService);
+    
+    // Clear instances to simulate the scenario where class is registered but instance doesn't exist
+    const container = IOC as any;
+    container.lifecycleManager.clear();
+    
+    // Should throw error when trying to get instance that doesn't exist
+    expect(() => {
+      IOC.getInsByClass(UnregisteredService);
+    }).toThrow(/no instance found for/);
+  });
+
+  test("should throw error for non-class input", () => {
+    expect(() => {
+      IOC.getInsByClass({} as any);
+    }).toThrow(/target is not a class/);
+  });
+
+  test("should return instance when it exists", () => {
+    class RegisteredService {
+      name = "registered";
+    }
+    
+    IOC.reg(RegisteredService);
+    const instance = IOC.get(RegisteredService);
+    
+    // Should return the instance
+    const retrievedInstance = IOC.getInsByClass(RegisteredService);
+    expect(retrievedInstance).toBe(instance);
+  });
+});

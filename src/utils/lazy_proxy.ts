@@ -45,10 +45,12 @@ export function createLazyProxy<T extends object>(
     get(_, prop) {
       if (prop === LAZY_PROXY_SYMBOL) return true;
       if (prop === LAZY_RESOLVED_SYMBOL) return resolved !== null;
-      return Reflect.get(resolve(), prop, resolve());
+      const target = resolve();
+      return Reflect.get(target, prop, target);
     },
     set(_, prop, value) {
-      return Reflect.set(resolve(), prop, value, resolve());
+      const target = resolve();
+      return Reflect.set(target, prop, value, target);
     },
     has(_, prop) {
       if (prop === LAZY_PROXY_SYMBOL || prop === LAZY_RESOLVED_SYMBOL) return true;

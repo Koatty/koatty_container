@@ -85,7 +85,7 @@ function mergeMetadata(parentMetadata: Record<string, any>, metadata: Record<str
  * @returns An array containing all collected metadata
  */
 export function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any,
-  _propertyKey?: string | symbol): any[] {
+  _propertyKey?: string | symbol): Record<string, any> {
   // get metadata value of a metadata key on the prototype
   // let metadata = Reflect.getOwnMetadata(metadataKey, target, propertyKey);
   let metadata = container.listPropertyData(metadataKey, target) ?? {};
