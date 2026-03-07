@@ -9,7 +9,7 @@ Get property metadata by decorator name key with caching.
 **Signature:**
 
 ```typescript
-getPropertyData(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): any;
+getPropertyData<T = any>(decoratorNameKey: string | symbol, target: Function | object, propertyName: string | symbol): T;
 ```
 
 ## Parameters
@@ -82,7 +82,7 @@ The property name
 
 **Returns:**
 
-any
+T
 
 The metadata value for the property
 

@@ -9,7 +9,7 @@ Get the component type of target class or object.
 **Signature:**
 
 ```typescript
-getType(target: Function | object): any;
+getType<T = string>(target: Function | object): T;
 ```
 
 ## Parameters
@@ -50,7 +50,7 @@ The target class constructor or object instance
 
 **Returns:**
 
-any
+T
 
 The component type string
 

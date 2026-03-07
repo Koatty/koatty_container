@@ -9,7 +9,7 @@ Get property data by decorator name key.
 **Signature:**
 
 ```typescript
-listPropertyData(decoratorNameKey: string | symbol, target: Function | object): any;
+listPropertyData<T = Record<string, any>>(decoratorNameKey: string | symbol, target: Function | object): T;
 ```
 
 ## Parameters
@@ -66,7 +66,7 @@ The target class or object
 
 **Returns:**
 
-any
+T
 
 {<!-- -->object<!-- -->} The property data object
 

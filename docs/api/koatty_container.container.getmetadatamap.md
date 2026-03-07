@@ -9,7 +9,7 @@ Get metadata map for the specified target and key.
 **Signature:**
 
 ```typescript
-getMetadataMap(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): any;
+getMetadataMap<T = any>(metadataKey: string | symbol, target: Function | object, propertyKey?: string | symbol): T;
 ```
 
 ## Parameters
@@ -82,7 +82,7 @@ _(Optional)_ Optional property key
 
 **Returns:**
 
-any
+T
 
 Map instance containing metadata
 

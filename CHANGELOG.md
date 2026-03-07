@@ -1,5 +1,38 @@
 # Changelog
 
+## 2.2.0
+
+### Architecture Refactoring Release
+
+This release focuses on extracting responsibilities from the monolithic Container class to improve maintainability and single responsibility principle compliance.
+
+### Refactoring
+
+- **T-34**: Fixed Lazy Proxy double resolve() call in get/set traps
+- **T-35**: Removed unreachable dead code in get() method cycle detection
+- **T-36**: Fixed getInsByClass residual type lie - now throws Error when no instance found
+- **T-37**: Extracted DependencyAnalyzer from Container class (~110 lines)
+- **T-38**: Extracted PerformanceManager from Container class (~250 lines)
+- **T-39**: Extracted PreloadManager from Container class (~200 lines)
+- **T-40**: Extracted BatchRegistrar from Container class (~120 lines)
+- **T-41**: IContainer metadata methods any → generic with defaults (5 methods)
+- **T-42**: ObjectDefinitionOptions and IAspect any type narrowing (args, proceed, options)
+- **T-43**: Enabled useUnknownInCatchVariables for stricter error handling (46 catch blocks)
+
+### Technical Debt
+
+- Container.ts remains at 932 lines (target was ≤750 lines) - requires additional extraction in future release
+
+### Test Coverage
+
+- 292 tests passing (16 test suites)
+- Statement coverage: 84.12%
+- Branch coverage: 71.42%
+- Function coverage: 74.56%
+- Line coverage: 86.61%
+
+---
+
 ## 2.1.0
 
 ### Major Refactoring and Bug Fix Release

@@ -9,7 +9,7 @@ Recursively retrieves metadata from a container by traversing the prototype chai
 **Signature:**
 
 ```typescript
-export declare function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any, _propertyKey?: string | symbol): any[];
+export declare function recursiveGetMetadata(container: IContainer, metadataKey: any, target: any, _propertyKey?: string | symbol): Record<string, any>;
 ```
 
 ## Parameters
@@ -98,7 +98,7 @@ _(Optional)_ Optional property key
 
 **Returns:**
 
-any\[\]
+Record&lt;string, any&gt;
 
 An array containing all collected metadata
 

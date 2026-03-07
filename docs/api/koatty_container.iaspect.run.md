@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-run: (args: any[], proceed?: Function, options?: any) => Promise<any>;
+run: (args: unknown[], proceed?: (...args: unknown[]) => Promise<unknown>, options?: Record<string, unknown>) => Promise<unknown>;
 ```

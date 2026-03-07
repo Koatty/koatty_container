@@ -49,7 +49,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true, /* Add 'undefined' to un-declared indexed access types. */
-    "useUnknownInCatchVariables": false, /* Default catch clause variables as unknown instead of any. */
+
     /* Source Map Options */
     // "sourceRoot": "./",                    /* Specify the location where debugger should locate TypeScript files instead of source locations. */
     // "mapRoot": "./",                       /* Specify the location where debugger should locate map files instead of generated locations. */

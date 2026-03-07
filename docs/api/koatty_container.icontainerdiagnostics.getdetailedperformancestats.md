@@ -9,9 +9,9 @@ Get detailed performance statistics
 **Signature:**
 
 ```typescript
-getDetailedPerformanceStats(): any;
+getDetailedPerformanceStats(): Record<string, unknown>;
 ```
 **Returns:**
 
-any
+Record&lt;string, unknown&gt;
 

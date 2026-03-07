@@ -9,7 +9,7 @@ Get metadata value by type and decorator key.
 **Signature:**
 
 ```typescript
-getClassMetadata(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): any;
+getClassMetadata<T = any>(type: string, decoratorNameKey: string | symbol, target: Function | object, propertyName?: string): T;
 ```
 
 ## Parameters
@@ -98,7 +98,7 @@ _(Optional)_ Optional property name
 
 **Returns:**
 
-any
+T
 
 The metadata value associated with the decorator key
 

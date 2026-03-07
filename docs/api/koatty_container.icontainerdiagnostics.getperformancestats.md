@@ -10,7 +10,7 @@ Get performance statistics including cache hit rates and memory usage
 
 ```typescript
 getPerformanceStats(): {
-        cache: any;
+        cache: Record<string, unknown>;
         totalRegistered: number;
         memoryUsage: {
             classMap: number;
@@ -21,7 +21,7 @@ getPerformanceStats(): {
 ```
 **Returns:**
 
-{ cache: any; totalRegistered: number; memoryUsage: { classMap: number; instanceMap: number; metadataMap: number; }; }
+{ cache: Record&lt;string, unknown&gt;; totalRegistered: number; memoryUsage: { classMap: number; instanceMap: number; metadataMap: number; }; }
 
 Performance statistics object
 
