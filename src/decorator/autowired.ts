@@ -7,6 +7,7 @@
 // tslint:disable-next-line: no-import-side-effect
 import * as helper from "koatty_lib";
 import "reflect-metadata";
+import { DefaultLogger as logger } from "koatty_logger";
 import { IOC } from "../container/container";
 import { ClassOrString, TAGGED_PROP } from "../container/icontainer";
 import { getComponentTypeByClassName } from "../utils/operator";
@@ -95,8 +96,13 @@ export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONE
       throw new Error("the Inject decorator only used by constructor method");
     }
     // 获取成员参数类型
-    const paramTypes = Reflect.getMetadata("design:paramtypes", target, propertyKey as string | symbol);
-    let identifier = paramTypes[parameterIndex]?.name;
+    const paramTypes = propertyKey != null
+      ? Reflect.getMetadata("design:paramtypes", target, propertyKey as string | symbol)
+      : Reflect.getMetadata("design:paramtypes", target);
+    if (paramTypes === undefined) {
+      logger.Warn(`Inject decorator: design:paramtypes metadata is undefined for target. Please ensure "emitDecoratorMetadata: true" is enabled in your tsconfig.json.`);
+    }
+    let identifier = paramTypes?.[parameterIndex]?.name;
     if (!identifier || identifier === "Object") {
       if (helper.isString(paramName)) {
         propertyKey = paramName;
