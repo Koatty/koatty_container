@@ -6,10 +6,12 @@
 
 Decorator that marks a property for dependency injection.
 
+Supports both legacy and TC39 field decorator calling conventions. Supports explicit type parameter to bypass `Reflect.getMetadata("design:type")`<!-- -->, enabling compatibility with esbuild/SWC and other modern build tools that do not support `emitDecoratorMetadata`<!-- -->.
+
 **Signature:**
 
 ```typescript
-export declare function Autowired<T>(paramName?: ClassOrString<T>, cType?: string, constructArgs?: any[], isDelay?: boolean): PropertyDecorator;
+export declare function Autowired<T>(paramName?: ClassOrString<T>, cType?: string, constructArgs?: any[], isDelay?: boolean): (...args: any[]) => any;
 ```
 
 ## Parameters
@@ -42,7 +44,7 @@ paramName
 
 </td><td>
 
-_(Optional)_ The class or string identifier for the dependency
+_(Optional)_ The class or string identifier for the dependency. - When a \*\*class\*\* is provided, it is used directly as the type identifier without querying `design:type`<!-- -->, enabling use without `emitDecoratorMetadata`<!-- -->. - When a \*\*string\*\* is provided, it is used as the identifier. - When \*\*undefined\*\*, falls back to `Reflect.getMetadata("design:type")` (legacy mode) or uses the field name as identifier (TC39 mode).
 
 
 </td></tr>
@@ -98,9 +100,7 @@ _(Optional)_ Whether to delay the injection (default: false)
 
 **Returns:**
 
-PropertyDecorator
-
-A property decorator function
+(...args: any\[\]) =&gt; any
 
 ## Exceptions
 
@@ -108,7 +108,18 @@ Error if injection type is incorrect or if trying to inject a controller
 
 ## Example
 
-\`\`\`<!-- -->typescript @<!-- -->Autowired() private userService: UserService;
 
-@<!-- -->Autowired('UserService') private userService: UserService; \* \`\`\`
+```typescript
+// Explicit class type (no design:type needed)
+@Autowired(UserService)
+private userService: UserService;
+
+// String identifier (no design:type needed)
+@Autowired('UserService')
+private userService: UserService;
+
+// Auto-infer from design:type (requires emitDecoratorMetadata, legacy only)
+@Autowired()
+private userService: UserService;
+```
 

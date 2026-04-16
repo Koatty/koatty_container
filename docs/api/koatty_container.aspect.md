@@ -9,7 +9,7 @@ Aspect decorator for AOP implementation. Used to mark a class as an Aspect Point
 **Signature:**
 
 ```typescript
-Aspect: (identifier?: string) => ClassDecorator
+Aspect: (identifier?: string) => (target: any, context?: any) => any
 ```
 
 ## Parameters
@@ -50,7 +50,7 @@ _(Optional)_ Optional custom identifier for the Aspect class
 
 **Returns:**
 
-ClassDecorator
+(target: any, context?: any) =&gt; any
 
 {<!-- -->ClassDecorator<!-- -->} Class decorator function
 

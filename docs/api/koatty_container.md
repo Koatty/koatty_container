@@ -198,6 +198,8 @@ Aspect decorator for AOP implementation. Used to mark a class as an Aspect Point
 
 Decorator that marks a property for dependency injection.
 
+Supports both legacy and TC39 field decorator calling conventions. Supports explicit type parameter to bypass `Reflect.getMetadata("design:type")`<!-- -->, enabling compatibility with esbuild/SWC and other modern build tools that do not support `emitDecoratorMetadata`<!-- -->.
+
 
 </td></tr>
 <tr><td>
@@ -219,6 +221,45 @@ Before decorator for AOP implementation. Executes the specified aspect before th
 </td><td>
 
 BeforeEach decorator for AOP implementation. Executes the specified aspect before each method in the target class.
+
+
+</td></tr>
+<tr><td>
+
+[createDualClassDecorator(handler)](./koatty_container.createdualclassdecorator.md)
+
+
+</td><td>
+
+Create a class decorator that works with both legacy and TC39 signatures.
+
+Legacy: (target: Function) =<!-- -->&gt; void TC39: (target: Function, context: ClassDecoratorContext) =<!-- -->&gt; Function \| void
+
+
+</td></tr>
+<tr><td>
+
+[createDualFieldDecorator(legacyHandler, tc39Handler)](./koatty_container.createdualfielddecorator.md)
+
+
+</td><td>
+
+Create a field/property decorator that works with both legacy and TC39 signatures.
+
+Legacy: (target: object, propertyKey: string\|symbol) =<!-- -->&gt; void TC39: (value: undefined, context: ClassFieldDecoratorContext) =<!-- -->&gt; ((initialValue) =<!-- -->&gt; any) \| void
+
+
+</td></tr>
+<tr><td>
+
+[createDualMethodDecorator(handler)](./koatty_container.createdualmethoddecorator.md)
+
+
+</td><td>
+
+Create a method decorator that works with both legacy and TC39 signatures.
+
+Legacy: (target: object, propertyKey: string\|symbol, descriptor: PropertyDescriptor) =<!-- -->&gt; void TC39: (method: Function, context: ClassMethodDecoratorContext) =<!-- -->&gt; Function \| void
 
 
 </td></tr>
@@ -279,6 +320,17 @@ Parameter decorator for dependency injection. Used to inject dependencies into c
 </td></tr>
 <tr><td>
 
+[isTC39Context(context)](./koatty_container.istc39context.md)
+
+
+</td><td>
+
+Check if the second argument is a TC39 decorator context object. TC39 context has { kind, name, metadata, addInitializer } shape.
+
+
+</td></tr>
+<tr><td>
+
 [overridePrototypeValue(instance)](./koatty_container.overrideprototypevalue.md)
 
 
@@ -301,12 +353,14 @@ Recursively retrieves metadata from a container by traversing the prototype chai
 </td></tr>
 <tr><td>
 
-[Values(value, defaultValue)](./koatty_container.values.md)
+[Values(value, defaultValue, expectedType)](./koatty_container.values.md)
 
 
 </td><td>
 
 Property decorator that assigns a value to a class property.
+
+Supports both legacy and TC39 field decorator calling conventions. Supports an optional `expectedType` parameter to bypass `Reflect.getMetadata("design:type")`<!-- -->, enabling compatibility with esbuild/SWC and other modern build tools that do not support `emitDecoratorMetadata`<!-- -->.
 
 
 </td></tr>

@@ -9,7 +9,7 @@ After decorator for AOP implementation. Executes the specified aspect after the 
 **Signature:**
 
 ```typescript
-After: <T>(aopName: ClassOrString<T>, options?: any) => MethodDecorator
+After: <T>(aopName: ClassOrString<T>, options?: any) => (...args: any[]) => any
 ```
 
 ## Parameters
@@ -66,7 +66,7 @@ _(Optional)_ Optional configuration for the aspect
 
 **Returns:**
 
-MethodDecorator
+(...args: any\[\]) =&gt; any
 
 {<!-- -->MethodDecorator<!-- -->} Method decorator function
 

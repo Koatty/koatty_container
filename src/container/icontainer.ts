@@ -326,6 +326,45 @@ export interface IContainer {
    * ```
    */
   [Symbol.dispose]?(): void;
+
+  /**
+   * Create a class decorator that works with both legacy and TC39 signatures.
+   * @param handler - receives (target, context?) and performs the actual decoration logic
+   * @param type - must be 'class'
+   */
+  createDecorator(
+    handler: (target: Function, context?: any) => Function | void,
+    type: 'class'
+  ): (target: any, context?: any) => any;
+
+  /**
+   * Create a method decorator that works with both legacy and TC39 signatures.
+   * @param handler - receives normalized args object
+   * @param type - must be 'method'
+   */
+  createDecorator(
+    handler: (args: {
+      target?: object;
+      methodName: string;
+      descriptor?: PropertyDescriptor;
+      method?: Function;
+      context?: any;
+    }) => any,
+    type: 'method'
+  ): (...args: any[]) => any;
+
+  /**
+   * Create a field/property decorator that works with both legacy and TC39 signatures.
+   * @param handlers - object with legacy and tc39 handler functions
+   * @param type - must be 'field'
+   */
+  createDecorator(
+    handlers: {
+      legacy: (target: object, propertyKey: string | symbol) => void;
+      tc39: (context: any) => ((initialValue: any) => any) | void;
+    },
+    type: 'field'
+  ): (...args: any[]) => any;
 }
 
 /**

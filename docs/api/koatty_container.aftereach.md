@@ -9,7 +9,7 @@ AfterEach decorator for AOP implementation. Executes the specified aspect after 
 **Signature:**
 
 ```typescript
-AfterEach: <T>(aopName: ClassOrString<T>, options?: any) => ClassDecorator
+AfterEach: <T>(aopName: ClassOrString<T>, options?: any) => (target: any, context?: any) => any
 ```
 
 ## Parameters
@@ -66,7 +66,7 @@ _(Optional)_ Optional configuration for the aspect
 
 **Returns:**
 
-ClassDecorator
+(target: any, context?: any) =&gt; any
 
 {<!-- -->ClassDecorator<!-- -->} Class decorator function
 

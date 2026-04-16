@@ -6,10 +6,12 @@
 
 Property decorator that assigns a value to a class property.
 
+Supports both legacy and TC39 field decorator calling conventions. Supports an optional `expectedType` parameter to bypass `Reflect.getMetadata("design:type")`<!-- -->, enabling compatibility with esbuild/SWC and other modern build tools that do not support `emitDecoratorMetadata`<!-- -->.
+
 **Signature:**
 
 ```typescript
-export declare function Values(value: unknown | Function, defaultValue?: unknown): PropertyDecorator;
+export declare function Values(value: unknown | Function, defaultValue?: unknown, expectedType?: Function): (...args: any[]) => any;
 ```
 
 ## Parameters
@@ -62,13 +64,27 @@ _(Optional)_ Optional default value if the main value is empty
 
 
 </td></tr>
+<tr><td>
+
+expectedType
+
+
+</td><td>
+
+Function
+
+
+</td><td>
+
+_(Optional)_ Optional explicit type constructor (e.g. `String`<!-- -->, `Number`<!-- -->, `Boolean`<!-- -->) for type checking. When provided, skips `Reflect.getMetadata("design:type")`<!-- -->.
+
+
+</td></tr>
 </tbody></table>
 
 **Returns:**
 
-PropertyDecorator
-
-PropertyDecorator
+(...args: any\[\]) =&gt; any
 
 ## Exceptions
 
@@ -79,6 +95,11 @@ PropertyDecorator
 
 ```ts
 class Example {
+  // With explicit type (no design:type needed)
+  @Values('test', undefined, String)
+  name: string;
+
+  // Without explicit type (requires emitDecoratorMetadata)
   @Values('test')
   name: string;
 

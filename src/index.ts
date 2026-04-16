@@ -12,6 +12,8 @@ export * from "./decorator/autowired";
 // Component decorator removed - use the one from koatty_core instead
 // export * from "./decorator/component";
 export * from "./decorator/values";
+// Only export isTC39Context from compat - createDual*Decorator functions are now accessible via IOC.createDecorator()
+export { isTC39Context } from "./decorator/compat";
 export * from "./utils/operator";
 export * from "./manager/index";
 // Export performance optimization and utility classes

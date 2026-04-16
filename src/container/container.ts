@@ -20,6 +20,11 @@ import {
   Constructor, IContainer, IContainerDiagnostics,
   ObjectDefinitionOptions, TAGGED_CLS
 } from "./icontainer";
+import {
+  createDualClassDecorator,
+  createDualMethodDecorator,
+  createDualFieldDecorator
+} from "../decorator/compat";
 import { createLazyProxy } from "../utils/lazy_proxy";
 import { MetadataStore } from "./metadata_store";
 import { LifecycleManager } from "./lifecycle_manager";
@@ -906,6 +911,29 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public clearPerformanceCache(): void {
     this.performanceManager.clearPerformanceCache();
+  }
+
+  /**
+   * Create a decorator that works with both legacy and TC39 signatures.
+   * Dispatches to the appropriate compat helper based on `type`.
+   *
+   * @param handler - The decorator handler function (or {legacy, tc39} object for field type)
+   * @param type - Decorator type: 'class', 'method', or 'field'
+   */
+  public createDecorator(handler: any, type: string): any {
+    switch (type) {
+      case 'class':
+        return createDualClassDecorator(handler);
+      case 'method':
+        return createDualMethodDecorator(handler);
+      case 'field':
+        if (handler && typeof handler === 'object' && 'legacy' in handler && 'tc39' in handler) {
+          return createDualFieldDecorator(handler.legacy, handler.tc39);
+        }
+        throw new Error("Field decorator requires { legacy, tc39 } handler object");
+      default:
+        throw new Error(`Unknown decorator type: ${type}`);
+    }
   }
 }
 

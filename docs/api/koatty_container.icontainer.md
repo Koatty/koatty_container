@@ -258,5 +258,16 @@ Set application instance
 
 
 </td></tr>
+<tr><td>
+
+[setExistingInstance(target, instance)](./koatty_container.icontainer.setexistinginstance.md)
+
+
+</td><td>
+
+Store a pre-built instance in the container without creating a new one.
+
+
+</td></tr>
 </tbody></table>
 

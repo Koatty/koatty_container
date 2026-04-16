@@ -4,11 +4,20 @@ import { IOC } from "../src/container/container";
 import { TAGGED_ARGS } from "../src/container/icontainer";
 
 // Mock IOC for testing
-jest.mock("../src/container/container", () => ({
-  IOC: {
-    savePropertyData: jest.fn()
-  }
-}));
+jest.mock("../src/container/container", () => {
+  const { createDualFieldDecorator } = require("../src/decorator/compat");
+  return {
+    IOC: {
+      savePropertyData: jest.fn(),
+      createDecorator: (handlers: any, type: string) => {
+        if (type === 'field') {
+          return createDualFieldDecorator(handlers.legacy, handlers.tc39);
+        }
+        throw new Error(`Unsupported type: ${type}`);
+      }
+    }
+  };
+});
 
 describe("Values Decorator", () => {
   beforeEach(() => {
@@ -311,7 +320,6 @@ describe("Values Decorator", () => {
     });
 
     it("should handle custom type that is not in type mapping", () => {
-      // Mock Reflect.getMetadata to return a custom type
       const originalGetMetadata = Reflect.getMetadata;
       jest.spyOn(Reflect, 'getMetadata').mockReturnValue({ name: 'CustomType' });
 
@@ -323,6 +331,280 @@ describe("Values Decorator", () => {
       }).toThrow("Type mismatch: expected customtype, but received string for property 'customProp'");
 
       Reflect.getMetadata = originalGetMetadata;
+    });
+  });
+
+  describe("Explicit expectedType Parameter", () => {
+    it("should use expectedType for type checking instead of design:type", () => {
+      const getMetadataSpy = jest.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === "design:type") return undefined;
+        return Reflect.getMetadata.call(Reflect, key);
+      });
+
+      expect(() => {
+        class TestClass {
+          @Values("explicit string", undefined, String)
+          name: string;
+        }
+      }).not.toThrow();
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "name",
+          method: "explicit string"
+        },
+        expect.any(Object),
+        "name"
+      );
+
+      getMetadataSpy.mockRestore();
+    });
+
+    it("should throw type mismatch when expectedType does not match value", () => {
+      expect(() => {
+        class TestClass {
+          @Values(123, undefined, String)
+          name: string;
+        }
+      }).toThrow("Type mismatch: expected string, but received number for property 'name'");
+    });
+
+    it("should pass type check for matching number with explicit Number type", () => {
+      expect(() => {
+        class TestClass {
+          @Values(42, undefined, Number)
+          count: number;
+        }
+      }).not.toThrow();
+    });
+
+    it("should pass type check for matching boolean with explicit Boolean type", () => {
+      expect(() => {
+        class TestClass {
+          @Values(true, undefined, Boolean)
+          isActive: boolean;
+        }
+      }).not.toThrow();
+    });
+
+    it("should use default value with explicit expectedType", () => {
+      expect(() => {
+        class TestClass {
+          @Values(null, "default value", String)
+          title: string;
+        }
+      }).not.toThrow();
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "title",
+          method: "default value"
+        },
+        expect.any(Object),
+        "title"
+      );
+    });
+
+    it("should fall back to design:type when expectedType is not provided", () => {
+      expect(() => {
+        class TestClass {
+          @Values("string value")
+          name: string;
+        }
+      }).not.toThrow();
+    });
+
+    it("should skip type checking when both expectedType and design:type are unavailable", () => {
+      const getMetadataSpy = jest.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === "design:type") return undefined;
+        return Reflect.getMetadata.call(Reflect, key);
+      });
+
+      expect(() => {
+        class TestClass {
+          @Values("any value")
+          anyProp: any;
+        }
+      }).not.toThrow();
+
+      getMetadataSpy.mockRestore();
+    });
+
+    it("should not type-check function values even with expectedType", () => {
+      const fn = () => "dynamic value";
+
+      expect(() => {
+        class TestClass {
+          @Values(fn, undefined, String)
+          dynamicProp: any;
+        }
+      }).not.toThrow();
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "dynamicProp",
+          method: fn
+        },
+        expect.any(Object),
+        "dynamicProp"
+      );
+    });
+  });
+
+  describe("TC39 field decorator mode", () => {
+    function createTC39Context(fieldName: string, initializers: Function[]) {
+      return {
+        kind: "field",
+        name: fieldName,
+        metadata: {},
+        addInitializer(fn: Function) {
+          initializers.push(fn);
+        },
+      };
+    }
+
+    it("should route to TC39 handler when TC39 context is passed", () => {
+      jest.clearAllMocks();
+      const initializers: Function[] = [];
+
+      const decorator = Values("tc39_value");
+      const ctx = createTC39Context("myField", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+
+      class Dummy {}
+      initializers[0].call(new Dummy());
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "myField",
+          method: "tc39_value"
+        },
+        Dummy.prototype,
+        "myField"
+      );
+    });
+
+    it("should use default value in TC39 mode", () => {
+      jest.clearAllMocks();
+      const initializers: Function[] = [];
+
+      const decorator = Values(null, "tc39_default");
+      const ctx = createTC39Context("title", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+
+      class Dummy {}
+      initializers[0].call(new Dummy());
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "title",
+          method: "tc39_default"
+        },
+        Dummy.prototype,
+        "title"
+      );
+    });
+
+    it("should pass function values through in TC39 mode", () => {
+      jest.clearAllMocks();
+      const initializers: Function[] = [];
+      const fn = () => "dynamic";
+
+      const decorator = Values(fn);
+      const ctx = createTC39Context("dynamicField", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+
+      class Dummy {}
+      initializers[0].call(new Dummy());
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "dynamicField",
+          method: fn
+        },
+        Dummy.prototype,
+        "dynamicField"
+      );
+    });
+
+    it("should type-check with expectedType in TC39 mode", () => {
+      const initializers: Function[] = [];
+
+      expect(() => {
+        const decorator = Values(123, undefined, String);
+        const ctx = createTC39Context("badField", initializers);
+        decorator(undefined, ctx);
+      }).toThrow("Type mismatch: expected string, but received number for property 'badField'");
+    });
+
+    it("should pass type check with matching expectedType in TC39 mode", () => {
+      const initializers: Function[] = [];
+
+      const decorator = Values("hello", undefined, String);
+      const ctx = createTC39Context("strField", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+    });
+
+    it("should skip type checking when expectedType is not provided in TC39 mode", () => {
+      jest.clearAllMocks();
+      const initializers: Function[] = [];
+
+      const decorator = Values("any value");
+      const ctx = createTC39Context("anyField", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+
+      class Dummy {}
+      initializers[0].call(new Dummy());
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "anyField",
+          method: "any value"
+        },
+        Dummy.prototype,
+        "anyField"
+      );
+    });
+
+    it("should use main value over default when main is not empty in TC39 mode", () => {
+      jest.clearAllMocks();
+      const initializers: Function[] = [];
+
+      const decorator = Values("main", "default");
+      const ctx = createTC39Context("field", initializers);
+      decorator(undefined, ctx);
+
+      expect(initializers).toHaveLength(1);
+
+      class Dummy {}
+      initializers[0].call(new Dummy());
+
+      expect(IOC.savePropertyData).toHaveBeenCalledWith(
+        TAGGED_ARGS,
+        {
+          name: "field",
+          method: "main"
+        },
+        Dummy.prototype,
+        "field"
+      );
     });
   });
 });

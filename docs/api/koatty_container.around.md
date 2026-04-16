@@ -9,7 +9,7 @@ Around decorator for AOP implementation. Wraps the target method execution with 
 **Signature:**
 
 ```typescript
-Around: <T>(aopName: ClassOrString<T>, options?: any) => MethodDecorator
+Around: <T>(aopName: ClassOrString<T>, options?: any) => (...args: any[]) => any
 ```
 
 ## Parameters
@@ -66,7 +66,7 @@ _(Optional)_ Optional configuration for the aspect
 
 **Returns:**
 
-MethodDecorator
+(...args: any\[\]) =&gt; any
 
 {<!-- -->MethodDecorator<!-- -->} Method decorator function
 

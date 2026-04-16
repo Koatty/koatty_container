@@ -15,63 +15,114 @@ import { getComponentTypeByClassName } from "../utils/operator";
 /**
  * Decorator that marks a property for dependency injection.
  * 
- * @param paramName - The class or string identifier for the dependency
+ * Supports both legacy and TC39 field decorator calling conventions.
+ * Supports explicit type parameter to bypass `Reflect.getMetadata("design:type")`,
+ * enabling compatibility with esbuild/SWC and other modern build tools that do not
+ * support `emitDecoratorMetadata`.
+ * 
+ * @param paramName - The class or string identifier for the dependency.
+ *   - When a **class** is provided, it is used directly as the type identifier
+ *     without querying `design:type`, enabling use without `emitDecoratorMetadata`.
+ *   - When a **string** is provided, it is used as the identifier.
+ *   - When **undefined**, falls back to `Reflect.getMetadata("design:type")` (legacy mode)
+ *     or uses the field name as identifier (TC39 mode).
  * @param cType - The component type of the dependency
  * @param constructArgs - Constructor arguments for the dependency instance
  * @param isDelay - Whether to delay the injection (default: false)
- * @returns A property decorator function
  * @throws Error if injection type is incorrect or if trying to inject a controller
  * @example
  * ```typescript
- * @Autowired()
+ * // Explicit class type (no design:type needed)
+ * @Autowired(UserService)
  * private userService: UserService;
  * 
+ * // String identifier (no design:type needed)
  * @Autowired('UserService')
  * private userService: UserService;
- * * ```
+ * 
+ * // Auto-infer from design:type (requires emitDecoratorMetadata, legacy only)
+ * @Autowired()
+ * private userService: UserService;
+ * ```
  */
 export function Autowired<T>(paramName?: ClassOrString<T>, cType: string = "COMPONENT", constructArgs?: any[],
-  isDelay = false): PropertyDecorator {
-  return (target: object, propertyKey: string | symbol) => {
-    const designType = Reflect.getMetadata("design:type", target, propertyKey);
-    let identifier = designType?.name;
-    
-    // If paramName is provided (string or class), use it as the identifier
-    if (paramName) {
-      if (helper.isString(paramName)) {
-        identifier = helper.camelCase(paramName, true);
+  isDelay = false) {
+  return IOC.createDecorator({
+    legacy: (target: object, propertyKey: string | symbol) => {
+      let designType: Function | undefined;
+      let identifier: string | undefined;
+
+      if (paramName !== undefined && paramName !== null) {
+        if (helper.isString(paramName)) {
+          identifier = helper.camelCase(paramName, true);
+        } else {
+          identifier = (paramName as new () => T)?.name;
+        }
       } else {
-        identifier = paramName?.name;
+        designType = Reflect.getMetadata("design:type", target, propertyKey);
+        identifier = designType?.name;
+
+        if (!identifier || identifier === "Object") {
+          throw Error("Autowired should refuse to inject incorrect types. Please provide a paramName or use explicit typing.");
+        }
       }
-    } else if (!identifier || identifier === "Object") {
-      // Only throw error if no paramName is provided and we can't infer the type
-      throw Error("Autowired should refuse to inject incorrect types. Please provide a paramName or use explicit typing.");
-    }
 
-    if (!identifier) {
-      throw Error("Autowired should refuse to inject incorrect types.");
-    }
-    if (cType === undefined) {
-      cType = getComponentTypeByClassName(identifier);
-    }
-    //Cannot rely on injection controller
-    if (cType === "CONTROLLER") {
-      throw new Error(`Controller bean cannot be injection!`);
-    }
+      if (!identifier) {
+        throw Error("Autowired should refuse to inject incorrect types.");
+      }
+      if (cType === undefined) {
+        cType = getComponentTypeByClassName(identifier);
+      }
+      if (cType === "CONTROLLER") {
+        throw new Error(`Controller bean cannot be injection!`);
+      }
 
-    // Set delay to true when:
-    // 1. Explicitly requested (isDelay = true)
-    // 2. Design type is Object (indicating any type or circular reference)
-    // 3. String identifier is used without proper typing
-    const shouldDelay = isDelay || !designType || designType.name === "Object" || helper.isString(paramName);
+      const shouldDelay = isDelay || (!paramName && (!designType || designType?.name === "Object")) || helper.isString(paramName);
 
-    IOC.savePropertyData(TAGGED_PROP, {
-      type: cType,
-      identifier,
-      delay: shouldDelay,
-      args: constructArgs ?? []
-    }, target, propertyKey);
-  };
+      IOC.savePropertyData(TAGGED_PROP, {
+        type: cType,
+        identifier,
+        delay: shouldDelay,
+        args: constructArgs ?? []
+      }, target, propertyKey);
+    },
+    tc39: (context: any) => {
+      const fieldName = String(context.name);
+      let identifier: string | undefined;
+
+      if (paramName !== undefined && paramName !== null) {
+        if (helper.isString(paramName)) {
+          identifier = helper.camelCase(paramName, true);
+        } else {
+          identifier = (paramName as new () => T)?.name;
+        }
+      } else {
+        identifier = helper.camelCase(fieldName, true);
+      }
+
+      if (!identifier) {
+        throw Error("Autowired should refuse to inject incorrect types.");
+      }
+      let resolvedCType = cType;
+      if (resolvedCType === undefined) {
+        resolvedCType = getComponentTypeByClassName(identifier);
+      }
+      if (resolvedCType === "CONTROLLER") {
+        throw new Error(`Controller bean cannot be injection!`);
+      }
+
+      const shouldDelay = isDelay || !paramName || helper.isString(paramName);
+
+      context.addInitializer(function (this: any) {
+        IOC.savePropertyData(TAGGED_PROP, {
+          type: resolvedCType,
+          identifier,
+          delay: shouldDelay,
+          args: constructArgs ?? []
+        }, Object.getPrototypeOf(this), fieldName);
+      });
+    }
+  }, 'field');
 }
 
 /**
@@ -95,7 +146,6 @@ export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONE
     if (propertyKey) {
       throw new Error("the Inject decorator only used by constructor method");
     }
-    // 获取成员参数类型
     const paramTypes = propertyKey != null
       ? Reflect.getMetadata("design:paramtypes", target, propertyKey as string | symbol)
       : Reflect.getMetadata("design:paramtypes", target);
@@ -118,7 +168,6 @@ export function Inject<T>(paramName?: ClassOrString<T>, cType: string = "COMPONE
     if (cType === undefined) {
       cType = getComponentTypeByClassName(identifier);
     }
-    //Cannot rely on injection controller
     if (cType === "CONTROLLER") {
       throw new Error(`Controller bean cannot be injection!`);
     }

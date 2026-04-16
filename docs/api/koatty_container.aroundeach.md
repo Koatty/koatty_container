@@ -9,7 +9,7 @@ AroundEach decorator for AOP implementation. Wraps each method execution in the 
 **Signature:**
 
 ```typescript
-AroundEach: <T>(aopName: ClassOrString<T>, options?: any) => ClassDecorator
+AroundEach: <T>(aopName: ClassOrString<T>, options?: any) => (target: any, context?: any) => any
 ```
 
 ## Parameters
@@ -66,7 +66,7 @@ _(Optional)_ Optional configuration for the aspect
 
 **Returns:**
 
-ClassDecorator
+(target: any, context?: any) =&gt; any
 
 {<!-- -->ClassDecorator<!-- -->} Class decorator function
 
