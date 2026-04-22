@@ -84,6 +84,39 @@ Clear only instances while preserving class registrations and metadata This is u
 </td></tr>
 <tr><td>
 
+[createDecorator(handler, type)](./koatty_container.icontainer.createdecorator.md)
+
+
+</td><td>
+
+Create a class decorator that works with both legacy and TC39 signatures.
+
+
+</td></tr>
+<tr><td>
+
+[createDecorator(handler, type)](./koatty_container.icontainer.createdecorator_1.md)
+
+
+</td><td>
+
+Create a method decorator that works with both legacy and TC39 signatures.
+
+
+</td></tr>
+<tr><td>
+
+[createDecorator(handlers, type)](./koatty_container.icontainer.createdecorator_2.md)
+
+
+</td><td>
+
+Create a field/property decorator that works with both legacy and TC39 signatures.
+
+
+</td></tr>
+<tr><td>
+
 [get(identifier, type, args)](./koatty_container.icontainer.get.md)
 
 
@@ -255,17 +288,6 @@ Save property metadata to the container.
 </td><td>
 
 Set application instance
-
-
-</td></tr>
-<tr><td>
-
-[setExistingInstance(target, instance)](./koatty_container.icontainer.setexistinginstance.md)
-
-
-</td><td>
-
-Store a pre-built instance in the container without creating a new one.
 
 
 </td></tr>

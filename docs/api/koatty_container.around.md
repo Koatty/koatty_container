@@ -4,8 +4,6 @@
 
 ## Around() function
 
-Around decorator for AOP implementation. Wraps the target method execution with the specified aspect.
-
 **Signature:**
 
 ```typescript
@@ -42,8 +40,6 @@ aopName
 
 </td><td>
 
-The name or class of the aspect to execute
-
 
 </td></tr>
 <tr><td>
@@ -58,7 +54,7 @@ any
 
 </td><td>
 
-_(Optional)_ Optional configuration for the aspect
+_(Optional)_
 
 
 </td></tr>
@@ -67,18 +63,4 @@ _(Optional)_ Optional configuration for the aspect
 **Returns:**
 
 (...args: any\[\]) =&gt; any
-
-{<!-- -->MethodDecorator<!-- -->} Method decorator function
-
-## Example
-
-
-```typescript
-class UserService {
-  @Around(TransactionAspect)
-  async createUser(userData: any) {
-    return await this.userRepository.create(userData);
-  }
-}
-```
 

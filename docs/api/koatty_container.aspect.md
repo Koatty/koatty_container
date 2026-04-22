@@ -4,8 +4,6 @@
 
 ## Aspect() function
 
-Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system.
-
 **Signature:**
 
 ```typescript
@@ -42,7 +40,7 @@ string
 
 </td><td>
 
-_(Optional)_ Optional custom identifier for the Aspect class
+_(Optional)_
 
 
 </td></tr>
@@ -51,27 +49,4 @@ _(Optional)_ Optional custom identifier for the Aspect class
 **Returns:**
 
 (target: any, context?: any) =&gt; any
-
-{<!-- -->ClassDecorator<!-- -->} Class decorator function
-
-## Exceptions
-
-{<!-- -->Error<!-- -->} When class name doesn't end with 'Aspect' suffix
-
-{<!-- -->Error<!-- -->} When class doesn't implement 'run' method
-
-## Example
-
-
-```typescript
-@Aspect()
-class LoggingAspect {
-  run(args: any[], proceed?: Function): Promise<any> {
-    console.log('Before method execution');
-    const result = await proceed?.(args);
-    console.log('After method execution');
-    return result;
-  }
-}
-```
 

@@ -165,6 +165,20 @@ Clear performance cache
 </td></tr>
 <tr><td>
 
+[createDecorator(handler, type)](./koatty_container.container.createdecorator.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Create a decorator that works with both legacy and TC39 signatures. Dispatches to the appropriate compat helper based on `type`<!-- -->.
+
+
+</td></tr>
+<tr><td>
+
 [generateDependencyReport()](./koatty_container.container.generatedependencyreport.md)
 
 
@@ -512,20 +526,6 @@ Save property metadata to the container with caching.
 </td><td>
 
 Set application instance
-
-
-</td></tr>
-<tr><td>
-
-[setExistingInstance(target, instance)](./koatty_container.container.setexistinginstance.md)
-
-
-</td><td>
-
-
-</td><td>
-
-Store a pre-built instance in the container without creating a new one.
 
 
 </td></tr>

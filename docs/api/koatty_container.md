@@ -141,8 +141,6 @@ Description
 
 </td><td>
 
-After decorator for AOP implementation. Executes the specified aspect after the target method.
-
 
 </td></tr>
 <tr><td>
@@ -151,8 +149,6 @@ After decorator for AOP implementation. Executes the specified aspect after the 
 
 
 </td><td>
-
-AfterEach decorator for AOP implementation. Executes the specified aspect after each method in the target class.
 
 
 </td></tr>
@@ -163,8 +159,6 @@ AfterEach decorator for AOP implementation. Executes the specified aspect after 
 
 </td><td>
 
-Around decorator for AOP implementation. Wraps the target method execution with the specified aspect.
-
 
 </td></tr>
 <tr><td>
@@ -174,8 +168,6 @@ Around decorator for AOP implementation. Wraps the target method execution with 
 
 </td><td>
 
-AroundEach decorator for AOP implementation. Wraps each method execution in the target class with the specified aspect.
-
 
 </td></tr>
 <tr><td>
@@ -184,8 +176,6 @@ AroundEach decorator for AOP implementation. Wraps each method execution in the 
 
 
 </td><td>
-
-Aspect decorator for AOP implementation. Used to mark a class as an Aspect PointCut in the AOP system.
 
 
 </td></tr>
@@ -209,8 +199,6 @@ Supports both legacy and TC39 field decorator calling conventions. Supports expl
 
 </td><td>
 
-Before decorator for AOP implementation. Executes the specified aspect before the target method.
-
 
 </td></tr>
 <tr><td>
@@ -219,47 +207,6 @@ Before decorator for AOP implementation. Executes the specified aspect before th
 
 
 </td><td>
-
-BeforeEach decorator for AOP implementation. Executes the specified aspect before each method in the target class.
-
-
-</td></tr>
-<tr><td>
-
-[createDualClassDecorator(handler)](./koatty_container.createdualclassdecorator.md)
-
-
-</td><td>
-
-Create a class decorator that works with both legacy and TC39 signatures.
-
-Legacy: (target: Function) =<!-- -->&gt; void TC39: (target: Function, context: ClassDecoratorContext) =<!-- -->&gt; Function \| void
-
-
-</td></tr>
-<tr><td>
-
-[createDualFieldDecorator(legacyHandler, tc39Handler)](./koatty_container.createdualfielddecorator.md)
-
-
-</td><td>
-
-Create a field/property decorator that works with both legacy and TC39 signatures.
-
-Legacy: (target: object, propertyKey: string\|symbol) =<!-- -->&gt; void TC39: (value: undefined, context: ClassFieldDecoratorContext) =<!-- -->&gt; ((initialValue) =<!-- -->&gt; any) \| void
-
-
-</td></tr>
-<tr><td>
-
-[createDualMethodDecorator(handler)](./koatty_container.createdualmethoddecorator.md)
-
-
-</td><td>
-
-Create a method decorator that works with both legacy and TC39 signatures.
-
-Legacy: (target: object, propertyKey: string\|symbol, descriptor: PropertyDescriptor) =<!-- -->&gt; void TC39: (method: Function, context: ClassMethodDecoratorContext) =<!-- -->&gt; Function \| void
 
 
 </td></tr>

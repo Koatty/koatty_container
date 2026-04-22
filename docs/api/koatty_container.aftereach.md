@@ -4,8 +4,6 @@
 
 ## AfterEach() function
 
-AfterEach decorator for AOP implementation. Executes the specified aspect after each method in the target class.
-
 **Signature:**
 
 ```typescript
@@ -42,8 +40,6 @@ aopName
 
 </td><td>
 
-The name or class of the aspect to execute
-
 
 </td></tr>
 <tr><td>
@@ -58,7 +54,7 @@ any
 
 </td><td>
 
-_(Optional)_ Optional configuration for the aspect
+_(Optional)_
 
 
 </td></tr>
@@ -67,17 +63,4 @@ _(Optional)_ Optional configuration for the aspect
 **Returns:**
 
 (target: any, context?: any) =&gt; any
-
-{<!-- -->ClassDecorator<!-- -->} Class decorator function
-
-## Example
-
-
-```typescript
-@AfterEach(AuditAspect)
-class UserService {
-  async getUser(id: string) { ... }
-  async updateUser(id: string, data: any) { ... }
-}
-```
 
