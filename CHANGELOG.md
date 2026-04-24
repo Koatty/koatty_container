@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- build
+- build
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+  - koatty_lib@1.5.0
+  - koatty_logger@3.0.0
+
+## 2.0.9
+
+### Patch Changes
+
+- build
+- Phase 1: Critical bug fixes
+  - **koatty-container**: Replace global.**KOATTY_IOC** with Symbol.for to prevent global namespace pollution (TASK-1-7)
+  - **koatty-logger**: Fix incorrect log level mapping - warning should map to warn, not error (TASK-1-5)
+  - **koatty-typeorm**: Remove hardcoded database credentials security vulnerability (TASK-1-3)
+  - **koatty-typeorm**: Fix incorrect TypeORM event name 'Stop' -> 'beforeServerStop' (TASK-1-4)
+
+- Updated dependencies
+- Updated dependencies
+  - koatty_lib@1.4.9
+  - koatty_logger@2.8.5
+
 ## 2.0.8
 
 ### Patch Changes
@@ -257,7 +287,6 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 - **performance**: add intelligent metadata caching system for real-world scenarios
-
   - Implement high-performance LRU metadata cache with TTL support for frequent reflect operations
   - Add type-specific metadata preloading for optimized component registration workflows
   - Introduce smart cache invalidation based on access patterns
@@ -265,7 +294,6 @@ All notable changes to this project will be documented in this file. See [standa
   - Support for hot-spot metadata preloading during application startup phases
 
 - **version-conflict**: add comprehensive version conflict detection and resolution system
-
   - Implement automatic detection of multiple koatty_container versions in the same project
   - Add intelligent version compatibility checking with semantic versioning rules
   - Provide multiple conflict resolution strategies (use_latest, use_earliest, force_current)
