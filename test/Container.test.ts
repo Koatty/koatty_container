@@ -172,22 +172,21 @@ describe("Symbol.dispose", () => {
 });
 
 describe("getInsByClass error handling", () => {
-  test("should throw error when instance not found", () => {
+  test("should return undefined when instance not found", () => {
     class UnregisteredService {
       name = "unregistered";
     }
-    
+
     // Register the class but don't create an instance
     IOC.reg(UnregisteredService);
-    
+
     // Clear instances to simulate the scenario where class is registered but instance doesn't exist
     const container = IOC as any;
     container.lifecycleManager.clear();
-    
-    // Should throw error when trying to get instance that doesn't exist
-    expect(() => {
-      IOC.getInsByClass(UnregisteredService);
-    }).toThrow(/no instance found for/);
+
+    // getInsByClass returns undefined (no throw) so callers can branch;
+    // ComponentManager relies on this to skip components without instances
+    expect(IOC.getInsByClass(UnregisteredService)).toBeUndefined();
   });
 
   test("should throw error for non-class input", () => {

@@ -339,7 +339,11 @@ describe("DecoratorManager", () => {
       propertyManager.registerWrapper('validate', validateWrapper);
 
       class TestClass {
-        public name: string = '';
+        // useDefineForClassFields:false compiles initializers to constructor
+        // assignments that run through the prototype setter — an empty-string
+        // initializer would fail the length>0 validation at construction, so
+        // declare without initializing (declare emits no field at all)
+        declare name: string;
       }
 
       const metadata: DecoratorMetadata = {
@@ -359,23 +363,21 @@ describe("DecoratorManager", () => {
       );
 
       Object.defineProperty(TestClass.prototype, 'name', descriptor);
-      
+
       const instance = new TestClass();
-      
-      // Should return field initializer value (not defaultValue) - this is expected behavior
-      const nameValue = instance.name;
-      expect(nameValue).toBe(''); // Field initializer takes precedence over decorator defaultValue
-      
-      // Should allow valid values
+
+      // Under [[Set]] semantics the getter serves the decorator defaultValue
+      // until a value passes validation
+      expect(instance.name).toBe('default');
+
+      // Valid values pass through the setter
       instance.name = 'valid';
       expect(instance.name).toBe('valid');
-      
-      // Validation should still work for field initializer properties
-      // Since field initializer overwrites the descriptor, validation won't work
-      // This is expected behavior - commenting out this test as it's not applicable
-      // expect(() => {
-      //   instance.name = '';
-      // }).toThrow('Validation failed for name');
+
+      // Validation is enforced on assignment
+      expect(() => {
+        instance.name = '';
+      }).toThrow('Validation failed for name');
     });
 
     test("should use defaultValue when no field initializer exists", () => {
@@ -742,9 +744,12 @@ describe("DecoratorManager", () => {
       decoratorManager.class.registerWrapper('inject', injectWrapper);
       decoratorManager.property.registerWrapper('validate', validateWrapper);
 
-      // Define a complex class
+      // Define a complex class. useDefineForClassFields:false compiles the
+      // `name` initializer into a constructor assignment that would run
+      // through the prototype setter defined below (and fail validation),
+      // so declare the field without initializing it.
       class ComplexService {
-        public name: string = '';
+        declare name: string;
         public logger: any;
 
         public processData(data: string): string {
@@ -805,9 +810,8 @@ describe("DecoratorManager", () => {
       // Test injected dependency
       expect(instance.logger).toBe(console);
       
-      // Test property validation
-      // TypeScript creates instance property with initializer value, need to delete to access decorator
-      delete (instance as any).name;
+      // Test property validation (getter serves the defaultValue until a
+      // valid value is assigned; no own field exists under `declare`)
       expect(instance.name).toBe('default');
       instance.name = 'valid';
       expect(instance.name).toBe('valid');

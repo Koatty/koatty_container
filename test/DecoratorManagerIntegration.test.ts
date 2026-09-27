@@ -162,17 +162,21 @@ describe("DecoratorManager Integration Tests", () => {
         config: { apiUrl: 'https://api.example.com', timeout: 5000 }
       })
       class UserService {
+        // useDefineForClassFields:false compiles initializers into
+        // constructor assignments that run through the @Validate setters;
+        // empty-string would fail 'Name cannot be empty' at construction,
+        // so declare without initializing
         @Validate('string', [
           { fn: (v: string) => v.length > 0, message: 'Name cannot be empty' },
           { fn: (v: string) => v.length < 50, message: 'Name too long' }
         ], 'Anonymous')
-        public name: string = '';
+        declare public name: string;
 
         @Validate('number', [
           { fn: (v: number) => v >= 0, message: 'Age must be positive' },
           { fn: (v: number) => v < 150, message: 'Age must be realistic' }
         ], 0)
-        public age: number = 0;
+        declare public age: number;
 
         private logger: any;
         private config: any;
@@ -216,24 +220,22 @@ describe("DecoratorManager Integration Tests", () => {
       expect(userService).toHaveProperty('config');
       expect((userService as any).config.apiUrl).toBe('https://api.example.com');
 
-      // Test property values (field initializers take precedence over decorator defaults)
-      expect(userService.name).toBe(''); // Field initializer value, not decorator default
-      expect(userService.age).toBe(0); // Field initializer value (same as decorator default)
+      // Test property values (getter serves the decorator default until a
+      // valid value is assigned)
+      expect(userService.name).toBe('Anonymous'); // decorator default
+      expect(userService.age).toBe(0); // decorator default (same as before)
 
       userService.name = 'John Doe';
       userService.age = 30;
       expect(userService.name).toBe('John Doe');
       expect(userService.age).toBe(30);
 
-      // Test validation errors
-      // Delete instance property to access decorator setter
-      delete (userService as any).name;
+      // Test validation errors (the descriptor is a prototype accessor under
+      // [[Set]] semantics — no instance field to delete)
       expect(() => {
         userService.name = ''; // Should fail validation
       }).toThrow('Name cannot be empty');
 
-      // Delete instance property to access decorator setter
-      delete (userService as any).age;
       expect(() => {
         userService.age = -5; // Should fail validation
       }).toThrow('Age must be positive');

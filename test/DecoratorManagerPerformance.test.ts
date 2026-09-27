@@ -289,10 +289,14 @@ describe("DecoratorManager Performance Tests", () => {
         priority: 1
       };
 
+      // useDefineForClassFields:false compiles initializers to constructor
+      // assignments that run through the prototype setters defined below —
+      // empty strings would fail validation at construction, so declare
+      // without initializing
       class TestClass {
-        public name: string = '';
-        public email: string = '';
-        public phone: string = '';
+        declare name: string;
+        declare email: string;
+        declare phone: string;
       }
 
       const start = performance.now();
@@ -309,8 +313,8 @@ describe("DecoratorManager Performance Tests", () => {
 
       const instance = new TestClass();
       
-      // Test property functionality (field initializer takes precedence)
-      expect(instance.name).toBe(''); // Field initializer value, not decorator default
+      // Test property functionality (getter serves the defaultValue)
+      expect(instance.name).toBe('default'); // decorator default
       instance.name = 'John';
       expect(instance.name).toBe('John');
       
