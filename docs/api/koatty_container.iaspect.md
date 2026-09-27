@@ -69,6 +69,8 @@ Description
 
 </td><td>
 
+Aspect entry point. `options.result` carries the business method's return value and is only populated for After/AfterEach aspects; Before/Around aspects receive `undefined` there. `options.targetMethod` and `options.target` identify the intercepted method.
+
 
 </td></tr>
 </tbody></table>

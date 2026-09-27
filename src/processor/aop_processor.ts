@@ -301,6 +301,32 @@ export function getAOPMethodMetadata(target: any, methodName: string, container?
 }
 
 /**
+ * Aspect error policy (SEC-01 / ADR-101):
+ * - 'throw': aspect failures abort the business method (fail-closed, default);
+ * - 'log': legacy behavior, log and continue (opt-in per aspect or via
+ *   `security.aop.onAspectError` in the application config).
+ */
+type AspectErrorPolicy = 'throw' | 'log';
+
+/**
+ * Resolve the error policy for a single aspect. The explicit decorator option
+ * (`@Before(name, { onError: 'log' })`) wins, then the application security
+ * profile (`app.security.aop.onAspectError`), defaulting to fail-closed.
+ */
+function resolveErrorPolicy(data: any, container?: IContainer): AspectErrorPolicy {
+  if (data?.options?.onError === 'log' || data?.options?.onError === 'throw') {
+    return data.options.onError;
+  }
+  try {
+    const policy = (container?.getApp?.() as any)?.security?.aop?.onAspectError;
+    if (policy === 'log' || policy === 'throw') return policy;
+  } catch {
+    // application not reachable yet; stay fail-closed
+  }
+  return 'throw';
+}
+
+/**
  * Execute before aspects
  */
 async function executeBefore(target: any, methodName: string, args: any[], aspectData: any[], container?: IContainer): Promise<any[]> {
@@ -319,6 +345,9 @@ async function executeBefore(target: any, methodName: string, args: any[], aspec
           }
         }
       } catch (error) {
+        if (resolveErrorPolicy(data, container) === 'throw') {
+          throw error;
+        }
         logger.Error(`Before aspect execution failed for ${data.aopName}:`, error);
       }
     }
@@ -337,15 +366,20 @@ async function executeAfter(target: any, methodName: string, result: any, aspect
         if (container) {
           const aspect = await resolveAspect(data.aopName, container);
           if (aspect && typeof aspect.run === 'function') {
+            // `result` is only available to After/AfterEach aspects (see IAspect.run)
             const enhancedOptions = {
               ...data.options,
               targetMethod: data.method || methodName,
-              target
+              target,
+              result
             };
             await aspect.run(originalArgs || [], undefined, enhancedOptions);
           }
         }
       } catch (error) {
+        if (resolveErrorPolicy(data, container) === 'throw') {
+          throw error;
+        }
         logger.Error(`After aspect execution failed for ${data.aopName}:`, error);
       }
     }
@@ -385,6 +419,11 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
       }
     }
   } catch (error) {
+    // Around aspect failure must not silently fall through to the business
+    // method either (SEC-01 / ADR-101)
+    if (resolveErrorPolicy(selectedAspect, container) === 'throw') {
+      throw error;
+    }
     logger.Error(`Around aspect execution failed for ${selectedAspect.aopName}:`, error);
   }
 
