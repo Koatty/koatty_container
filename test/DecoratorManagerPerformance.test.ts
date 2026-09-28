@@ -372,18 +372,19 @@ describe("DecoratorManager Performance Tests", () => {
 
   describe("Facade Performance", () => {
     test("should provide efficient access to all managers", () => {
-      const start = performance.now();
-      
       const method = decoratorManager.method;
       const cls = decoratorManager.class;
       const property = decoratorManager.property;
       
-      const duration = performance.now() - start;
-      
       expect(method).toBeInstanceOf(MethodDecoratorManager);
       expect(cls).toBeInstanceOf(ClassDecoratorManager);
       expect(property).toBeInstanceOf(PropertyDecoratorManager);
-      expect(duration).toBeLessThan(10); // Should be very fast
+      // 确定性的“高效”断言，替代原先的墙钟阈值 `duration < 10`（在
+      // `turbo run test --force` 并行负载下实测 50ms，属抖动；数值基准见 §12.3）：
+      // 重复访问必须命中缓存并返回同一实例，即不会每次访问都重建 manager。
+      expect(decoratorManager.method).toBe(method);
+      expect(decoratorManager.class).toBe(cls);
+      expect(decoratorManager.property).toBe(property);
     });
 
     test("should handle bulk operations efficiently", () => {
