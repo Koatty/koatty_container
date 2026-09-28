@@ -400,13 +400,19 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
 
   const selectedAspect = aroundAspects[aroundAspects.length - 1];
 
+  let business: Promise<any> | undefined;
+  const proceedOnce = (finalArgs: any[]) => {
+    // Repeated proceed calls and log-policy recovery share the same outcome.
+    business ??= Promise.resolve().then(() => originalMethod.apply(target, finalArgs));
+    return business;
+  };
   try {
     if (container) {
       const aspect = await resolveAspect(selectedAspect.aopName, container);
       if (aspect && typeof aspect.run === 'function') {
         const proceed = async (...modifiedArgs: unknown[]): Promise<unknown> => {
           const finalArgs = modifiedArgs.length > 0 ? modifiedArgs : args;
-          return await originalMethod.apply(target, finalArgs);
+          return await proceedOnce(finalArgs);
         };
 
         const enhancedOptions = {
@@ -427,7 +433,7 @@ async function executeAround(target: any, methodName: string, args: any[], aspec
     logger.Error(`Around aspect execution failed for ${selectedAspect.aopName}:`, error);
   }
 
-  return await originalMethod.apply(target, args);
+  return await proceedOnce(args);
 }
 
 function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDescriptor, container?: IContainer) {
