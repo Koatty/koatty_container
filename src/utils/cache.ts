@@ -432,25 +432,34 @@ export class MetadataCache {
   /**
    * Key building methods
    */
+  private targetIds = new WeakMap<object, number>();
+  private nextTargetId = 0;
+  private targetKey(target: any): string {
+    const identity = typeof target === 'object' && target?.constructor ? target.constructor : target;
+    if (!identity || !['object', 'function'].includes(typeof identity)) return String(identity);
+    let id = this.targetIds.get(identity);
+    if (id === undefined) { id = ++this.nextTargetId; this.targetIds.set(identity, id); }
+    return `${identity.name ?? 'Anonymous'}#${id}`;
+  }
   private buildReflectKey(key: string, target: any, propertyKey?: string | symbol): string {
-    const className = target.name || target.constructor?.name || 'Anonymous';
+    const className = this.targetKey(target);
     const prop = propertyKey ? `:${String(propertyKey)}` : '';
     return `reflect:${key}:${className}${prop}`;
   }
 
   private buildPropertyKey(decoratorKey: string, target: any, propertyName: string | symbol): string {
-    const className = target.name || target.constructor?.name || 'Anonymous';
+    const className = this.targetKey(target);
     return `property:${decoratorKey}:${className}:${String(propertyName)}`;
   }
 
   private buildClassKey(type: string, decoratorKey: string, target: any, propertyName?: string): string {
-    const className = target.name || target.constructor?.name || 'Anonymous';
+    const className = this.targetKey(target);
     const prop = propertyName ? `:${propertyName}` : '';
     return `class:${type}:${decoratorKey}:${className}${prop}`;
   }
 
   private buildDependencyKey(target: any): string {
-    const className = target.name || target.constructor?.name || 'Anonymous';
+    const className = this.targetKey(target);
     return `dependency:${className}`;
   }
 
@@ -499,19 +508,33 @@ export class MetadataCache {
    */
   static getShared(): MetadataCache {
     if (!MetadataCache._shared) {
-      MetadataCache._shared = new MetadataCache({
-        capacity: 3000,
-        defaultTTL: 10 * 60 * 1000,
-        maxMemoryUsage: 150 * 1024 * 1024,
-        cacheConfigs: {
-          [CacheType.DEPENDENCY_PREPROCESS]: { capacity: 800, ttl: 12 * 60 * 1000 },
-          [CacheType.AOP_INTERCEPTORS]: { capacity: 500, ttl: 15 * 60 * 1000 },
-          [CacheType.METHOD_NAMES]: { capacity: 800, ttl: 20 * 60 * 1000 },
-          [CacheType.ASPECT_INSTANCES]: { capacity: 200, ttl: 30 * 60 * 1000 }
-        }
-      });
+      MetadataCache._shared = new MetadataCache(MetadataCache.getSharedOptions());
     }
     return MetadataCache._shared;
+  }
+
+  /**
+   * The option set used by the process-wide shared cache. Exposed so that
+   * per-container caches (ARCH-01 / D-1) stay tuned identically to the default
+   * container's cache.
+   */
+  static getSharedOptions(): {
+    capacity: number;
+    defaultTTL: number;
+    maxMemoryUsage: number;
+    cacheConfigs: Partial<Record<CacheType, { capacity?: number; ttl?: number }>>;
+  } {
+    return {
+      capacity: 3000,
+      defaultTTL: 10 * 60 * 1000,
+      maxMemoryUsage: 150 * 1024 * 1024,
+      cacheConfigs: {
+        [CacheType.DEPENDENCY_PREPROCESS]: { capacity: 800, ttl: 12 * 60 * 1000 },
+        [CacheType.AOP_INTERCEPTORS]: { capacity: 500, ttl: 15 * 60 * 1000 },
+        [CacheType.METHOD_NAMES]: { capacity: 800, ttl: 20 * 60 * 1000 },
+        [CacheType.ASPECT_INSTANCES]: { capacity: 200, ttl: 30 * 60 * 1000 }
+      }
+    };
   }
 
   /**

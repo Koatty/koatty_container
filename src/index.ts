@@ -20,3 +20,5 @@ export * from "./manager/index";
 // export { MetadataCache } from "./utils/cache";
 // export { CircularDepDetector, CircularDepError } from "./utils/circular";
 
+
+export { PostConstruct, PreDestroy } from "./decorator/lifecycle";

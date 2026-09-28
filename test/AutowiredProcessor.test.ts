@@ -286,7 +286,7 @@ describe("Autowired Processor Coverage Tests", () => {
       expect(instanceB).toBeDefined();
     });
 
-    it("should fallback to propertyKey for circular dependencies", () => {
+    it("rejects a dependency resolver failure instead of silently injecting another bean", () => {
       @Component()
       class FallbackService {
         @Autowired("UnknownService", "COMPONENT", [], true)
@@ -307,7 +307,7 @@ describe("Autowired Processor Coverage Tests", () => {
 
       expect(() => {
         injectAutowired(FallbackService, FallbackService.prototype, container);
-      }).not.toThrow();
+      }).toThrow();
 
       // Trigger delayed injection
       mockApp.emit('appReady');
@@ -317,7 +317,7 @@ describe("Autowired Processor Coverage Tests", () => {
   });
 
   describe("Property Definition Edge Cases", () => {
-    it("should handle defineProperty errors gracefully", () => {
+    it("rejects failed property injection", () => {
       @Component()
       class TestService {
         @Autowired("SomeService", "COMPONENT", [], true)
@@ -332,7 +332,7 @@ describe("Autowired Processor Coverage Tests", () => {
 
       expect(() => {
         injectAutowired(TestService, TestService.prototype, container);
-      }).not.toThrow();
+      }).toThrow();
 
       // Trigger delayed injection - should handle defineProperty errors
       mockApp.emit('appReady');

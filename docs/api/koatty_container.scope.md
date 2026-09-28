@@ -7,5 +7,5 @@
 **Signature:**
 
 ```typescript
-export type Scope = 'Singleton' | 'Prototype';
+export type Scope = 'Singleton' | 'Prototype' | 'Request';
 ```

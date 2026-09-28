@@ -1,197 +1,10 @@
-/**
- * @ author: richen
- * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
- * @ license: BSD (3-Clause)
- * @ version: 2020-07-06 11:19:30
- */
-
+/** AOP uses one entry point and preserves synchronous results until a thenable appears. */
 import { DefaultLogger as logger } from "koatty_logger";
-import { IContainer, IAspect, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
-import { MetadataCache, CacheType } from "../utils/cache";
+import { IContainer, TAGGED_AOP, TAGGED_CLS } from "../container/icontainer";
 import { debugLog } from "../utils/debug";
+import { getMethodNames } from "../utils/operator";
 
-// Unified shared cache instance for all AOP operations
-const metadataCache = MetadataCache.getShared();
-
-// AOP statistics tracking
-let aopCacheStats = {
-  aspectCacheHits: 0,
-  aspectCacheMisses: 0,
-  methodNamesCacheHits: 0,
-  methodNamesCacheMisses: 0
-};
-
-/**
- * Check if AOP cache is enabled
- */
-function isAOPCacheEnabled(): boolean {
-  return process.env.KOATTY_CONTAINER_ENABLE_AOP_CACHE !== 'false';
-}
-
-/**
- * Get AOP cache statistics with detailed metrics
- */
-export function getAOPCacheStats() {
-  const stats = metadataCache.getStats();
-
-  // Calculate hit rates for different cache types
-  const aspectStats = stats.byType[CacheType.ASPECT_INSTANCES] || { hits: 0, misses: 0, hitRate: 0, size: 0 };
-  const methodNamesStats = stats.byType[CacheType.METHOD_NAMES] || { hits: 0, misses: 0, hitRate: 0, size: 0 };
-
-  const totalHits = aspectStats.hits + methodNamesStats.hits;
-  const totalMisses = aspectStats.misses + methodNamesStats.misses;
-  const totalRequests = totalHits + totalMisses;
-  const overallHitRate = totalRequests > 0 ? totalHits / totalRequests : 0;
-
-  return {
-    overallHitRate,
-    cacheSize: {
-      aspects: aspectStats.size,
-      methodNames: methodNamesStats.size
-    },
-    hitRates: {
-      aspects: aspectStats.hitRate || 0,
-      methodNames: methodNamesStats.hitRate || 0,
-      overall: overallHitRate
-    },
-    memoryUsage: stats.memoryUsage
-  };
-}
-
-/**
- * Log AOP cache performance
- */
-export function logAOPCachePerformance() {
-  const stats = getAOPCacheStats();
-  debugLog(() => `AOP cache stats - Overall hit rate: ${(stats.overallHitRate * 100).toFixed(2)}%`);
-  debugLog(() => `AOP cache stats - Aspects: ${stats.cacheSize.aspects}, Methods: ${stats.cacheSize.methodNames}`);
-  debugLog(() => `AOP hit rates - Overall: ${(stats.overallHitRate * 100).toFixed(2)}%`);
-}
-
-/**
- * Get cached aspect instance
- */
-function getCachedAspect(aopName: string): IAspect | undefined {
-  if (!isAOPCacheEnabled()) {
-    return undefined;
-  }
-
-  const aspect = metadataCache.getAspectInstance<IAspect>(aopName);
-  if (aspect) {
-    aopCacheStats.aspectCacheHits++;
-    return aspect;
-  }
-
-  aopCacheStats.aspectCacheMisses++;
-  return undefined;
-}
-
-/**
- * Cache aspect instance
- */
-function cacheAspectInstance(aopName: string, aspect: IAspect): void {
-  if (isAOPCacheEnabled()) {
-    metadataCache.setAspectInstance(aopName, aspect);
-  }
-}
-
-/**
- * Get cached method names
- */
-function getCachedMethodNames(targetKey: string): string[] | undefined {
-  if (!isAOPCacheEnabled()) {
-    return undefined;
-  }
-
-  const methods = metadataCache.getMethodNames(targetKey);
-  if (methods) {
-    aopCacheStats.methodNamesCacheHits++;
-    return methods;
-  }
-
-  aopCacheStats.methodNamesCacheMisses++;
-  return undefined;
-}
-
-/**
- * Cache method names
- */
-function cacheMethodNames(targetKey: string, methods: string[]): void {
-  if (isAOPCacheEnabled()) {
-    metadataCache.setMethodNames(targetKey, methods);
-  }
-}
-
-/**
- * Get aspect instance with caching
- */
-async function resolveAspect(aopName: string, container: IContainer): Promise<IAspect> {
-  let aspect = getCachedAspect(aopName);
-  if (aspect) {
-    return aspect;
-  }
-
-  try {
-    aspect = container.get(aopName, "COMPONENT");
-    if (aspect) {
-      cacheAspectInstance(aopName, aspect);
-      return aspect;
-    }
-  } catch (error) {
-    logger.Error(`Failed to get aspect ${aopName}:`, error);
-    throw error;
-  }
-
-  throw new Error(`Aspect ${aopName} not found`);
-}
-
-/**
- * Get all methods of a target class/object with caching
- * Excludes constructor, init, __before, __after methods for BeforeEach/AfterEach/AroundEach decorators
- */
-function getMethodNames(target: any): string[] {
-  const targetKey = target.name || target.constructor?.name || 'Anonymous';
-
-  // Try to get from cache first
-  const cachedMethods = getCachedMethodNames(targetKey);
-  if (cachedMethods) {
-    return cachedMethods;
-  }
-
-  // Compute method names
-  const methods: string[] = [];
-  let currentProto = target.prototype || target;
-
-  // excluded methods (according to rule 2: constructor, init, before, _after excepted)
-  const excludedMethods = ['constructor', 'init', 'before', '_after', '__before', '__after'];
-
-  while (currentProto && currentProto !== Object.prototype) {
-    const names = Object.getOwnPropertyNames(currentProto);
-    for (const name of names) {
-      if (!excludedMethods.includes(name) &&
-        typeof currentProto[name] === 'function' &&
-        !methods.includes(name)) {
-        methods.push(name);
-      }
-    }
-    currentProto = Object.getPrototypeOf(currentProto);
-  }
-
-  // Cache the result
-  cacheMethodNames(targetKey, methods);
-  return methods;
-}
-
-/**
- * Get AOP metadata for a method with enhanced caching
- */
 export function getAOPMethodMetadata(target: any, methodName: string, container?: IContainer): any[] {
-  const cacheKey = `aop:${target.name}:${methodName}`;
-
-  const cached = metadataCache.get(CacheType.CLASS_METADATA, cacheKey);
-  if (cached) {
-    return cached;
-  }
 
   const classAOPData = container?.getClassMetadata(TAGGED_CLS, TAGGED_AOP, target) || [];
 
@@ -295,329 +108,90 @@ export function getAOPMethodMetadata(target: any, methodName: string, container?
   debugLog(() => `  Final AOP metadata: ${JSON.stringify(aopMetadata)}`);
 
   // Cache the result
-  metadataCache.set(CacheType.CLASS_METADATA, cacheKey, aopMetadata);
+
 
   return aopMetadata;
 }
 
-/**
- * Aspect error policy (SEC-01 / ADR-101):
- * - 'throw': aspect failures abort the business method (fail-closed, default);
- * - 'log': legacy behavior, log and continue (opt-in per aspect or via
- *   `security.aop.onAspectError` in the application config).
- */
-type AspectErrorPolicy = 'throw' | 'log';
 
-/**
- * Resolve the error policy for a single aspect. The explicit decorator option
- * (`@Before(name, { onError: 'log' })`) wins, then the application security
- * profile (`app.security.aop.onAspectError`), defaulting to fail-closed.
- */
-function resolveErrorPolicy(data: any, container?: IContainer): AspectErrorPolicy {
-  if (data?.options?.onError === 'log' || data?.options?.onError === 'throw') {
-    return data.options.onError;
-  }
+const ORIGINAL = Symbol.for('koatty.aop.original');
+const then = (value: any, next: (value: any) => any): any =>
+  value && typeof value.then === 'function' ? Promise.resolve(value).then(next) : next(value);
+
+function policy(data: any, container?: IContainer): 'throw' | 'log' {
+  return data?.options?.onError ?? (container?.getApp() as any)?.security?.aop?.onAspectError ?? 'throw';
+}
+function recover(action: () => any, failure: (error: any) => any): any {
   try {
-    const policy = (container?.getApp?.() as any)?.security?.aop?.onAspectError;
-    if (policy === 'log' || policy === 'throw') return policy;
-  } catch {
-    // application not reachable yet; stay fail-closed
-  }
-  return 'throw';
+    const value = action();
+    return value && typeof value.then === 'function' ? Promise.resolve(value).catch(failure) : value;
+  } catch (error) { return failure(error); }
 }
-
-/**
- * Execute before aspects
- */
-async function executeBefore(target: any, methodName: string, args: any[], aspectData: any[], container?: IContainer): Promise<any[]> {
-  for (const data of aspectData) {
-    if (data.type === 'Before' || data.type === 'BeforeEach') {
-      try {
-        if (container) {
-          const aspect = await resolveAspect(data.aopName, container);
-          if (aspect && typeof aspect.run === 'function') {
-            const enhancedOptions = {
-              ...data.options,
-              targetMethod: data.method || methodName,
-              target
-            };
-            await aspect.run(args, undefined, enhancedOptions);
-          }
-        }
-      } catch (error) {
-        if (resolveErrorPolicy(data, container) === 'throw') {
-          throw error;
-        }
-        logger.Error(`Before aspect execution failed for ${data.aopName}:`, error);
-      }
+function callAspect(data: any, self: any, args: any[], proceed: any, result: any, container?: IContainer): any {
+  if (!container) throw new Error(`No container for aspect ${data.aopName}`);
+  const aspect: any = container.get(data.aopName, 'COMPONENT');
+  if (!aspect || typeof aspect.run !== 'function') throw new Error(`Aspect ${data.aopName} not found`);
+  return aspect.run(args, proceed, { ...data.options, target: self, targetMethod: data.method, result });
+}
+function once(action: (...args: any[]) => any): (...args: any[]) => any {
+  let called = false, failed = false, result: any;
+  return (...args) => {
+    if (!called) {
+      called = true;
+      try { result = action(...args); } catch (error) { failed = true; result = error; }
     }
-  }
-
-  return args;
-}
-
-/**
- * Execute after aspects
- */
-async function executeAfter(target: any, methodName: string, result: any, aspectData: any[], originalArgs?: any[], container?: IContainer): Promise<any> {
-  for (const data of aspectData) {
-    if (data.type === 'After' || data.type === 'AfterEach') {
-      try {
-        if (container) {
-          const aspect = await resolveAspect(data.aopName, container);
-          if (aspect && typeof aspect.run === 'function') {
-            // `result` is only available to After/AfterEach aspects (see IAspect.run)
-            const enhancedOptions = {
-              ...data.options,
-              targetMethod: data.method || methodName,
-              target,
-              result
-            };
-            await aspect.run(originalArgs || [], undefined, enhancedOptions);
-          }
-        }
-      } catch (error) {
-        if (resolveErrorPolicy(data, container) === 'throw') {
-          throw error;
-        }
-        logger.Error(`After aspect execution failed for ${data.aopName}:`, error);
-      }
-    }
-  }
-
-  return result;
-}
-
-/**
- * Execute around aspects
- */
-async function executeAround(target: any, methodName: string, args: any[], aspectData: any[], originalMethod: Function, container?: IContainer): Promise<any> {
-  const aroundAspects = aspectData.filter(data => data.type === 'Around' || data.type === 'AroundEach');
-
-  if (aroundAspects.length === 0) {
-    return await originalMethod.apply(target, args);
-  }
-
-  const selectedAspect = aroundAspects[aroundAspects.length - 1];
-
-  let business: Promise<any> | undefined;
-  const proceedOnce = (finalArgs: any[]) => {
-    // Repeated proceed calls and log-policy recovery share the same outcome.
-    business ??= Promise.resolve().then(() => originalMethod.apply(target, finalArgs));
-    return business;
+    if (failed) throw result;
+    return result;
   };
-  try {
-    if (container) {
-      const aspect = await resolveAspect(selectedAspect.aopName, container);
-      if (aspect && typeof aspect.run === 'function') {
-        const proceed = async (...modifiedArgs: unknown[]): Promise<unknown> => {
-          const finalArgs = modifiedArgs.length > 0 ? modifiedArgs : args;
-          return await proceedOnce(finalArgs);
-        };
-
-        const enhancedOptions = {
-          ...selectedAspect.options,
-          targetMethod: selectedAspect.method || methodName,
-          target
-        };
-
-        return await aspect.run(args, proceed, enhancedOptions);
-      }
-    }
-  } catch (error) {
-    // Around aspect failure must not silently fall through to the business
-    // method either (SEC-01 / ADR-101)
-    if (resolveErrorPolicy(selectedAspect, container) === 'throw') {
-      throw error;
-    }
-    logger.Error(`Around aspect execution failed for ${selectedAspect.aopName}:`, error);
-  }
-
-  return await proceedOnce(args);
 }
 
-function defineAOPMethod(target: any, methodName: string, descriptor: PropertyDescriptor, container?: IContainer) {
-  const originalMethod = descriptor.value;
-  if (typeof originalMethod !== 'function') {
-    return descriptor;
+export function injectAOP(target: any, container?: IContainer, instance?: any): any {
+  if (!target?.prototype) return target;
+  const destination = instance ?? target.prototype;
+  for (const methodName of getMethodNames(target)) {
+    if (['constructor', '__before', '__after', 'init', 'destroy', 'destructor'].includes(methodName)) continue;
+    const method = destination[methodName];
+    if (typeof method !== 'function') continue;
+    const original = method[ORIGINAL] ?? method;
+    const metadata = getAOPMethodMetadata(target, methodName, container);
+    const before = metadata.filter(d => d.type === 'Before' || (d.type === 'BeforeEach' && !destination.__before));
+    const after = metadata.filter(d => d.type === 'After' || (d.type === 'AfterEach' && !destination.__after));
+    const around = metadata.filter(d => d.type === 'Around' || d.type === 'AroundEach').slice(-1)[0];
+    if (!metadata.length && !destination.__before && !destination.__after) continue;
+    const wrapper = function(this: any, ...args: any[]): any {
+      const proceed = once((...changed: any[]) => original.apply(this, changed.length ? changed : args));
+      const onError = (data: any, fallback: () => any) => (error: any) => {
+        if (policy(data, container) !== 'log') throw error;
+        logger.Error(`Aspect ${data.aopName} failed`, error);
+        return fallback();
+      };
+      let pending = this.__before ? this.__before() : undefined;
+      for (const data of before) pending = then(pending, () => recover(
+        () => callAspect(data, this, args, undefined, undefined, container), onError(data, () => undefined)));
+      pending = then(pending, () => around ? recover(
+        () => callAspect(around, this, args, proceed, undefined, container), onError(around, () => proceed())) : proceed());
+      return then(pending, result => {
+        let completed: any;
+        for (const data of after) completed = then(completed, () => recover(
+          () => callAspect(data, this, args, undefined, result, container), onError(data, () => undefined)));
+        if (this.__after) completed = then(completed, () => this.__after());
+        return then(completed, () => result);
+      });
+    };
+    Object.defineProperty(wrapper, ORIGINAL, { value: original });
+    Object.defineProperty(destination, methodName, { value: wrapper, configurable: true, writable: true });
   }
-
-  descriptor.value = async function (this: any, ...args: any[]) {
-    const aspectData = getAOPMethodMetadata(target, methodName, container);
-
-    try {
-      const hasDefaultBefore = typeof this.__before === 'function';
-      const hasBeforeEach = aspectData.some(data => data.type === 'BeforeEach');
-
-      const hasDefaultAfter = typeof this.__after === 'function';
-      const hasAfterEach = aspectData.some(data => data.type === 'AfterEach');
-
-      if (hasDefaultBefore && hasBeforeEach) {
-        logger.Warn(`__before and @BeforeEach both detected on ${target.name}.${methodName}, __before takes priority and @BeforeEach will be ignored`);
-      }
-
-      if (hasDefaultAfter && hasAfterEach) {
-        logger.Warn(`__after and @AfterEach both detected on ${target.name}.${methodName}, __after takes priority and @AfterEach will be ignored`);
-      }
-
-      if (hasDefaultBefore) {
-        await this.__before();
-      }
-
-      let processedArgs = args;
-      const beforeAspects = aspectData.filter(data => data.type === 'Before');
-      if (beforeAspects.length > 0) {
-        processedArgs = await executeBefore(this, methodName, args, beforeAspects, container);
-      }
-
-      if (!hasDefaultBefore) {
-        const beforeEachAspects = aspectData.filter(data => data.type === 'BeforeEach');
-        if (beforeEachAspects.length > 0) {
-          processedArgs = await executeBefore(this, methodName, processedArgs, beforeEachAspects, container);
-        }
-      }
-
-      let result = await executeAround(this, methodName, processedArgs, aspectData, originalMethod, container);
-
-      if (!hasDefaultAfter) {
-        const afterEachAspects = aspectData.filter(data => data.type === 'AfterEach');
-        if (afterEachAspects.length > 0) {
-          result = await executeAfter(this, methodName, result, afterEachAspects, args, container);
-        }
-      }
-
-      const afterAspects = aspectData.filter(data => data.type === 'After');
-      if (afterAspects.length > 0) {
-        result = await executeAfter(this, methodName, result, afterAspects, args, container);
-      }
-
-      if (hasDefaultAfter) {
-        await this.__after();
-      }
-
-      return result;
-    } catch (error) {
-      logger.Error(`AOP method execution failed for ${target.name}.${methodName}:`, error);
-      throw error;
-    }
-  };
-
-  return descriptor;
-}
-
-export function injectAOP(target: any, container?: IContainer): any {
-  if (!target?.prototype) {
-    return target;
-  }
-
-  if (target.prototype.__aopApplied) {
-    debugLog(() => `AOP already applied to ${target.name}, skipping duplicate application`);
-    return target;
-  }
-
-  const methods = getMethodNames(target);
-  let aopMethodCount = 0;
-
-  for (const methodName of methods) {
-    if (methodName === '__before' || methodName === '__after') {
-      continue;
-    }
-
-    const aspectData = getAOPMethodMetadata(target, methodName, container);
-
-    const hasBuiltinBefore = typeof target.prototype.__before === 'function' ||
-      Object.prototype.hasOwnProperty.call(target.prototype, '__before');
-    const hasBuiltinAfter = typeof target.prototype.__after === 'function' ||
-      Object.prototype.hasOwnProperty.call(target.prototype, '__after');
-
-    const hasAspectsOrDefaults = aspectData.length > 0 || hasBuiltinBefore || hasBuiltinAfter;
-
-    if (hasAspectsOrDefaults) {
-      const descriptor = Object.getOwnPropertyDescriptor(target.prototype, methodName);
-      if (descriptor && descriptor.value) {
-        Object.defineProperty(target.prototype, methodName, defineAOPMethod(target, methodName, descriptor, container));
-        aopMethodCount++;
-
-        if (hasBuiltinBefore || hasBuiltinAfter) {
-          debugLog(() => `Applied AOP to ${target.name}.${methodName} with built-in methods: __before=${hasBuiltinBefore}, __after=${hasBuiltinAfter}`);
-        }
-      }
-    }
-  }
-
-  Object.defineProperty(target.prototype, '__aopApplied', {
-    value: true,
-    writable: false,
-    enumerable: false,
-    configurable: false
-  });
-
-  if (aopMethodCount > 0) {
-    debugLog(() => `Applied AOP to ${target.name}: ${aopMethodCount} methods enhanced`);
-  }
-
   return target;
 }
 
-/**
- * Clear all AOP caches
- */
-export function clearAOPCache(): void {
-  metadataCache.clearType(CacheType.METHOD_NAMES);
-  metadataCache.clearType(CacheType.ASPECT_INSTANCES);
-
-  // Reset statistics
-  aopCacheStats = {
-    aspectCacheHits: 0,
-    aspectCacheMisses: 0,
-    methodNamesCacheHits: 0,
-    methodNamesCacheMisses: 0
-  };
-
-  debugLog(() => 'AOP cache cleared');
-}
-
+// Compatibility diagnostics: instances are no longer cached by process-wide name.
+export function clearAOPCache(): void { /* no shared mutable cache */ }
 export function warmupAOPCache(targets: any[], container?: IContainer): void {
-  const startTime = Date.now();
-
-  for (const target of targets) {
-    try {
-      const methods = getMethodNames(target);
-      for (const methodName of methods) {
-        getAOPMethodMetadata(target, methodName, container);
-      }
-    } catch (error) {
-      logger.Error(`Failed to warmup AOP cache for ${target.name}:`, error);
-    }
-  }
-
-  const warmupTime = Date.now() - startTime;
-  debugLog(() => `AOP cache warmed up for ${targets.length} targets in ${warmupTime}ms`);
-
-  const stats = getAOPCacheStats();
-  debugLog(() => `AOP cache stats - Aspects: ${stats.cacheSize.aspects}, Methods: ${stats.cacheSize.methodNames}`);
-  debugLog(() => `AOP hit rates - Overall: ${(stats.overallHitRate * 100).toFixed(2)}%`);
+  for (const target of targets) for (const method of getMethodNames(target)) getAOPMethodMetadata(target, method, container);
 }
-
-/**
- * Optimize AOP cache performance
- */
-export function optimizeAOPCache(): void {
-  metadataCache.optimize();
-
-  const stats = getAOPCacheStats();
-  debugLog(() => `AOP cache optimized - Overall hit rate: ${(stats.overallHitRate * 100).toFixed(2)}%`);
+export function optimizeAOPCache(): void { /* registration-time closures need no eviction */ }
+export function getAOPCacheSize() { return { aspects: 0, methodNames: 0 }; }
+export function getAOPCacheStats() {
+  return { overallHitRate: 0, cacheSize: getAOPCacheSize(), hitRates: { aspects: 0, methodNames: 0, overall: 0 }, memoryUsage: 0 };
 }
-
-/**
- * Get AOP cache size information
- */
-export function getAOPCacheSize(): {
-  aspects: number;
-  methodNames: number;
-} {
-  return {
-    aspects: metadataCache.size(CacheType.ASPECT_INSTANCES),
-    methodNames: metadataCache.size(CacheType.METHOD_NAMES)
-  };
-}
+export function logAOPCachePerformance(): void { debugLog(() => 'AOP metadata is compiled per instance; aspect instances resolve from the current container'); }

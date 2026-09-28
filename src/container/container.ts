@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "async_hooks";
 /**
  * @ author: richen
  * @ copyright: Copyright (c) - <richenlin(at)gmail.com>
@@ -18,14 +19,13 @@ import {
 } from "../utils/operator";
 import {
   Constructor, IContainer, IContainerDiagnostics,
-  ObjectDefinitionOptions, TAGGED_CLS
+  ObjectDefinitionOptions, TAGGED_CLS, TAGGED_ARGS, TAGGED_PROP
 } from "./icontainer";
 import {
   createDualClassDecorator,
   createDualMethodDecorator,
   createDualFieldDecorator
 } from "../decorator/compat";
-import { createLazyProxy } from "../utils/lazy_proxy";
 import { MetadataStore } from "./metadata_store";
 import { LifecycleManager } from "./lifecycle_manager";
 import { DependencyAnalyzer } from "./dependency_analyzer";
@@ -66,6 +66,7 @@ import { PerformanceManager } from "./performance_manager";
 export class Container implements IContainer, IContainerDiagnostics {
   private app: Application;
   private classMap: Map<string, Function>;
+  private classIdentities = new WeakMap<object, { id: string; type: string }>();
   private lifecycleManager: LifecycleManager;
   private static instance: Container;
 
@@ -81,30 +82,38 @@ export class Container implements IContainer, IContainerDiagnostics {
   private batchRegistrar: BatchRegistrar;
 
   /**
-   * Get singleton instance of Container
-   * 
+   * Get singleton instance of Container.
+   *
+   * This is the *default* container.
+   *
    * @returns {Container} The singleton instance
    */
   static getInstance(): Container {
     if (!this.instance) {
-      this.instance = new Container();
+      this.instance = new Container({ shared: true });
     }
     return this.instance;
   }
 
   /**
-   * Private constructor for Container class.
-   * Initializes container properties including application object, class map,
-   * instance map and metadata map.
-   * @private
+   * Constructor for Container class.
+   *
+   * Prefer `Container.getInstance()` for the default container, or
+   * `new Container()` for an isolated one.
+   *
+   * @param opts.shared - when true, reuse the process-wide shared
+   *   `MetadataCache` (used by the default container).
    */
-  private constructor() {
+  constructor(opts: { shared?: boolean } = {}) {
+    const shared = opts.shared === true;
     this.app = new App();
     this.classMap = new Map();
-    this.lifecycleManager = new LifecycleManager();
+    this.lifecycleManager = new LifecycleManager((target, instance, options) => this.prepareInstance(target, instance, options));
     this.circularDependencyDetector = new CircularDepDetector();
 
-    this.metadataCache = MetadataCache.getShared();
+    this.metadataCache = shared
+      ? MetadataCache.getShared()
+      : new MetadataCache(MetadataCache.getSharedOptions());
     this.metadataStore = new MetadataStore(this.metadataCache);
     this.dependencyAnalyzer = new DependencyAnalyzer(
       this.circularDependencyDetector,
@@ -139,11 +148,79 @@ export class Container implements IContainer, IContainerDiagnostics {
   }
 
   /**
+   * Resolve the request context currently in scope (ARCH-02 / D-2).
+   *
+   * Prefers an explicitly bound context (set via `runInRequestScope`), then
+   * falls back to the application's AsyncLocalStorage-backed
+   * `getCurrentContext()`. Returns `undefined` outside a request.
+   */
+  private requestStorage = new AsyncLocalStorage<object>();
+  private definitions = new Map<Function, ObjectDefinitionOptions>();
+  private constructing = new Map<Function, any>();
+  private requestManagers = new WeakMap<object, LifecycleManager>();
+  private getRequestContext(): object | undefined {
+    return this.requestStorage.getStore() ?? (this.app as any)?.getCurrentContext?.();
+  }
+
+  public runInRequestScope<T>(ctx: object, fn: () => T): T {
+    const storage = (this.app as any)?.ctxStorage;
+    return storage?.run ? storage.run(ctx, fn) : this.requestStorage.run(ctx, fn);
+  }
+
+  public readyRequestScope(ctx: object): Promise<void> | undefined {
+    const manager = this.requestManagers.get(ctx);
+    return manager?.hasLifecycleHooks ? manager.ready() : undefined;
+  }
+  public async releaseRequestScope(ctx: object): Promise<void> {
+    const manager = this.requestManagers.get(ctx);
+    this.requestManagers.delete(ctx);
+
+    await manager?.clear();
+  }
+
+  private metadataRevision = 0;
+  private plainClasses = new WeakMap<Function, { revision: string; plain: boolean }>();
+
+  private prepareInstance(target: Function, instance: any, options: ObjectDefinitionOptions): void {
+    Object.defineProperty(instance, 'app', { value: this.app, configurable: true, writable: true, enumerable: true });
+    Object.defineProperty(instance, '_options', { value: options, configurable: true });
+    const revision = `${this.metadataRevision}:${(IOC as Container)?.metadataRevision ?? 0}`;
+    let plan = this.plainClasses.get(target);
+    if (!plan || plan.revision !== revision) {
+      let plain = true;
+      for (let cls: any = target; cls && cls !== Function.prototype; cls = Object.getPrototypeOf(cls)) {
+        if (Object.keys(this.listPropertyData(TAGGED_PROP, cls) ?? {}).length ||
+            Object.keys(this.listPropertyData(TAGGED_ARGS, cls) ?? {}).length ||
+            Object.getOwnPropertyNames(cls.prototype ?? {}).some(key => key !== 'constructor' &&
+              typeof Object.getOwnPropertyDescriptor(cls.prototype, key)?.value === 'function')) { plain = false; break; }
+      }
+      plan = { revision, plain };
+      this.plainClasses.set(target, plan);
+    }
+    if (plan.plain) return;
+    this.constructing.set(target, instance);
+    try {
+      injectAutowired(target, instance, this, options);
+      injectValues(target, instance, this, options);
+      injectAOP(target, this, instance);
+    } finally { this.constructing.delete(target); }
+  }
+
+  /**
    * Set application instance
    * @param app Application instance
    */
+  private deferredInstances = new Map<object | Function, ObjectDefinitionOptions>();
+  private lifecycleApps = new WeakSet<object>();
   public setApp(app: Application) {
     this.app = app;
+    if (app && !this.lifecycleApps.has(app)) {
+      this.lifecycleApps.add(app);
+      app.once?.('appReady', () => this.ready());
+      // Koatty drains other resources before disposing its container. Lightweight
+      // EventEmitter embedders can await this listener through their lifecycle dispatcher.
+      if (typeof (app as any).stopResources !== 'function') app.once?.('appStop', () => this.clear());
+    }
   }
 
   /**
@@ -272,12 +349,19 @@ export class Container implements IContainer, IContainerDiagnostics {
     }
 
     // Only do the heavy initialization if instance doesn't exist
-    if (!hasExistingInstance) {
+    {
       const dependencies = this.extractDependencies(target);
 
-      // Strict Lifetime check: Singleton cannot depend on Prototype
+      // Strict Lifetime check: Singleton cannot depend on Prototype (opt-in)
       if (options.strictLifetime === true && options.scope === 'Singleton') {
         this.checkStrictLifetime(identifier as string, dependencies, options.type ?? 'COMPONENT');
+      }
+
+      // ARCH-02 / D-2: Singleton depending on a Request-scoped bean is always a
+      // scope violation. Request scope is new in this release, so enforcing it
+      // unconditionally cannot break existing applications.
+      if (options.scope === 'Singleton') {
+        this.checkNoRequestScopeDependency(identifier as string, dependencies);
       }
 
       try {
@@ -288,35 +372,13 @@ export class Container implements IContainer, IContainerDiagnostics {
           dependencies
         );
 
-        // define app
-        Reflect.defineProperty((<Function>target).prototype, "app", {
-          configurable: true,
-          enumerable: true,
-          writable: true,
-          value: this.app
-        });
-
-        // inject
-        this._injection(target, options, identifier);
-        // inject options once
-        Reflect.defineProperty((<Function>target).prototype, "_options", {
-          enumerable: false,
-          configurable: true,
-          writable: true,
-          value: options
-        });
-
-        // async instance
-        if (options.isAsync) {
-          if (this.app && typeof this.app.once === 'function') {
-            this.app.once("appReady", () => this._setInstance(target, options));
-          } else {
-            logger.Warn(`Cannot register async instance for ${identifier}: app.once is not available`);
-          }
+        this.definitions.set(target as Function, options);
+        if (options.scope === 'Singleton' && !hasExistingInstance) {
+          if (options.isAsync) this.deferredInstances.set(target, options);
+          else this._setInstance(target, options);
         }
 
-        this._setInstance(target, options);
-
+        this.circularDependencyDetector.detectCircularDependency(identifier as string);
         // mark component resolution completed
         this.circularDependencyDetector.finishResolving(identifier);
 
@@ -335,10 +397,6 @@ export class Container implements IContainer, IContainerDiagnostics {
         }
         throw error;
       }
-    } else {
-      // Instance already exists, just register the new identifier mapping
-      // No need to re-inject or re-initialize, just ensure the class mapping exists
-      logger.Debug(`Registering additional identifier '${identifier}' for existing class ${(target as Function).name}`);
     }
   }
 
@@ -359,8 +417,24 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @throws {Error} When Singleton depends on Prototype
    * @private
    */
-  private checkStrictLifetime(id: string, dependencies: string[], type: string): void {
-    return this.dependencyAnalyzer.checkStrictLifetime(id, dependencies, type);
+  private checkStrictLifetime(id: string, dependencies: string[], _type: string): void {
+    for (const name of dependencies) {
+      const cls = this.getClass(name, getComponentTypeByClassName(name));
+      if (cls && (this.definitions.get(cls)?.scope ?? Reflect.get(cls.prototype, '_options')?.scope) === 'Prototype') throw new Error(`Strict Mode: Singleton '${id}' cannot depend on Prototype '${name}'`);
+    }
+  }
+
+  /**
+   * Fail fast when a Singleton declares a Request-scoped dependency
+   * (ARCH-02 / D-2).
+   */
+  private checkNoRequestScopeDependency(id: string, dependencies: string[]): void {
+    for (const name of dependencies) {
+      const cls = this.getClass(name, getComponentTypeByClassName(name));
+      if (cls && (this.definitions.get(cls)?.scope ?? Reflect.get(cls.prototype, '_options')?.scope) === 'Request') {
+        throw new Error(`Scope violation: Singleton '${id}' cannot depend on Request-scoped '${name}'. Use a Request-scoped consumer.`);
+      }
+    }
   }
 
   /**
@@ -383,28 +457,6 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @param identifier Component identifier for circular dependency detection
    * @private
    */
-  private _injection<T extends object | Function>(target: T, options: ObjectDefinitionOptions, identifier: string): void {
-    try {
-      // start resolving dependencies
-      this.circularDependencyDetector.startResolving(identifier);
-
-      // inject autowired
-      injectAutowired(<Function>target, (<Function>target).prototype, IOC, options);
-      // inject properties values
-      injectValues(<Function>target, (<Function>target).prototype, IOC, options);
-      injectAOP(<Function>target, this);
-
-    } catch (error) {
-      // if it is a circular dependency error, throw it again
-      if (error instanceof CircularDepError) {
-        throw error;
-      }
-
-      // other injection errors
-      logger.Error(`Injection failed for ${identifier}:`, error);
-      throw error;
-    }
-  }
 
   /**
    * Get component instance by identifier.
@@ -429,122 +481,44 @@ export class Container implements IContainer, IContainerDiagnostics {
    * const userService = container.get(UserService, 'Prototype', [1, 2, 3]);
    * ```
    */
-  public get<T>(identifier: string | Constructor<T>, type?: string,
-    ...args: any[]): T {
-    let className: string;
-    if (helper.isClass(<any>identifier)) {
-      className = (<Constructor<T>>identifier)?.name;
-    } else {
-      className = <string>identifier;
-    }
-
-    if (!type) {
-      type = getComponentTypeByClassName(className);
-    }
-
-    const target = <T>this.getClass(className, type);
-    if (!target) {
-      throw new Error(`Bean ${className} not found`);
-    }
-
-    const targetFunc = target as unknown as Function;
-    const options = Reflect.get(targetFunc.prototype, "_options");
-    const isPrototype = options?.scope === "Prototype";
-
-    // Create new instance when:
-    // 1. Explicit args provided
-    // 2. OR scope is Prototype (ignore instanceMap)
-    if (args.length > 0 || isPrototype) {
-      try {
-        // for Prototype scope, detect circular dependency each time
-        if (isPrototype) {
-          const cycle = this.circularDependencyDetector.detectCircularDependency(className);
-          if (cycle) {
-            logger.Warn(`Prototype scope component ${className} has circular dependency, using Lazy Proxy`);
-            // NOTE: For Prototype scope, each property access triggers a NEW instance construction.
-            // This is intentional behavior - Prototype beans should NOT be cached.
-            // The resolver below creates a fresh instance every time it's accessed.
-            return createLazyProxy(
-              () => Reflect.construct(targetFunc, args, targetFunc) as object,
-              className
-            ) as unknown as T;
-          }
-        }
-
-        const instance = Reflect.construct(targetFunc, args, targetFunc);
-        overridePrototypeValue(<Function>instance);
-        return instance as T;
-      } catch (error) {
-        if (error instanceof CircularDepError) {
-          throw error;
-        }
-        // Safely handle error message extraction
-        const errorMessage = error && typeof error === 'object' && 'message' in error 
-          ? (error as Error).message 
-          : String(error || 'Unknown error');
-        throw new Error(`Failed to create instance of ${className}: ${errorMessage}`);
+  public get<T>(identifier: string | Constructor<T>, type?: string, ...args: any[]): T {
+    const className = typeof identifier === 'function' ? this.getIdentifier(identifier) : identifier;
+    const target = this.getClass(className, type ?? getComponentTypeByClassName(className));
+    if (!target) throw new Error(`Bean ${className} not found`);
+    const options = this.definitions.get(target) ?? this.getPropertyData<any>('SERVICE_OPTIONS', target, className)
+      ?? Reflect.get(target.prototype, '_options') ?? { scope: 'Singleton' };
+    const scope = options.scope ?? 'Singleton';
+    const ctx = this.getRequestContext();
+    if (scope === 'Request' && !ctx) throw new Error(`Request-scoped bean ${className} requires an active request context`);
+    for (const owner of this.constructing.keys()) {
+      if (scope === 'Request' && (this.definitions.get(owner)?.scope ?? 'Singleton') === 'Singleton') {
+        throw new Error(`Scope violation: Singleton '${owner.name}' cannot depend on Request-scoped '${className}'`);
       }
     }
-
-    // Return cached instance for Singleton
-    let instance = this.lifecycleManager.getInstance(targetFunc) as T;
-    if (!instance) {
-      // Check if this component is part of a circular dependency
-      // Use precise detection instead of broad "includes" check
-      const detector = this.circularDependencyDetector;
-      const cycle = detector.detectCircularDependency(className);
-
-      if (cycle) {
-        // For circular dependencies, return Lazy Proxy
-        logger.Debug(`Component ${className} is in circular dependency cycle [${cycle.join(' -> ')}], returning Lazy Proxy`);
-        return createLazyProxy(
-          () => this.lifecycleManager.getInstance(targetFunc) as object,
-          className
-        ) as unknown as T;
+    if (this.constructing.has(target)) return this.constructing.get(target);
+    if (this.deferredInstances.has(target)) throw new Error(`Async component ${className} is not ready; await container.ready() before resolving it`);
+    if (scope === 'Request') {
+      let manager = this.requestManagers.get(ctx!);
+      if (!manager) {
+        manager = new LifecycleManager((cls, instance, opts) => this.prepareInstance(cls, instance, opts));
+        this.requestManagers.set(ctx!, manager);
       }
-
-      // Check if this is a case where instances were cleared but class registration exists
-      const wasInstanceCleared = this.classMap.has(`${type}:${className}`);
-
-      if (wasInstanceCleared) {
-        // Instance was cleared for non-circular dependency, safe to recreate
-        logger.Debug(`Instance was cleared for ${className}, recreating with proper dependency injection flow`);
-
-        try {
-          // Re-run the full registration process to ensure proper dependency injection
-          // Ensure options is defined with default values
-          const safeOptions = options || { scope: "Singleton", args: [] };
-          this._injection(targetFunc, safeOptions, className);
-          this._setInstance(targetFunc, safeOptions);
-
-          // Get the newly created instance
-          instance = this.lifecycleManager.getInstance(targetFunc) as T;
-          if (!instance) {
-            throw new Error(`Failed to recreate instance for ${className}`);
-          }
-
-          logger.Debug(`Successfully recreated singleton instance for ${className}`);
-        } catch (error) {
-          if (error instanceof CircularDepError) {
-            // If circular dependency is detected during recreation, return Lazy Proxy
-            logger.Debug(`Circular dependency detected for ${className} during recreation, returning Lazy Proxy`);
-            return createLazyProxy(
-              () => this.lifecycleManager.getInstance(targetFunc) as object,
-              className
-            ) as unknown as T;
-          } else {
-            // Safely handle error message extraction
-            const errorMessage = error && typeof error === 'object' && 'message' in error 
-              ? (error as Error).message 
-              : String(error || 'Unknown error');
-            throw new Error(`Failed to recreate instance of ${className}: ${errorMessage}`);
-          }
-        }
-      } else {
-        throw new Error(`Bean ${className} not found`);
-      }
+      manager.setInstance(target, { ...options, args: args.length ? args : options.args });
+      return manager.getInstance(target) as T;
     }
-    return instance;
+    if (scope === 'Prototype' || args.length) {
+      const instance = Reflect.construct(target, args.length ? args : options.args ?? []);
+      overridePrototypeValue(instance);
+      this.prepareInstance(target, instance, options);
+      if (ctx) {
+        let manager = this.requestManagers.get(ctx);
+        if (!manager) { manager = new LifecycleManager(); this.requestManagers.set(ctx, manager); }
+        manager.trackInstance(instance, options);
+      } else this.lifecycleManager.trackInstance(instance, options);
+      return instance;
+    }
+    this.lifecycleManager.setInstance(target, options);
+    return this.lifecycleManager.getInstance(target) as T;
   }
 
   /**
@@ -577,7 +551,20 @@ export class Container implements IContainer, IContainerDiagnostics {
    * ```
    */
   public getInsByClass<T extends object | Function>(target: T, args: any[] = []): T {
-    return this.lifecycleManager.getInsByClass(target, args);
+    if (!helper.isClass(target)) throw new Error('getInsByClass: target is not a class');
+    const cls = target as unknown as Function;
+    const id = this.getIdentifier(cls);
+    const type = this.getType<string>(cls);
+    if (!this.getClass(id, type)) {
+      if (!args.length) return undefined as unknown as T;
+      const instance = Reflect.construct(cls, args);
+      this.prepareInstance(cls, instance, { scope: 'Prototype', type });
+      return instance;
+    }
+    if (!args.length && (this.definitions.get(cls)?.scope ?? 'Singleton') === 'Singleton') {
+      return this.lifecycleManager.getInstance(cls) as unknown as T;
+    }
+    return this.get(id, type, ...args) as T;
   }
 
   /**
@@ -606,7 +593,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public getIdentifier(target: Function | object): string {
     if (helper.isFunction(target)) {
-      const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
+      const metaData = this.classIdentities.get(target) ?? Reflect.getOwnMetadata(TAGGED_CLS, target);
       return metaData ? metaData.id ?? "" : target.name ?? "";
     }
     return target.constructor ? target.constructor.name ?? "" : "";
@@ -619,7 +606,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @returns The component type string
    */
   public getType<T = string>(target: Function | object): T {
-    const metaData = Reflect.getOwnMetadata(TAGGED_CLS, target);
+    const metaData = this.classIdentities.get(target) ?? Reflect.getOwnMetadata(TAGGED_CLS, target);
     if (metaData) {
       return metaData.type as T;
     }
@@ -635,7 +622,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @param identifier The unique identifier for the class
    */
   public saveClass(type: string, module: Function, identifier: string) {
-    Reflect.defineMetadata(TAGGED_CLS, { id: identifier, type }, module);
+    this.classIdentities.set(module, { id: identifier, type });
+    if (this === IOC) Reflect.defineMetadata(TAGGED_CLS, { id: identifier, type }, module);
     const key = `${type}:${identifier}`;
     if (!this.classMap.has(key)) {
       this.classMap.set(key, module);
@@ -668,6 +656,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public saveClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName?: string) {
+    this.metadataRevision++;
     this.metadataStore.saveClassMetadata(type, decoratorNameKey, data, target, propertyName);
   }
 
@@ -687,7 +676,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public getClassMetadata<T = any>(type: string, decoratorNameKey: string | symbol, target: Function | object,
     propertyName?: string): T {
-    return this.metadataStore.getClassMetadata<T>(type, decoratorNameKey, target, propertyName);
+    return this.metadataStore.getClassMetadata<T>(type, decoratorNameKey, target, propertyName)
+      ?? (this !== IOC ? IOC.getClassMetadata<T>(type, decoratorNameKey, target, propertyName) : undefined as T);
   }
 
   /**
@@ -705,6 +695,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public attachClassMetadata(type: string, decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName?: string) {
+    this.metadataRevision++;
     this.metadataStore.attachClassMetadata(type, decoratorNameKey, data, target, propertyName);
   }
 
@@ -722,6 +713,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public savePropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName: string | symbol) {
+    this.metadataRevision++;
     this.metadataStore.savePropertyData(decoratorNameKey, data, target, propertyName);
   }
 
@@ -739,6 +731,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public attachPropertyData(decoratorNameKey: string | symbol, data: any, target: Function | object,
     propertyName: string | symbol) {
+    this.metadataRevision++;
     this.metadataStore.attachPropertyData(decoratorNameKey, data, target, propertyName);
   }
 
@@ -756,7 +749,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public getPropertyData<T = any>(decoratorNameKey: string | symbol, target: Function | object,
     propertyName: string | symbol): T {
-    return this.metadataStore.getPropertyData<T>(decoratorNameKey, target, propertyName);
+    return this.metadataStore.getPropertyData<T>(decoratorNameKey, target, propertyName)
+      ?? (this !== IOC ? IOC.getPropertyData<T>(decoratorNameKey, target, propertyName) : undefined as T);
   }
 
   /**
@@ -771,7 +765,8 @@ export class Container implements IContainer, IContainerDiagnostics {
    * ```
    */
   public listPropertyData<T = Record<string, any>>(decoratorNameKey: string | symbol, target: Function | object): T {
-    return this.metadataStore.listPropertyData<T>(decoratorNameKey, target);
+    return { ...(this !== IOC ? IOC.listPropertyData(decoratorNameKey, target) : {}),
+      ...this.metadataStore.listPropertyData(decoratorNameKey, target) } as T;
   }
 
   /**
@@ -801,15 +796,36 @@ export class Container implements IContainer, IContainerDiagnostics {
    * clear all resources in container
    * @memberof Container
    */
-  public clear(): void {
+  public async ready(): Promise<void> {
+    const pending = [...this.deferredInstances];
+    this.deferredInstances.clear();
+    for (const [target, options] of pending) this._setInstance(target, options);
+    for (const [target, options] of this.definitions) {
+      if (options.scope !== 'Singleton') continue;
+      for (const dep of Object.values(this.listPropertyData<any>('TAGGED_PROP', target))) {
+        const name = (dep as any).identifier;
+        const cls = this.getClass(name, (dep as any).type) ?? this.getClass(name, getComponentTypeByClassName(name));
+        if (cls && this.definitions.get(cls)?.scope === 'Request') throw new Error(`Scope violation: Singleton '${target.name}' cannot depend on Request-scoped '${name}'`);
+      }
+    }
+    await this.lifecycleManager.ready();
+  }
+
+  public seal(): void { this.lifecycleManager.seal(); }
+
+  public clear(): Promise<void> {
     this.classMap.clear();
+    this.classIdentities = new WeakMap();
+    this.definitions.clear();
     this.app = new App();
-    this.lifecycleManager.clear();
+    const disposed = this.lifecycleManager.clear();
+    this.deferredInstances.clear();
     this.circularDependencyDetector.clear();
 
     this.metadataStore.clear();
 
     logger.Debug("Container cleared including performance optimization components");
+    return disposed;
   }
 
   /**
@@ -830,6 +846,7 @@ export class Container implements IContainer, IContainerDiagnostics {
    */
   public clearClass(): void {
     this.classMap.clear();
+    this.classIdentities = new WeakMap();
     logger.Debug("Container class cleared");
   }
 
@@ -839,11 +856,12 @@ export class Container implements IContainer, IContainerDiagnostics {
    * @memberof Container
    */
 
-  public clearInstances(): void {
-    this.lifecycleManager.clear();
+  public clearInstances(): Promise<void> {
+    const disposed = this.lifecycleManager.clear();
     this.circularDependencyDetector.clear();
 
     logger.Debug("Container instances cleared, class registrations and metadata preserved");
+    return disposed;
   }
 
   /**
@@ -859,8 +877,13 @@ export class Container implements IContainer, IContainerDiagnostics {
    * }
    * ```
    */
+  public async [Symbol.asyncDispose](): Promise<void> {
+    try { await this.clear(); } finally { this.metadataCache.stopCleanupTimer(); }
+  }
+
   public [Symbol.dispose](): void {
-    this.clear();
+    // Synchronous using cannot await async hooks. Use await using for deterministic cleanup.
+    this.clear().catch(error => logger.Error('Async container disposal failed; use await using', error));
     this.metadataCache.stopCleanupTimer();
     logger.Debug('Container disposed via Symbol.dispose');
   }

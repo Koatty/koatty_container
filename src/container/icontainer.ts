@@ -6,7 +6,7 @@
  */
 import { Application } from "./app";
 
-export type Scope = 'Singleton' | 'Prototype';
+export type Scope = 'Singleton' | 'Prototype' | 'Request';
 
 // used to store class properties aop
 export const TAGGED_AOP = 'TAGGED_AOP';
@@ -46,7 +46,7 @@ export interface CircularDepDetector {
   };
   getDependencyGraphVisualization(): string;
   getTransitiveDependencies(identifier: string): string[];
-  clear(): void;
+  clear(): void | Promise<void>;
 }
 
 /**
@@ -84,6 +84,8 @@ export interface IContainer {
    * @param app Application instance
    */
   setApp(app: Application): void;
+  ready?(): Promise<void>;
+  seal?(): void;
   /**
    * Get the application instance.
    * 
@@ -303,7 +305,7 @@ export interface IContainer {
    * clear all resources in container
    * @memberof Container
    */
-  clear(): void;
+  clear(): void | Promise<void>;
 
   /**
    * Clear only instances while preserving class registrations and metadata
@@ -474,5 +476,6 @@ export interface IAspect {
    * `undefined` there. `options.targetMethod` and `options.target` identify
    * the intercepted method.
    */
-  run: (args: unknown[], proceed?: (...args: unknown[]) => Promise<unknown>, options?: Record<string, unknown>) => Promise<unknown>;
+  run: (args: unknown[], proceed?: (...args: unknown[]) => any, options?: Record<string, unknown>) => any;
+
 }

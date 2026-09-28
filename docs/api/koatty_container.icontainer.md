@@ -238,6 +238,17 @@ Get property data by decorator name key.
 </td></tr>
 <tr><td>
 
+[ready()?](./koatty_container.icontainer.ready.md)
+
+
+</td><td>
+
+_(Optional)_
+
+
+</td></tr>
+<tr><td>
+
 [reg(identifier, target, options)](./koatty_container.icontainer.reg.md)
 
 
@@ -277,6 +288,17 @@ Save class metadata to the container.
 </td><td>
 
 Save property metadata to the container.
+
+
+</td></tr>
+<tr><td>
+
+[seal()?](./koatty_container.icontainer.seal.md)
+
+
+</td><td>
+
+_(Optional)_
 
 
 </td></tr>

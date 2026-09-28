@@ -23,12 +23,6 @@ export class DependencyAnalyzer {
    * @returns An array of dependency identifiers
    */
   public extractDependencies(target: any): string[] {
-    // Check cache first
-    const cachedDependencies = this.metadataCache.getCachedDependencies(target);
-    if (cachedDependencies) {
-      return cachedDependencies;
-    }
-
     const dependencies: string[] = [];
 
     try {
@@ -72,11 +66,17 @@ export class DependencyAnalyzer {
   }
 
   /**
-   * Check strict lifetime constraint: Singleton cannot depend on Prototype
+   * Check strict lifetime constraint: Singleton cannot depend on Prototype or
+   * on a Request-scoped bean (ARCH-02 / D-2).
+   *
+   * A Singleton outliving a request would capture request-scoped state and leak
+   * it across requests, so this is rejected at registration time rather than
+   * silently misbehaving at runtime.
+   *
    * @param id The identifier of the component being registered
    * @param dependencies Array of dependency identifiers
    * @param type The component type
-   * @throws {Error} When Singleton depends on Prototype
+   * @throws {Error} When Singleton depends on Prototype or Request scope
    */
   public checkStrictLifetime(id: string, dependencies: string[], _type: string): void {
     for (const dep of dependencies) {
@@ -86,6 +86,41 @@ export class DependencyAnalyzer {
         const depOptions = Reflect.get((depClass as Function).prototype, '_options');
         if (depOptions?.scope === 'Prototype') {
           throw new Error(`Strict Mode: Singleton '${id}' cannot depend on Prototype '${dep}'`);
+        }
+        if (depOptions?.scope === 'Request') {
+          throw new Error(
+            `Scope violation: Singleton '${id}' cannot depend on Request-scoped '${dep}'. ` +
+            `Request-scoped beans are created per request and would leak state across requests. ` +
+            `Use a Request-scoped consumer.`
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Reject a Singleton that declares a Request-scoped dependency
+   * (ARCH-02 / D-2).
+   *
+   * Unlike the Prototype rule this is always enforced: a Singleton outliving a
+   * request would capture request-scoped state and leak it across requests.
+   *
+   * @param id The identifier of the component being registered
+   * @param dependencies Array of dependency identifiers
+   * @throws {Error} When a Singleton depends on a Request-scoped bean
+   */
+  public checkNoRequestScopeDependency(id: string, dependencies: string[]): void {
+    for (const dep of dependencies) {
+      const depType = getComponentTypeByClassName(dep);
+      const depClass = this.getClassFn(dep, depType);
+      if (depClass) {
+        const depOptions = Reflect.get((depClass as Function).prototype, '_options');
+        if (depOptions?.scope === 'Request') {
+          throw new Error(
+            `Scope violation: Singleton '${id}' cannot depend on Request-scoped '${dep}'. ` +
+            `Request-scoped beans are created per request and would leak state across requests. ` +
+            `Use a Request-scoped consumer.`
+          );
         }
       }
     }

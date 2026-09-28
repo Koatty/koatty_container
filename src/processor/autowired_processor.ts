@@ -9,7 +9,7 @@
  */
 import * as helper from "koatty_lib";
 import { DefaultLogger as logger } from "koatty_logger";
-import { IContainer, IContainerDiagnostics, ObjectDefinitionOptions, TAGGED_PROP } from "../container/icontainer";
+import { IContainer, ObjectDefinitionOptions, TAGGED_PROP } from "../container/icontainer";
 import { recursiveGetMetadata } from "../utils/operator";
 import { MetadataCache, CacheType } from "../utils/cache";
 import { debugLog } from "../utils/debug";
@@ -115,258 +115,21 @@ function preprocessDependencies(target: Function, container: IContainer): Depend
 /**
  * Enhanced dependency injection with preprocessing and caching
  */
-export function injectAutowired(target: Function, prototypeChain: object,
+export function injectAutowired(target: Function, instance: object,
   container: IContainer, _options?: ObjectDefinitionOptions) {
-  
-    const injectionStart = Date.now();
-    const className = target.name || 'Anonymous';
-    
-    try {
-    // Get or preprocess dependencies
-    let preprocessedData = dependencyWeakCache.get(target);
-    if (!preprocessedData) {
-      preprocessedData = preprocessDependencies(target, container);
-    }
-
-    if (!preprocessedData.dependencies || preprocessedData.dependencies.length === 0) {
-      return;
-    }
-
-    let injectedCount = 0;
-    const delayedDependencies: Array<{
-      dependency: { name: string; propertyKey: string; type?: string; method?: Function; args?: any[] };
-      isCircular: boolean;
-    }> = [];
-    
-    // Step 0: Complete circular dependency detection for ALL dependencies (principle 6+)
-    // Class successful registration doesn't mean no circular dependencies exist
-    const diagnosticsContainer = container as unknown as IContainerDiagnostics;
-    const detector = diagnosticsContainer.getCircularDependencyDetector();
-    const hasCircularDeps = detector.hasCircularDependencies();
-    const allCircularDeps = hasCircularDeps ? detector.getAllCircularDependencies() : [];
-    
-    debugLog(() => `[injectAutowired] className=${className}, hasCircularDeps=${hasCircularDeps}, allCircularDeps=${JSON.stringify(allCircularDeps)}`);
-    
-    // Check each dependency for circular relationships, regardless of immediate availability
-    const dependencyCircularityMap = new Map<string, boolean>();
-    for (const dependency of preprocessedData.dependencies) {
-      if (dependency.name) {
-        const isCircularDependency = allCircularDeps.some((cycle: string[]) =>
-          cycle.includes(className) && cycle.includes(dependency.name)
-        );
-        dependencyCircularityMap.set(dependency.propertyKey, isCircularDependency);
-        
-        if (isCircularDependency) {
-          debugLog(() => `Circular dependency detected: ${className}.${dependency.propertyKey} -> ${dependency.name} (even if resolvable)`);
-        }
-      }
-    }
-    
-    // Step 1: Process each dependency individually with improved string identifier support
-    for (const dependency of preprocessedData.dependencies) {
-      let dependencyValue: any = undefined;
-      let resolved = false;
-      let isCircular = false;
-      
-      // First, check for circular dependencies (principle 6+)
-      // Class successful registration doesn't mean no circular dependencies exist
-      isCircular = dependencyCircularityMap.get(dependency.propertyKey) || false;
-      
-        try {
-        if (!isCircular) {
-          try {
-            dependencyValue = container.get(dependency.name);
-          } catch {
-            dependencyValue = undefined;
-          }
-          if (dependencyValue !== undefined) {
-            resolved = true;
-          } else {
-            const lazyProxy = createLazyProxy<object>(
-              () => container.get(dependency.name, dependency.type) as object,
-              `${className}.${dependency.propertyKey} -> ${dependency.name}`
-            );
-            Object.defineProperty(prototypeChain, dependency.propertyKey, {
-              value: lazyProxy, writable: true, enumerable: true, configurable: true
-            });
-            injectedCount++;
-            debugLog(() => `Injected Lazy Proxy for unresolved dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}`);
-            continue;
-          }
-        } else {
-          const lazyProxy = createLazyProxy<object>(
-            () => container.get(dependency.name, dependency.type) as object,
-            `${className}.${dependency.propertyKey} -> ${dependency.name}`
-          );
-          Object.defineProperty(prototypeChain, dependency.propertyKey, {
-            value: lazyProxy, writable: true, enumerable: true, configurable: true
-          });
-          injectedCount++;
-          debugLog(() => `Injected Lazy Proxy for circular dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}`);
-          continue;
-        }
-        
-        if (resolved && dependencyValue !== undefined) {
-          // Immediate injection to prototype (principle 2)
-          Object.defineProperty(prototypeChain, dependency.propertyKey, {
-            value: dependencyValue,
-            writable: true,
-            enumerable: true,
-            configurable: true
-          });
-          injectedCount++;
-          debugLog(() => `Immediately injected: ${className}.${dependency.propertyKey} = ${dependency.name}`);
-        } else {
-          // Add to delayed dependencies for later processing
-          delayedDependencies.push({
-            dependency,
-            isCircular
-          });
-          debugLog(() => `Delayed dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}${isCircular ? ' (circular)' : ' (not available)'}`);
-        }
-      } catch (error) {
-        // If immediate injection fails and is NOT circular, add to delayed dependencies
-        // Circular dependencies are already handled with Lazy Proxy above
-        if (isCircular) {
-          continue;
-        }
-        delayedDependencies.push({
-          dependency,
-          isCircular
-        });
-        debugLog(() => `Failed immediate injection for ${className}.${dependency.propertyKey}, will use delayed loading: ${error}`);
-      }
-    }
-    
-    // Step 2: Set up delayed loading for dependencies that couldn't be resolved immediately
-    if (delayedDependencies.length > 0) {
-      setupDelayedInjection(container, prototypeChain, className, delayedDependencies);
-    }
-
-    const injectionTime = Date.now() - injectionStart;
-    debugLog(() => `Dependency injection completed for ${className}: ${injectedCount}/${preprocessedData.dependencies.length} dependencies in ${injectionTime}ms`);
-
-  } catch (error) {
-    logger.Error(`Autowired injection failed for ${className}:`, error);
-    throw error;
+  const metadata = recursiveGetMetadata(container, TAGGED_PROP, target);
+  for (const [key, data] of Object.entries(metadata)) {
+    const dep: any = data;
+    const name = typeof dep.identifier === 'function' ? dep.identifier.name : dep.identifier ?? dep.name ?? key;
+    const resolve = () => {
+      const type = container.getClass(name, dep.type) ? dep.type : undefined;
+      return container.get(name, type, ...(dep.args ?? []));
+    };
+    const hasClass = container.getClass(name, dep.type) || container.getClass(name, undefined)
+      || container.getClass(name, 'SERVICE') || container.getClass(name, 'COMPONENT');
+    const value = hasClass ? resolve() : createLazyProxy(resolve as () => object, `${target.name}.${key}`);
+    Object.defineProperty(instance, key, { value, writable: true, enumerable: true, configurable: true });
   }
-}
-
-/**
- * Set up delayed injection for dependencies that couldn't be resolved immediately
- * This includes circular dependencies and dependencies that are not yet available
- */
-function setupDelayedInjection(
-  container: IContainer, 
-  prototypeChain: object, 
-  className: string,
-  delayedDependencies: Array<{
-    dependency: { name: string; propertyKey: string; type?: string; method?: Function; args?: any[] };
-    isCircular: boolean;
-  }>
-): void {
-  const app = container.getApp();
-  if (!app || typeof app.on !== 'function') {
-    debugLog(() => `Cannot setup delayed injection for ${className}: app.on is not available`);
-    return;
-  }
-  
-  // Use a unique event handler to avoid duplicates
-  const delayedInjectionHandler = () => {
-    debugLog(() => `Executing delayed injection for ${className} with ${delayedDependencies.length} dependencies`);
-    
-    let successfulDelayedInjections = 0;
-    let failedInjections = 0;
-    
-    for (const { dependency } of delayedDependencies) {
-      try {
-        let delayedValue;
-        let injectionSuccessful = false;
-        
-        // For non-circular delayed dependencies, try normal resolution
-        // Note: Circular dependencies are already handled with Lazy Proxy in the main flow
-        // and never reach this delayed queue
-        try {
-          delayedValue = container.get(dependency.name, dependency.type);
-          injectionSuccessful = true;
-        } catch {
-          // Fallback to propertyKey for string-based dependencies
-          try {
-            delayedValue = container.get(dependency.propertyKey, dependency.type);
-            injectionSuccessful = true;
-          } catch {
-            debugLog(() => `Delayed dependency ${dependency.name} still not available`);
-          }
-        }
-        
-        let finalValue: any;
-        if (injectionSuccessful && delayedValue !== undefined) {
-          finalValue = delayedValue;
-        } else {
-          finalValue = createLazyProxy<object>(
-            () => container.get(dependency.name, dependency.type) as object,
-            `${className}.${dependency.propertyKey} -> ${dependency.name} (delayed)`
-          );
-          debugLog(() => `Created Lazy Proxy for unresolved delayed dependency: ${className}.${dependency.propertyKey} -> ${dependency.name}`);
-        }
-        
-        // Always define the property on prototype to ensure all instances have access
-        Object.defineProperty(prototypeChain, dependency.propertyKey, {
-          value: finalValue,
-          writable: true,
-          enumerable: true,
-          configurable: true
-        });
-        
-        // Additionally, fix existing instances if they have undefined properties
-        try {
-          const targetClass = container.getClass(className);
-          if (targetClass) {
-            const instance = container.getInsByClass(targetClass);
-            if (instance && (instance as any)[dependency.propertyKey] === undefined) {
-              // Directly assign the value to existing instance
-              (instance as any)[dependency.propertyKey] = finalValue;
-            }
-          }
-        } catch {
-          // Silently handle any errors in instance property setting
-        }
-        
-        if (injectionSuccessful) {
-          successfulDelayedInjections++;
-          debugLog(() => `Successfully injected delayed dependency: ${className}.${dependency.propertyKey} = ${dependency.name}`);
-        } else {
-          failedInjections++;
-          debugLog(() => `Failed to resolve delayed dependency ${className}.${dependency.propertyKey}, created Lazy Proxy`);
-        }
-        
-      } catch (error) {
-        failedInjections++;
-        debugLog(() => `Failed to inject delayed dependency ${dependency.name} into ${className}.${dependency.propertyKey}: ${error}`);
-        
-        try {
-          const lazyProxy = createLazyProxy<object>(
-            () => container.get(dependency.name, dependency.type) as object,
-            `${className}.${dependency.propertyKey} -> ${dependency.name} (error recovery)`
-          );
-          Object.defineProperty(prototypeChain, dependency.propertyKey, {
-            value: lazyProxy,
-            writable: true,
-            enumerable: true,
-            configurable: true
-          });
-        } catch {
-          // Silently handle defineProperty errors
-        }
-      }
-    }
-    
-    debugLog(() => `Delayed injection completed for ${className}: ${successfulDelayedInjections} successful, ${failedInjections} failed (using Lazy Proxy)`);
-  };
-  
-  // Add event listener for delayed injection
-  app.once?.('appReady', delayedInjectionHandler);
-  debugLog(() => `Setup delayed injection for ${className} with ${delayedDependencies.length} dependencies`);
 }
 
 /**

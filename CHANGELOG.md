@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased (Phase A–D remediation)
+
+- 容器注册表、类标识、实例注入与 AOP 解析均按容器隔离；注入不再写入共享原型。同名构造函数的元数据缓存不再串用。
+- 通过 `new Container()` 创建容器，撤回未发布的重复工厂入口。默认 `IOC` 保留作为装饰器定义目录与直接使用入口。
+- Request scope 使用 ALS，跨 await 保持上下文；请求外访问与 Singleton 捕获 Request 依赖抛错。Prototype 每次重新注入，Request/Prototype 生命周期钩子按实际实例执行。
+- AOP 仅使用现有 `IAspect.run`：同步链返回同步值，遇到 Promise/thenable 才等待；异步内置钩子阻塞业务，Around proceed 至多执行一次。撤回未发布的 runSync。
+- 性能基准在独立 Node 进程执行源码，保持 Request/Singleton 解析各 < 2µs 的门槛；不使用 Jest VM 的跨域调用开销作发布指标。
+
+迁移说明：`docs/migration/phase-d-router-hotpath.md`。尚未发布。
+
 ## 4.0.0
 
 ### Patch Changes

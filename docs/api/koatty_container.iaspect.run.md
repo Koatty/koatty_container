@@ -9,5 +9,5 @@ Aspect entry point. `options.result` carries the business method's return value 
 **Signature:**
 
 ```typescript
-run: (args: unknown[], proceed?: (...args: unknown[]) => Promise<unknown>, options?: Record<string, unknown>) => Promise<unknown>;
+run: (args: unknown[], proceed?: (...args: unknown[]) => any, options?: Record<string, unknown>) => any;
 ```

@@ -4,14 +4,12 @@
 
 ## Container.clear() method
 
-clear all resources in container  Container
-
 **Signature:**
 
 ```typescript
-clear(): void;
+clear(): Promise<void>;
 ```
 **Returns:**
 
-void
+Promise&lt;void&gt;
 

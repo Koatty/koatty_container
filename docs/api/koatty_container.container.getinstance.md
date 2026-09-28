@@ -4,7 +4,9 @@
 
 ## Container.getInstance() method
 
-Get singleton instance of Container
+Get singleton instance of Container.
+
+This is the \*default\* container.
 
 **Signature:**
 

@@ -4,8 +4,6 @@
 
 ## Container.\[Symbol.dispose\]() method
 
-Dispose the container and release all resources. Implements TC39 Explicit Resource Management (using declaration). Available in Node.js 20+ and TypeScript 5.2+
-
 **Signature:**
 
 ```typescript
@@ -14,14 +12,4 @@ Dispose the container and release all resources. Implements TC39 Explicit Resour
 **Returns:**
 
 void
-
-## Example
-
-
-```ts
-{
-  using container = Container.getInstance();
-  // container is automatically disposed when leaving scope
-}
-```
 

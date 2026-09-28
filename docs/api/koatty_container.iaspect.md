@@ -64,7 +64,7 @@ Description
 
 </td><td>
 
-(args: unknown\[\], proceed?: (...args: unknown\[\]) =&gt; Promise&lt;unknown&gt;, options?: Record&lt;string, unknown&gt;) =&gt; Promise&lt;unknown&gt;
+(args: unknown\[\], proceed?: (...args: unknown\[\]) =&gt; any, options?: Record&lt;string, unknown&gt;) =&gt; any
 
 
 </td><td>

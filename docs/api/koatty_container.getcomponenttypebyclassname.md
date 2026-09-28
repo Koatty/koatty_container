@@ -9,7 +9,7 @@ Get component type based on class name identifier
 **Signature:**
 
 ```typescript
-export declare function getComponentTypeByClassName(identifier: string): "COMPONENT" | "CONTROLLER" | "MIDDLEWARE" | "SERVICE";
+export declare function getComponentTypeByClassName(identifier: string): "CONTROLLER" | "MIDDLEWARE" | "SERVICE" | "COMPONENT";
 ```
 
 ## Parameters
@@ -50,7 +50,7 @@ The class name string to check
 
 **Returns:**
 
-"COMPONENT" \| "CONTROLLER" \| "MIDDLEWARE" \| "SERVICE"
+"CONTROLLER" \| "MIDDLEWARE" \| "SERVICE" \| "COMPONENT"
 
 Component type string: 'CONTROLLER', 'MIDDLEWARE', 'SERVICE' or 'COMPONENT'
 

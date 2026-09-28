@@ -289,6 +289,24 @@ Override undefined instance properties with values from its prototype. Preserves
 </td></tr>
 <tr><td>
 
+[PostConstruct()](./koatty_container.postconstruct.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[PreDestroy()](./koatty_container.predestroy.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
 [recursiveGetMetadata(container, metadataKey, target, \_propertyKey)](./koatty_container.recursivegetmetadata.md)
 
 

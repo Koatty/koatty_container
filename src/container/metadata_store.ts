@@ -53,8 +53,7 @@ export class MetadataStore {
       originMap.set(decoratorNameKey, []);
     }
     originMap.get(decoratorNameKey).push(data);
-    const currentValue = this.metadataCache.getClassMetadata(type, String(decoratorNameKey), target, propertyName) || [];
-    currentValue.push(data);
+    const currentValue = originMap.get(decoratorNameKey);
     this.metadataCache.setClassMetadata(type, String(decoratorNameKey), target, currentValue, propertyName);
   }
 
@@ -72,8 +71,7 @@ export class MetadataStore {
       originMap.set(propertyName, []);
     }
     originMap.get(propertyName).push(data);
-    const currentValue = this.metadataCache.getPropertyMetadata(String(decoratorNameKey), target, propertyName) || [];
-    currentValue.push(data);
+    const currentValue = originMap.get(propertyName);
     this.metadataCache.setPropertyMetadata(String(decoratorNameKey), target, propertyName, currentValue);
   }
 

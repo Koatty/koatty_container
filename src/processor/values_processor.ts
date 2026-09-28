@@ -51,10 +51,10 @@ export function injectValues(target: Function, prototypeChain: object,
       continue;
     }
     
-    logger.Debug(`Register inject ${name} properties => value: ${JSON.stringify(metadataValue)}`);
+    logger.Debug(`Register injected property ${name}`);
     let targetValue = method;
     if (helper.isFunction(method)) {
-      targetValue = method();
+      targetValue = method.call(prototypeChain);
     }
     Reflect.defineProperty(prototypeChain, name, {
       enumerable: true,

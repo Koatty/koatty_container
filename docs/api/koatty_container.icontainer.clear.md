@@ -9,9 +9,9 @@ clear all resources in container  Container
 **Signature:**
 
 ```typescript
-clear(): void;
+clear(): void | Promise<void>;
 ```
 **Returns:**
 
-void
+void \| Promise&lt;void&gt;
 

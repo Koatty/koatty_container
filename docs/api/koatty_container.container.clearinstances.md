@@ -9,9 +9,9 @@ Clear only instances while preserving class registrations and metadata This is u
 **Signature:**
 
 ```typescript
-clearInstances(): void;
+clearInstances(): Promise<void>;
 ```
 **Returns:**
 
-void
+Promise&lt;void&gt;
 

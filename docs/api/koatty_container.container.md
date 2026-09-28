@@ -19,6 +19,42 @@ export declare class Container implements IContainer, IContainerDiagnostics
 ```
 **Implements:** [IContainer](./koatty_container.icontainer.md)<!-- -->, [IContainerDiagnostics](./koatty_container.icontainerdiagnostics.md)
 
+## Constructors
+
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)(opts)](./koatty_container.container._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructor for Container class.
+
+Prefer `Container.getInstance()` for the default container, or `new Container()` for an isolated one.
+
+
+</td></tr>
+</tbody></table>
+
 ## Methods
 
 <table><thead><tr><th>
@@ -39,7 +75,7 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
-[\[Symbol.dispose\]()](./koatty_container.container._symbol.dispose_.md)
+[\[Symbol.asyncDispose\]()](./koatty_container.container._symbol.asyncdispose_.md)
 
 
 </td><td>
@@ -48,6 +84,18 @@ Description
 </td><td>
 
 Dispose the container and release all resources. Implements TC39 Explicit Resource Management (using declaration). Available in Node.js 20+ and TypeScript 5.2+
+
+
+</td></tr>
+<tr><td>
+
+[\[Symbol.dispose\]()](./koatty_container.container._symbol.dispose_.md)
+
+
+</td><td>
+
+
+</td><td>
 
 
 </td></tr>
@@ -102,8 +150,6 @@ Batch register components
 
 
 </td><td>
-
-clear all resources in container  Container
 
 
 </td></tr>
@@ -329,7 +375,9 @@ Get instance by class constructor
 
 </td><td>
 
-Get singleton instance of Container
+Get singleton instance of Container.
+
+This is the \*default\* container.
 
 
 </td></tr>
@@ -461,6 +509,32 @@ Preloads metadata for specified component types with performance optimization op
 </td></tr>
 <tr><td>
 
+[ready()](./koatty_container.container.ready.md)
+
+
+</td><td>
+
+
+</td><td>
+
+clear all resources in container  Container
+
+
+</td></tr>
+<tr><td>
+
+[readyRequestScope(ctx)](./koatty_container.container.readyrequestscope.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
 [reg(identifier, target, options)](./koatty_container.container.reg.md)
 
 
@@ -470,6 +544,30 @@ Preloads metadata for specified component types with performance optimization op
 </td><td>
 
 Register a class or instance to the container.
+
+
+</td></tr>
+<tr><td>
+
+[releaseRequestScope(ctx)](./koatty_container.container.releaserequestscope.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[runInRequestScope(ctx, fn)](./koatty_container.container.runinrequestscope.md)
+
+
+</td><td>
+
+
+</td><td>
 
 
 </td></tr>
@@ -517,6 +615,18 @@ Save property metadata to the container with caching.
 </td></tr>
 <tr><td>
 
+[seal()](./koatty_container.container.seal.md)
+
+
+</td><td>
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
 [setApp(app)](./koatty_container.container.setapp.md)
 
 
@@ -524,8 +634,6 @@ Save property metadata to the container with caching.
 
 
 </td><td>
-
-Set application instance
 
 
 </td></tr>

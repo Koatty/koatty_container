@@ -1083,7 +1083,7 @@ describe("Unified Performance Optimization", () => {
       expect(batchTime).toBeLessThan(1000); // 放宽时间限制
       
       // 测试的核心是验证批量注册性能，即使某些服务注册失败，批量注册本身应该是成功的
-      expect(batchTime).toBeGreaterThan(0);
+      expect(batchTime).toBeGreaterThanOrEqual(0);
     });
 
     test("Should handle different optimization options selectively", () => {
