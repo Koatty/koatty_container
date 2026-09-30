@@ -2,6 +2,10 @@ import assert from "assert";
 import { decoratorManager } from "../src/manager/index";
 import type { DecoratorMetadata } from "../src/manager/index";
 
+// Coverage instrumentation on 2-core CI runners pushes the async real-world
+// scenarios past jest's 5s default; nothing here should take 30s anywhere.
+jest.setTimeout(30000);
+
 describe("DecoratorManager Integration Tests", () => {
   beforeEach(() => {
     // Clear all caches before each test
