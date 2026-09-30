@@ -10,7 +10,7 @@
     "build:cp": "node ../../scripts/postBuild.js",
     "clean": "rimraf dist temp docs/api",
     "lint": "eslint --ext .ts,.js ./src",
-    "test": "pnpm run lint && NODE_OPTIONS=\"$NODE_OPTIONS --stack-size=4000\" jest --passWithNoTests",
+    "test": "pnpm run lint && node --stack-size=4000 node_modules/jest/bin/jest.js --passWithNoTests",
     "test:cov": "jest --collectCoverage --detectOpenHandles"
   },
   "main": "./dist/index.js",
