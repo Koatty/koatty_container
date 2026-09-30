@@ -41,6 +41,10 @@ export class MethodDecoratorManager {
   // Use WeakMap to avoid memory leaks and keep metadata private
   private methodRegistry = new WeakMap<Function, MethodWrapper>();
 
+  // Reverse index from a wrapper product back to its wrapper so re-decorating
+  // an already-wrapped method merges into one bounded chain instead of nesting
+  private wrappedIndex = new WeakMap<Function, MethodWrapper>();
+
   // Cache for compiled wrapper functions
   private wrapperCache = new Map<string, Function>();
 
@@ -149,8 +153,10 @@ export class MethodDecoratorManager {
       throw new Error(`Cannot decorate non-function property: ${propertyKey}`);
     }
 
-    // Check if method is already wrapped
-    let wrapper = this.methodRegistry.get(originalMethod);
+    // A descriptor value may be the original method or a product of an
+    // earlier registration; both must resolve to the same wrapper so the
+    // chain stays one compile of bounded depth instead of nesting forever.
+    let wrapper = this.methodRegistry.get(originalMethod) ?? this.wrappedIndex.get(originalMethod);
     if (!wrapper) {
       wrapper = {
         originalMethod,
@@ -174,6 +180,7 @@ export class MethodDecoratorManager {
     const wrappedMethod = this.createOptimizedWrapper(wrapper, target, propertyKey);
     wrapper.wrappedMethod = wrappedMethod;
     wrapper.isWrapped = true;
+    this.wrappedIndex.set(wrappedMethod, wrapper);
 
     // Mark the original method as decorated
     this.markAsDecorated(originalMethod, wrapper.decorators);
@@ -197,8 +204,11 @@ export class MethodDecoratorManager {
     // Sort decorators by priority (higher priority executes first)
     decorators.sort((a, b) => b.priority - a.priority);
 
-    // Generate cache key for this combination of decorators
-    const cacheKey = this.generateCacheKey(decorators, propertyKey);
+    // Generate cache key for this combination of decorators; the owning class
+    // is part of the key because the compiled wrapper closes over the original
+    // method — sharing it across classes would dispatch one class's method.
+    const owner = (target as { constructor?: { name?: string } } | null | undefined)?.constructor?.name ?? '';
+    const cacheKey = this.generateCacheKey(decorators, propertyKey, owner);
 
     // Check if we have a cached wrapper for this combination
     const cachedWrapper = this.wrapperCache.get(cacheKey);
@@ -262,13 +272,13 @@ export class MethodDecoratorManager {
    * @param methodName - Method name
    * @returns Cache key
    */
-  private generateCacheKey(decorators: DecoratorMetadata[], methodName: string): string {
+  private generateCacheKey(decorators: DecoratorMetadata[], methodName: string, owner = ''): string {
     const decoratorKeys = decorators
       .map(d => `${d.type}:${JSON.stringify(d.config)}`)
       .sort()
       .join('|');
 
-    return `${methodName}:${decoratorKeys}`;
+    return `${owner}:${methodName}:${decoratorKeys}`;
   }
 
   /**
