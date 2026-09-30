@@ -34,6 +34,9 @@ IOC.saveClass("COMPONENT", MyClass, "MyClass");
 
 ## 🌟 Key Features
 
+- 🧩 **Per-Container Isolation (4.1)** — registries, class identity, instance injection and AOP resolution are scoped per container; injection never writes to shared prototypes, and multi-app hosts get independent routing/container cleanup
+- ♻️ **Idempotent AOP Wrapping (4.1)** — re-registering decorators on an already-wrapped method merges into a single bounded wrapper chain (wrapper-product index) with per-class compiled-wrapper cache keys; TC39 field-initializer class semantics supported alongside legacy decorators
+- ⏳ **Lifecycle Guarantees (4.1)** — singleton initialization is awaited with reverse-order disposal; shutdown is idempotent
 - 🎯 **Custom Decorator Support** - Powerful decorator manager to easily extend your decorator ecosystem
 - ✅ **100% Test Coverage** - 257 tests passed with complete code coverage
 - 🚀 **High-Performance Cache** - WeakMap + LRU strategy for blazing fast startup and runtime
