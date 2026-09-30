@@ -18,12 +18,6 @@ module.exports = {
     }],
   },
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
-  // The DecoratorManagerIntegration suite predates real CI runs and is
-  // timing/state sensitive on 2-core runners (nondeterministic RangeError or
-  // assertion drift, and a large V8 stack reservation aborts with exit 134).
-  // It still runs for local development; a dedicated isolation rewrite is
-  // tracked in docs/phase-a-f-remediation-2026-09-30.md.
-  testPathIgnorePatterns: process.env.CI ? ['<rootDir>/test/DecoratorManagerIntegration.test.ts'] : [],
   testMatch: ['<rootDir>/test/**/*.(spec|test).[jt]s'], // 匹配测试用例的路径规则
   reporters: [
     'default',
